@@ -1,6 +1,8 @@
 'use client';
 
-import { Part, Chord } from '@/types';
+import { getRandomColor } from '@/helpers/color';
+import { getChordLines, getChordPattern } from '@/helpers/part';
+import { Part, Chord, Song, Color } from '@/types';
 import {
   createContext,
   useContext,
@@ -12,11 +14,15 @@ type SongState = {
   title: string;
   parts: Part[];
   currentPartId?: string;
+  colorsByPattern?: Record<string, Color>;
 };
 
 type Action =
+  | { type: 'openSong'; song: Song }
   | { type: 'addChord'; chord: Chord; partId?: string }
+  | { type: 'removeChord'; id: string; partId: string }
   | { type: 'addPart'; title?: string; chords?: Chord[] }
+  | { type: 'setPartTitle'; title: string; partId: string }
   | { type: 'setActivePart'; partId: string };
 type Dispatch = (action: Action) => void;
 
@@ -29,20 +35,22 @@ function reducer(state: SongState, action: Action): SongState {
     case 'addChord': {
       if (state.parts.length === 0) {
         const id = crypto.randomUUID().substring(0, 4);
+        const chords = [action.chord];
+        const color = getRandomColor();
+        const colorsByPattern = {
+          [getChordPattern(chords)]: color,
+        };
+        const newPart = {
+          id,
+          color,
+          title: 'New Part',
+          chords,
+        };
+
         return {
           ...state,
-          parts: [
-            {
-              id,
-              color: {
-                h: Math.round(Math.random() * 360),
-                s: Math.round(Math.random() * 100),
-                l: Math.round(Math.random() * 100),
-              },
-              title: 'New Part',
-              chords: [action.chord],
-            },
-          ],
+          colorsByPattern,
+          parts: [newPart],
           currentPartId: id,
         };
       }
@@ -62,15 +70,61 @@ function reducer(state: SongState, action: Action): SongState {
         currentPartId,
       };
     }
+    case 'removeChord': {
+      return {
+        ...state,
+        parts: state.parts.map((part) => {
+          if (part.id === action.partId) {
+            return {
+              ...part,
+              chords: part.chords.filter((c) => c.id !== action.id),
+            };
+          }
+          return part;
+        }),
+      };
+    }
     case 'addPart': {
       return {
         ...state,
+        parts: [
+          ...state.parts,
+          {
+            id: crypto.randomUUID().slice(0, 8),
+            title: `Part ${state.parts.length + 1}`,
+            chords: [],
+            color: getRandomColor(),
+          },
+        ],
+      };
+    }
+    case 'setPartTitle': {
+      return {
+        ...state,
+        parts: state.parts.map((part) => {
+          if (part.id === action.partId) {
+            return {
+              ...part,
+              title: action.title,
+            };
+          }
+          return part;
+        }),
       };
     }
     case 'setActivePart': {
       return {
         ...state,
         currentPartId: action.partId,
+      };
+    }
+    case 'openSong': {
+      const { title, parts } = action.song;
+      return {
+        ...state,
+        title,
+        parts,
+        currentPartId: parts[parts.length - 1].id,
       };
     }
     default: {
@@ -80,81 +134,25 @@ function reducer(state: SongState, action: Action): SongState {
   }
 }
 
-const initialState: SongState = {
-  title: 'New song',
-  parts: [
-    {
-      id: 'p-1',
-      title: 'Part one',
-      color: {
-        h: 140,
-        s: 30,
-        l: 30,
-      },
-
-      chords: [
-        {
-          id: 'c-1',
-          display: 'F#m',
-        },
-        {
-          id: 'c-2',
-          display: 'A',
-        },
-        {
-          id: 'c-3',
-          display: 'D7',
-        },
-      ],
-    },
-    {
-      id: 'p-1-2',
-      title: 'Part two',
-      color: {
-        h: 200,
-        s: 34,
-        l: 30,
-      },
-      chords: [
-        {
-          id: 'c-1-2',
-          display: 'F#m',
-        },
-        {
-          id: 'c-2-2',
-          display: 'A',
-        },
-        {
-          id: 'c-3-2',
-          display: 'D7',
-        },
-        {
-          id: 'c-4-2',
-          display: 'A',
-        },
-        {
-          id: 'c-5-2',
-          display: 'D7',
-        },
-        {
-          id: 'c-6-2',
-          display: 'A',
-        },
-        {
-          id: 'c-7-2',
-          display: 'D7',
-        },
-      ],
-    },
-  ],
+const emptyState: SongState = {
+  title: 'New Song',
+  parts: [],
 };
 
-export const SongProvider = ({ children }: PropsWithChildren) => {
-  const [state, dispatch] = useReducer(reducer, initialState);
+export const SongProvider = ({
+  initialSong,
+  children,
+}: PropsWithChildren<{ initialSong?: Song }>) => {
+  const [state, dispatch] = useReducer(reducer, initialSong ?? emptyState);
   const value = {
     state,
     dispatch,
   };
+  // state.parts.forEach((part) => {
+  //   console.log(getChordPattern(part.chords));
+  //   console.log(getChordLines(part.chords));
+  // });
+
   return <SongContext.Provider value={value}>{children}</SongContext.Provider>;
 };
 

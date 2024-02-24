@@ -1,0 +1,6 @@
+.arrangement {
+  display: flex;
+  flex-direction: column;
+  gap: calc(0.5 * var(--spacing-y));
+  grid-column: 2 / span 1;
+}

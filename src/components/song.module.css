@@ -1,0 +1,20 @@
+.songView {
+  display: grid;
+  grid-template-columns: 4fr 1fr;
+  grid-template-rows: min-content 1fr;
+  gap: var(--spacing);
+  justify-items: stretch;
+}
+
+.songHeader {
+  display: flex;
+  grid-column: span 2;
+  flex-direction: column;
+  gap: var(--spacing);
+}
+
+.chordsAdder {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing);
+}

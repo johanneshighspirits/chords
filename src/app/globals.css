@@ -5,6 +5,7 @@
   --spacing-x: calc(1.25 * var(--unit));
   --spacing: var(--spacing-y) var(--spacing-x);
 
+  --padding: calc(0.4 * var(--unit)) calc(0.6 * var(--unit));
   --radius: calc(0.25 * var(--unit));
   --radius-2: calc(2 * var(--radius));
 
@@ -133,4 +134,31 @@ a {
   .wrapper {
     max-width: 960px;
   }
+}
+
+button {
+  background: black;
+  border: 1px solid rgb(255 255 255 / 0.5);
+  border-radius: var(--radius);
+  padding: var(--padding);
+  appearance: none;
+}
+
+button:hover {
+  border-color: rgb(255 255 255 / 1);
+}
+
+button:active {
+  border-color: black;
+  background: white;
+  color: black;
+}
+
+button.blank {
+  background: transparent;
+  border: none;
+}
+
+button.blank:hover {
+  background: rgb(255 255 255 / 0.2);
 }

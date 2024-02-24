@@ -2,11 +2,25 @@
   display: grid;
   gap: var(--spacing);
   grid-template-columns: repeat(4, 1fr);
+  position: relative;
+}
+
+.duplicate {
+  opacity: 0.5;
 }
 
 .chord {
   display: grid;
+  position: relative;
   padding: 2rem;
   border-radius: var(--radius);
   background: var(--chord-color);
+}
+
+.duplicate .chord {
+  padding: 0.25rem;
+}
+
+.display {
+  text-align: center;
 }

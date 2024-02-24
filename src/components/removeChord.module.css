@@ -1,0 +1,10 @@
+.button {
+  position: absolute;
+  opacity: 0.3;
+  top: calc(0.25 * var(--unit));
+  right: calc(0.25 * var(--unit));
+}
+
+.button:hover {
+  opacity: 1;
+}

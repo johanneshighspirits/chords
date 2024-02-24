@@ -4,9 +4,14 @@ export type Song = {
   parts: Part[];
 };
 
+export type Note = 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G';
 export type Chord = {
   id: string;
   display: string;
+  note: Note;
+  major: boolean;
+  sign: '#' | 'b';
+  modifier: number;
 };
 
 export type Part = {
@@ -20,4 +25,9 @@ export type Color = {
   h: number;
   s: number;
   l: number;
+};
+
+export type ChordLine = {
+  pattern: string;
+  chords: Chord[];
 };
