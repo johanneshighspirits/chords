@@ -1,0 +1,21 @@
+.parts {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing);
+  margin: var(--spacing-y) auto;
+}
+
+.part {
+  background: var(--part-color);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing);
+  padding: var(--spacing);
+  border-radius: var(--radius-2);
+  border: 1px solid transparent;
+  transition: border 300ms;
+}
+
+.isActive {
+  border-color: rgb(255 255 255 / 0.75);
+}

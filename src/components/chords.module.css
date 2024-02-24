@@ -1,0 +1,12 @@
+.chords {
+  display: grid;
+  gap: var(--spacing);
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.chord {
+  display: grid;
+  padding: 2rem;
+  border-radius: var(--radius);
+  background: var(--chord-color);
+}
