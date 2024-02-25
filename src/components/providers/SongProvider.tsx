@@ -20,6 +20,7 @@ type SongState = {
 type Action =
   | { type: 'openSong'; song: Song }
   | { type: 'addChord'; chord: Chord; partId?: string }
+  | { type: 'editChord'; id: string; chord: Partial<Chord> }
   | { type: 'removeChord'; id: string; partId: string }
   | { type: 'addPart'; title?: string; chords?: Chord[] }
   | { type: 'setPartTitle'; title: string; partId: string }
@@ -37,8 +38,9 @@ function reducer(state: SongState, action: Action): SongState {
         const id = crypto.randomUUID().substring(0, 4);
         const chords = [action.chord];
         const color = getRandomColor();
+        const pattern = getChordPattern(chords);
         const colorsByPattern = {
-          [getChordPattern(chords)]: color,
+          [pattern]: color,
         };
         const newPart = {
           id,
@@ -68,6 +70,25 @@ function reducer(state: SongState, action: Action): SongState {
           return part;
         }),
         currentPartId,
+      };
+    }
+    case 'editChord': {
+      return {
+        ...state,
+        parts: state.parts.map((part) => {
+          return {
+            ...part,
+            chords: part.chords.map((chord) => {
+              if (chord.id === action.id) {
+                return {
+                  ...chord,
+                  ...action.chord,
+                };
+              }
+              return chord;
+            }),
+          };
+        }),
       };
     }
     case 'removeChord': {
@@ -161,14 +182,32 @@ export function useSong() {
   if (!ctx) {
     throw new Error('useSong must be used within a SongContext Provider');
   }
+  const { state, dispatch } = ctx;
 
-  return ctx;
+  const parts = ctx.state.parts.map((part) => {
+    return {
+      ...part,
+      chordLines: getChordLines(part.chords),
+      pattern: getChordPattern(part.chords),
+    };
+  });
+  return { ...state, parts, dispatch };
 }
 
 export function useSongParts() {
   const song = useSong();
   return {
-    currentPartId: song.state.currentPartId,
-    parts: song.state.parts,
+    currentPartId: song.currentPartId,
+    parts: song.parts,
+  };
+}
+
+export function useChords() {
+  const song = useSong();
+  const editChord = (id: string, chord: Partial<Chord>) => {
+    song.dispatch({ type: 'editChord', id, chord });
+  };
+  return {
+    editChord,
   };
 }

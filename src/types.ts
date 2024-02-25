@@ -10,14 +10,17 @@ export type Chord = {
   display: string;
   note: Note;
   major: boolean;
-  sign: '#' | 'b';
-  modifier: number;
+  sign?: '#' | 'b';
+  modifier?: number;
+  bar: number;
 };
 
 export type Part = {
   id: string;
   color: Color;
   title: string;
+  pattern?: string;
+  chordLines?: ChordLine[];
   chords: Chord[];
 };
 

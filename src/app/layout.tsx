@@ -17,9 +17,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={sanchez.className}>
-        <header>Chords</header>
+        <header>
+          <div className="wrapper">Chords</div>
+        </header>
         <main className="wrapper">{children}</main>
-        <footer>&copy; 2024</footer>
+        <footer>
+          <div className="wrapper">&copy; 2024</div>
+        </footer>
       </body>
     </html>
   );

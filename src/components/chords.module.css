@@ -1,7 +1,7 @@
 .chords {
   display: grid;
   gap: var(--spacing);
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(16, 1fr);
   position: relative;
 }
 
@@ -12,9 +12,44 @@
 .chord {
   display: grid;
   position: relative;
-  padding: 2rem;
+  padding: 2rem 0;
   border-radius: var(--radius);
   background: var(--chord-color);
+}
+
+.dragHandleRight,
+.dragHandleLeft {
+  display: block;
+  background: white;
+  opacity: 0;
+  position: absolute;
+  width: 8px;
+  padding: 0;
+  height: 100%;
+  transition: opacity 150ms ease-in;
+  cursor: ew-resize;
+}
+.dragHandleLeft {
+  left: 0;
+  border-radius: var(--radius) 0 0 var(--radius);
+}
+.dragHandleRight {
+  right: 0;
+  border-radius: 0 var(--radius) var(--radius) 0;
+}
+.dragHandleRight:hover,
+.dragHandleLeft:hover {
+  opacity: 0.5;
+}
+.dragHandleRight:before,
+.dragHandleLeft:before {
+  display: block;
+  position: absolute;
+  top: 0;
+  left: calc(-0.5 * var(--spacing-x) + 4px);
+  content: '';
+  height: 100%;
+  width: var(--spacing-x);
 }
 
 .duplicate .chord {

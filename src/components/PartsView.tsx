@@ -45,7 +45,7 @@ export const PartView = ({
   part: Part;
 }) => {
   const { dispatch } = useSong();
-  const { chords } = part;
+  const { chordLines } = part;
   const { h, s, l } = part.color;
 
   const handleClick = () => {
@@ -56,7 +56,6 @@ export const PartView = ({
     dispatch({ type: 'setPartTitle', title, partId: part.id });
   };
 
-  const lines = getChordLines(chords);
   return (
     <article
       className={clsx(styles.part, isActive && styles.isActive)}
@@ -69,9 +68,9 @@ export const PartView = ({
       <h3>
         <Editable onEdit={handleEditTitle}>{part.title}</Editable>
       </h3>
-      {lines.map((line, i) => {
+      {chordLines?.map((line, i) => {
         const pattern = getChordPattern(line.chords);
-        const prevLine = lines[i - 1];
+        const prevLine = chordLines[i - 1];
         const prevPattern = prevLine
           ? getChordPattern(prevLine.chords)
           : undefined;

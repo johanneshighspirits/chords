@@ -51,8 +51,9 @@ const MockSong: Song = {
   ],
 };
 export const getSong = async (slug: string): Promise<Song> => {
+  const title = slug[0].toUpperCase() + slug.substring(1).replaceAll('-', ' ');
   return {
     ...MockSong,
-    title: `New song - ${slug}`,
+    title,
   };
 };

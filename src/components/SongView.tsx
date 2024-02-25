@@ -16,10 +16,11 @@ export const SongView = ({ song }: SongViewProps) => {
       <div className={styles.songView}>
         <div className={styles.songHeader}>
           <h1>{title}</h1>
-          <div className={styles.chordsAdder}>
-            <p>Add chords</p>
-            <AddChord />
-          </div>
+        </div>
+
+        <div className={styles.chordsAdder}>
+          <p>Add chords</p>
+          <AddChord />
         </div>
 
         <PartsView />

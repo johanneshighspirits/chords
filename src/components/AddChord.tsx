@@ -11,7 +11,6 @@ export const AddChord = () => {
 
   const addChord = (chord: Chord | null) => {
     if (chord !== null) {
-      console.log('Adding chord', chord);
       dispatch({ type: 'addChord', chord });
     }
     setValue('');
@@ -22,8 +21,6 @@ export const AddChord = () => {
     if (inputValue.endsWith(' ')) {
       addChord(parseChord(inputValue));
     } else {
-      const chord = parseChord(inputValue);
-      console.log(chord);
       setValue(inputValue);
     }
   };

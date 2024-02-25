@@ -112,6 +112,11 @@ body {
   gap: 2rem;
 }
 
+header,
+footer {
+  padding: var(--spacing-y) 0;
+}
+
 a {
   color: inherit;
   text-decoration: none;

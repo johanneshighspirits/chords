@@ -2,7 +2,7 @@
   display: grid;
   grid-template-columns: 4fr 1fr;
   grid-template-rows: min-content 1fr;
-  gap: var(--spacing);
+  row-gap: var(--spacing-y);
   justify-items: stretch;
 }
 
@@ -14,7 +14,31 @@
 }
 
 .chordsAdder {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 25% 1fr 25%;
   gap: var(--spacing);
+}
+
+.chordsAdder form {
+  display: flex;
+}
+
+.chordsAdder input {
+  padding: 0.5em;
+  border: none;
+  width: 6em;
+  margin: auto;
+  border-bottom: 1px solid rgb(255 255 255 / 0.5);
+  background: rgb(255 255 255 / 0.05);
+  text-align: center;
+  font-size: 30px;
+  outline: none;
+}
+
+.chordsAdder input:hover {
+  background: rgb(255 255 255 / 0.075);
+}
+.chordsAdder input:focus {
+  background: rgb(255 255 255 / 0.1);
+  border-bottom: 1px solid white;
 }
