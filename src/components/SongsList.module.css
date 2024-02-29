@@ -1,0 +1,22 @@
+.SongsList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing);
+  margin: 0 auto;
+  width: 100%;
+  max-width: 480px;
+}
+
+.song {
+  display: grid;
+  grid-template-columns: 1fr 2rem;
+  gap: var(--spacing);
+  background: rgb(0 0 0 / 0.2);
+  align-items: center;
+  padding: var(--padding);
+  border-radius: var(--radius);
+}
+
+.song:hover {
+  background: rgb(0 0 0 / 0.7);
+}

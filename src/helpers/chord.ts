@@ -4,11 +4,11 @@ const ChordRegex =
   /^(?<note>[A-G])(?<sign>\#|b)?(?<minor>m)?(?<modifier>[0-9]*)?/i;
 
 export const parseChord = (input: string): Chord | null => {
-  const display = input.trim();
-  if (!display) {
+  const original = input.trim();
+  if (!original) {
     return null;
   }
-  const groups = ChordRegex.exec(display)?.groups;
+  const groups = ChordRegex.exec(original)?.groups;
   if (!groups) {
     return null;
   }
@@ -17,8 +17,11 @@ export const parseChord = (input: string): Chord | null => {
   const modNumber = Number(modifier);
   const chord = {
     id,
-    display,
-    note: note as Note,
+    original,
+    display: [note, sign, minor, modifier]
+      .filter((s) => s !== undefined)
+      .join(''),
+    note: note.toUpperCase() as Note,
     major: minor !== 'm',
     sign: sign as '#' | 'b',
     modifier: isNaN(modNumber) ? undefined : modNumber,

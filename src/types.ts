@@ -1,12 +1,17 @@
-export type Song = {
-  id: string;
-  title: string;
+export type Song = SongMeta & {
   parts: Part[];
+};
+
+export type SongMeta = {
+  id: string;
+  slug: string;
+  title: string;
 };
 
 export type Note = 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G';
 export type Chord = {
   id: string;
+  original: string;
   display: string;
   note: Note;
   major: boolean;

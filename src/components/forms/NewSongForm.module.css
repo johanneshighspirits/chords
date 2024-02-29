@@ -1,0 +1,12 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing);
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.form input {
+  padding: 1em 2em;
+}
