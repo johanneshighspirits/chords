@@ -75,6 +75,11 @@ export const createSong = async (formData: FormData) => {
   }
 };
 
+export const updateSong = async (song: Song) => {
+  const { slug } = song;
+  await writeFile(`./temp/${slug}.json`, JSON.stringify(song, null, 2));
+};
+
 export const getSong = async (slug: string): Promise<Song> => {
   const song = await readFile(`./temp/${slug}.json`, { encoding: 'utf8' });
   return JSON.parse(song);

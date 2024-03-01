@@ -2,16 +2,17 @@
 
 import { getRandomColor } from '@/helpers/color';
 import { getChordLines, getChordPattern } from '@/helpers/part';
-import { Part, Chord, Song, Color } from '@/types';
+import { Part, Chord, Song, Color, SongMeta } from '@/types';
 import {
   createContext,
   useContext,
   useReducer,
   PropsWithChildren,
+  useMemo,
 } from 'react';
+import { SongSaver } from './SongSaver';
 
-type SongState = {
-  title: string;
+type SongState = SongMeta & {
   parts: Part[];
   currentPartId?: string;
   colorsByPattern?: Record<string, Color>;
@@ -20,8 +21,15 @@ type SongState = {
 type Action =
   | { type: 'openSong'; song: Song }
   | { type: 'addChord'; chord: Chord; partId?: string }
+  | {
+      type: 'addChords';
+      chords: Chord[];
+      partId?: string;
+      afterChordId?: string;
+    }
   | { type: 'editChord'; id: string; chord: Partial<Chord> }
   | { type: 'removeChord'; id: string; partId: string }
+  | { type: 'removeChords'; chordIds: string[]; partId: string }
   | { type: 'addPart'; title?: string; chords?: Chord[] }
   | { type: 'setPartTitle'; title: string; partId: string }
   | { type: 'setActivePart'; partId: string };
@@ -72,6 +80,31 @@ function reducer(state: SongState, action: Action): SongState {
         currentPartId,
       };
     }
+    case 'addChords': {
+      return {
+        ...state,
+        parts: state.parts.map((part) => {
+          if (part.id === action.partId) {
+            const index =
+              part.chords.findIndex((c) => c.id === action.afterChordId) ||
+              part.chords.length;
+            const newChords = [
+              ...part.chords.slice(0, index + 1),
+              ...action.chords.map((chord) => ({
+                ...chord,
+                id: chord.id + 'x',
+              })),
+              ...part.chords.slice(index + 1),
+            ];
+            return {
+              ...part,
+              chords: newChords,
+            };
+          }
+          return part;
+        }),
+      };
+    }
     case 'editChord': {
       return {
         ...state,
@@ -99,6 +132,22 @@ function reducer(state: SongState, action: Action): SongState {
             return {
               ...part,
               chords: part.chords.filter((c) => c.id !== action.id),
+            };
+          }
+          return part;
+        }),
+      };
+    }
+    case 'removeChords': {
+      return {
+        ...state,
+        parts: state.parts.map((part) => {
+          if (part.id === action.partId) {
+            return {
+              ...part,
+              chords: part.chords.filter(
+                (c) => !action.chordIds.includes(c.id)
+              ),
             };
           }
           return part;
@@ -156,6 +205,8 @@ function reducer(state: SongState, action: Action): SongState {
 }
 
 const emptyState: SongState = {
+  id: '',
+  slug: '',
   title: 'New Song',
   parts: [],
 };
@@ -174,7 +225,12 @@ export const SongProvider = ({
   //   console.log(getChordLines(part.chords));
   // });
 
-  return <SongContext.Provider value={value}>{children}</SongContext.Provider>;
+  return (
+    <SongContext.Provider value={value}>
+      <SongSaver />
+      {children}
+    </SongContext.Provider>
+  );
 };
 
 export function useSong() {
@@ -184,13 +240,18 @@ export function useSong() {
   }
   const { state, dispatch } = ctx;
 
-  const parts = ctx.state.parts.map((part) => {
-    return {
-      ...part,
-      chordLines: getChordLines(part.chords),
-      pattern: getChordPattern(part.chords),
-    };
-  });
+  const parts = useMemo(
+    () =>
+      ctx.state.parts.map((part) => {
+        return {
+          ...part,
+          chordLines: getChordLines(part.chords),
+          pattern: getChordPattern(part.chords),
+        };
+      }),
+    [ctx.state.parts]
+  );
+
   return { ...state, parts, dispatch };
 }
 

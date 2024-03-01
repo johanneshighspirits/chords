@@ -6,7 +6,7 @@ import styles from './Button.module.css';
 import { deleteSong } from '@/actions/song';
 import { usePathname } from 'next/navigation';
 
-export const DeleteButton = ({
+export const DeleteSongButton = ({
   title,
   slug,
   children,

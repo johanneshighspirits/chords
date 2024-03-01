@@ -1,7 +1,7 @@
-import { Chord, Note } from '@/types';
+import { Chord, Note, Sign } from '@/types';
 
 const ChordRegex =
-  /^(?<note>[A-G])(?<sign>\#|b)?(?<minor>m)?(?<modifier>[0-9]*)?/i;
+  /^(?<root>[A-H])(?<signMatch>\#|b)?(?<minor>m)?(?<modifier>[0-9]*)?/i;
 
 export const parseChord = (input: string): Chord | null => {
   const original = input.trim();
@@ -12,21 +12,32 @@ export const parseChord = (input: string): Chord | null => {
   if (!groups) {
     return null;
   }
-  const { note, minor, sign, modifier } = groups;
+  const { root, minor, signMatch, modifier } = groups;
   const id = crypto.randomUUID().substring(0, 8);
   const modNumber = Number(modifier);
+  const note: Note = root.toUpperCase().replace('H', 'B') as Note;
+  const sign = getSign(signMatch);
   const chord = {
     id,
     original,
-    display: [note, sign, minor, modifier]
+    display: [note, signMatch, minor, modifier]
       .filter((s) => s !== undefined)
       .join(''),
     note: note.toUpperCase() as Note,
     major: minor !== 'm',
-    sign: sign as '#' | 'b',
+    sign,
     modifier: isNaN(modNumber) ? undefined : modNumber,
     bar: 1.0,
   };
 
   return chord;
+};
+
+export const SHARP = '&#9839;';
+export const FLAT = '&#9837;';
+
+const getSign = (match?: string): Sign => {
+  if (match === '#') return SHARP;
+  if (match === 'b') return FLAT;
+  return '';
 };

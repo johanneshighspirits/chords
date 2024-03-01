@@ -1,0 +1,13 @@
+.editor {
+  display: flex;
+  flex-direction: column;
+  opacity: 0.3;
+  transition: opacity 200ms ease-out;
+  position: absolute;
+  right: -24px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+.editor:hover {
+  opacity: 1;
+}

@@ -4,24 +4,33 @@ import { RemoveChord } from './RemoveChord';
 import clsx from 'clsx';
 import { useChords } from './providers/SongProvider';
 import { MouseEventHandler, useRef } from 'react';
+import { ChordsLineEditor } from './forms/ChordsLineEditor';
 
 type ChordsViewProps = {
-  chords: Chord[];
   partId: string;
+  chords: Chord[];
+  repeatCount?: number;
   isDuplicate?: boolean;
 };
 
 export const ChordsView = ({
   partId,
   chords,
+  repeatCount = 0,
   isDuplicate,
 }: ChordsViewProps) => {
   return (
-    <ul className={clsx(styles.chords, isDuplicate && styles.duplicate)}>
-      {chords.map((chord) => (
-        <ChordView chord={chord} key={chord.id} partId={partId} />
-      ))}
-    </ul>
+    <div className={styles.chordsLine}>
+      <ul className={clsx(styles.chords, isDuplicate && styles.duplicate)}>
+        {repeatCount > 0 && (
+          <span className={styles.repeatCount}>{repeatCount}x</span>
+        )}
+        {chords.map((chord) => (
+          <ChordView chord={chord} key={chord.id} partId={partId} />
+        ))}
+      </ul>
+      <ChordsLineEditor chords={chords} partId={partId}></ChordsLineEditor>
+    </div>
   );
 };
 
@@ -85,8 +94,12 @@ const ChordView = ({ partId, chord }: ChordViewProps) => {
       style={{
         gridColumn: `span ${chord.bar * 4}`,
       }}>
-      <RemoveChord id={chord.id} partId={partId} />
-      <span className={styles.display}>{chord.display}</span>
+      <RemoveChord
+        id={chord.id}
+        partId={partId}
+        className={styles.removeChord}
+      />
+      <FormattedChord className={styles.display} {...chord}></FormattedChord>
       {/* <button
         className={styles.dragHandleLeft}
         onMouseDown={handleMouseDown}
@@ -95,5 +108,28 @@ const ChordView = ({ partId, chord }: ChordViewProps) => {
         className={styles.dragHandleRight}
         onMouseDown={handleMouseDown}></button>
     </li>
+  );
+};
+
+export const FormattedChord = ({
+  className,
+  note,
+  sign,
+  major,
+  modifier,
+}: Chord & {
+  className?: string;
+}) => {
+  return (
+    <span className={className}>
+      {note}
+      {sign && (
+        <span
+          style={{ fontFamily: 'math' }}
+          dangerouslySetInnerHTML={{ __html: sign }}></span>
+      )}
+      {!major && 'm'}
+      {modifier && <sup>{modifier}</sup>}
+    </span>
   );
 };

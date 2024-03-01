@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import styles from './SongsList.module.css';
-import { DeleteButton } from './forms/DeleteButton';
+import { DeleteSongButton } from './forms/DeleteButton';
 import { getSongs } from '@/actions/song';
 
 export const SongsList = async () => {
@@ -18,9 +18,9 @@ export const SongsList = async () => {
         return (
           <li key={song.id} className={styles.song}>
             <Link href={`/song/${slug}`}>{title}</Link>
-            <DeleteButton title={title} slug={slug}>
+            <DeleteSongButton title={title} slug={slug}>
               X
-            </DeleteButton>
+            </DeleteSongButton>
           </li>
         );
       })}

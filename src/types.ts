@@ -1,3 +1,5 @@
+import { FLAT, SHARP } from './helpers/chord';
+
 export type Song = SongMeta & {
   parts: Part[];
 };
@@ -9,13 +11,15 @@ export type SongMeta = {
 };
 
 export type Note = 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G';
+export type Sign = typeof SHARP | typeof FLAT | '';
+
 export type Chord = {
   id: string;
   original: string;
   display: string;
   note: Note;
   major: boolean;
-  sign?: '#' | 'b';
+  sign: Sign;
   modifier?: number;
   bar: number;
 };
@@ -38,4 +42,6 @@ export type Color = {
 export type ChordLine = {
   pattern: string;
   chords: Chord[];
+  repeatCount?: number;
+  isDuplicate?: boolean;
 };

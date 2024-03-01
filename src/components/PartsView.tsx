@@ -14,16 +14,7 @@ export const PartsView = () => {
   const { currentPartId, parts } = useSongParts();
   return (
     <section className={styles.parts}>
-      {parts.map((part, i) => {
-        // const prevPart = parts[i - 1];
-        // if (prevPart) {
-        //   const prevPattern = getChordPattern(prevPart.chords);
-        //   const pattern = getChordPattern(part.chords);
-        //   console.log(pattern, prevPattern);
-        //   if (prevPattern === pattern) {
-        //     return <div key={part.id}>+ 1</div>;
-        //   }
-        // }
+      {parts.map((part) => {
         return (
           <PartView
             key={part.id}
@@ -69,18 +60,12 @@ export const PartView = ({
         <Editable onEdit={handleEditTitle}>{part.title}</Editable>
       </h3>
       {chordLines?.map((line, i) => {
-        const pattern = getChordPattern(line.chords);
-        const prevLine = chordLines[i - 1];
-        const prevPattern = prevLine
-          ? getChordPattern(prevLine.chords)
-          : undefined;
-        const isDuplicate = prevPattern === pattern;
-
         return (
           <ChordsView
             key={line.pattern + i}
-            isDuplicate={isDuplicate}
             chords={line.chords}
+            repeatCount={line.repeatCount}
+            isDuplicate={line.isDuplicate}
             partId={part.id}
           />
         );

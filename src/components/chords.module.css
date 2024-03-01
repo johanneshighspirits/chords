@@ -1,3 +1,7 @@
+.chordsLine {
+  position: relative;
+}
+
 .chords {
   display: grid;
   gap: var(--spacing);
@@ -15,6 +19,16 @@
   padding: 2rem 0;
   border-radius: var(--radius);
   background: var(--chord-color);
+}
+
+.removeChord {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 200ms ease-out;
+}
+.chord:hover .removeChord {
+  opacity: 1;
+  pointer-events: all;
 }
 
 .dragHandleRight,
@@ -58,4 +72,13 @@
 
 .display {
   text-align: center;
+}
+
+.repeatCount {
+  position: absolute;
+  top: calc(-0.5 * var(--spacing-y));
+  right: calc(-0.5 * var(--spacing-x));
+  padding: 0.15em 0.3em;
+  border-radius: var(--radius);
+  background: var(--dark-label-color);
 }
