@@ -5,10 +5,17 @@ import clsx from 'clsx';
 import { useChords } from './providers/SongProvider';
 import { MouseEventHandler, useRef } from 'react';
 import { ChordsLineEditor } from './forms/ChordsLineEditor';
+import { Debug } from './debug/Debug';
+import {
+  getNumberOfBeats,
+  getPositionFromBeats,
+  moveTiming,
+} from '@/helpers/timing';
 
 type ChordsViewProps = {
   partId: string;
   chords: Chord[];
+  lineIndex: number;
   repeatCount?: number;
   isDuplicate?: boolean;
 };
@@ -16,6 +23,7 @@ type ChordsViewProps = {
 export const ChordsView = ({
   partId,
   chords,
+  lineIndex,
   repeatCount = 0,
   isDuplicate,
 }: ChordsViewProps) => {
@@ -26,7 +34,12 @@ export const ChordsView = ({
           <span className={styles.repeatCount}>{repeatCount}x</span>
         )}
         {chords.map((chord) => (
-          <ChordView chord={chord} key={chord.id} partId={partId} />
+          <ChordView
+            chord={chord}
+            key={chord.id}
+            lineIndex={lineIndex}
+            partId={partId}
+          />
         ))}
       </ul>
       <ChordsLineEditor chords={chords} partId={partId}></ChordsLineEditor>
@@ -36,21 +49,20 @@ export const ChordsView = ({
 
 type ChordViewProps = {
   chord: Chord;
+  lineIndex: number;
   partId: string;
 };
 
-const ChordView = ({ partId, chord }: ChordViewProps) => {
+const ChordView = ({ partId, chord, lineIndex }: ChordViewProps) => {
   const { editChord } = useChords();
-  const xRef = useRef<{ x: number; width: number } | null>(null);
+  const xRef = useRef<{ chordX: number; beatWidth: number } | null>(null);
   const chordRef = useRef<HTMLLIElement | null>(null);
 
   const calculateBeats = (clientX: number) => {
     if (xRef.current) {
-      const distanceX = clientX - xRef.current.x;
-      const newWidth = xRef.current.width + distanceX;
-      const beats = chord.bar / 0.25;
-      const beatWidth = xRef.current.width / beats;
-      return Math.round(newWidth / beatWidth);
+      const newWidth = clientX - xRef.current.chordX;
+      const numberOfBeats = newWidth / xRef.current.beatWidth;
+      return Math.round(numberOfBeats);
     }
   };
 
@@ -58,7 +70,7 @@ const ChordView = ({ partId, chord }: ChordViewProps) => {
     if (chordRef.current && xRef.current !== null) {
       const newBeats = calculateBeats(e.clientX);
       if (newBeats) {
-        chordRef.current.style.gridColumn = `span ${newBeats}`;
+        chordRef.current.style.gridColumnEnd = `span ${newBeats}`;
       }
     }
   };
@@ -69,30 +81,46 @@ const ChordView = ({ partId, chord }: ChordViewProps) => {
     if (xRef.current !== null) {
       const newBeats = calculateBeats(e.clientX);
       if (newBeats) {
-        editChord(chord.id, { bar: newBeats * 0.25 });
+        editChord(
+          chord.id,
+          {
+            timing: {
+              ...chord.timing,
+              duration: getPositionFromBeats(newBeats),
+            },
+          },
+          'durationChange'
+        );
       }
       xRef.current = null;
     }
   };
 
   const handleMouseDown: MouseEventHandler<HTMLButtonElement> = (e) => {
-    const width = chordRef.current?.getBoundingClientRect().width;
-    if (width !== undefined) {
+    const rect = chordRef.current?.getBoundingClientRect();
+    if (rect) {
+      const { x, width } = rect;
       xRef.current = {
-        x: e.clientX,
-        width,
+        chordX: x,
+        beatWidth: width / getNumberOfBeats(chord.timing.duration),
       };
       window.addEventListener('mousemove', handleMouseMove);
       window.addEventListener('mouseup', handleMouseUp);
     }
   };
 
+  const gridColumnStart =
+    1 +
+    chord.timing.position.bar * 4 +
+    chord.timing.position.beat -
+    lineIndex * 16;
   return (
     <li
       ref={chordRef}
       className={styles.chord}
       style={{
-        gridColumn: `span ${chord.bar * 4}`,
+        gridColumnStart,
+        gridColumnEnd: `span ${getNumberOfBeats(chord.timing.duration)}`,
       }}>
       <RemoveChord
         id={chord.id}
@@ -100,6 +128,11 @@ const ChordView = ({ partId, chord }: ChordViewProps) => {
         className={styles.removeChord}
       />
       <FormattedChord className={styles.display} {...chord}></FormattedChord>
+      <Debug>
+        Pos: {chord.timing.position.bar}.{chord.timing.position.beat}.0
+        <br />
+        Len: {chord.timing.duration.bar}.{chord.timing.duration.beat}.0
+      </Debug>
       {/* <button
         className={styles.dragHandleLeft}
         onMouseDown={handleMouseDown}

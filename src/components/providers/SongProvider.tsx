@@ -11,6 +11,12 @@ import {
   useMemo,
 } from 'react';
 import { SongSaver } from './SongSaver';
+import {
+  Timing,
+  getNumberOfBeats,
+  moveChordBy,
+  moveTiming,
+} from '@/helpers/timing';
 
 type SongState = SongMeta & {
   parts: Part[];
@@ -27,10 +33,16 @@ type Action =
       partId?: string;
       afterChordId?: string;
     }
-  | { type: 'editChord'; id: string; chord: Partial<Chord> }
+  | {
+      type: 'editChord';
+      id: string;
+      chord: Partial<Chord>;
+      change: 'durationChange';
+    }
   | { type: 'removeChord'; id: string; partId: string }
   | { type: 'removeChords'; chordIds: string[]; partId: string }
   | { type: 'addPart'; title?: string; chords?: Chord[] }
+  | { type: 'removePart'; id: string }
   | { type: 'setPartTitle'; title: string; partId: string }
   | { type: 'setActivePart'; partId: string };
 type Dispatch = (action: Action) => void;
@@ -50,11 +62,12 @@ function reducer(state: SongState, action: Action): SongState {
         const colorsByPattern = {
           [pattern]: color,
         };
-        const newPart = {
+        const newPart: Part = {
           id,
           color,
           title: 'New Part',
           chords,
+          timing: Timing.init(),
         };
 
         return {
@@ -70,9 +83,44 @@ function reducer(state: SongState, action: Action): SongState {
         ...state,
         parts: state.parts.map((part) => {
           if (part.id === currentPartId) {
+            const lastChordTiming =
+              part.chords[part.chords.length - 1]?.timing ?? Timing.init();
+            const lastChordBeatOffset =
+              (lastChordTiming.position.beat + lastChordTiming.duration.beat) %
+              4;
+
             return {
               ...part,
-              chords: [...part.chords, action.chord],
+              chords: [
+                ...part.chords,
+                {
+                  ...action.chord,
+                  timing: {
+                    ...action.chord.timing,
+                    duration: {
+                      ...(lastChordBeatOffset > 0
+                        ? {
+                            bar: 0,
+                            beat: 4 - lastChordBeatOffset,
+                          }
+                        : action.chord.timing.duration),
+                    },
+                    position: {
+                      ...(lastChordBeatOffset > 0
+                        ? {
+                            bar: lastChordTiming.position.bar,
+                            beat: lastChordBeatOffset,
+                          }
+                        : {
+                            bar: part.chords[part.chords.length - 1]
+                              ? lastChordTiming.position.bar + 1
+                              : 0,
+                            beat: 0,
+                          }),
+                    },
+                  },
+                },
+              ],
             };
           }
           return part;
@@ -93,6 +141,14 @@ function reducer(state: SongState, action: Action): SongState {
               ...action.chords.map((chord) => ({
                 ...chord,
                 id: chord.id + 'x',
+                timing: moveTiming(
+                  chord.timing,
+                  {
+                    bar: 4,
+                    beat: 0,
+                  },
+                  'later'
+                ),
               })),
               ...part.chords.slice(index + 1),
             ];
@@ -109,18 +165,38 @@ function reducer(state: SongState, action: Action): SongState {
       return {
         ...state,
         parts: state.parts.map((part) => {
-          return {
-            ...part,
-            chords: part.chords.map((chord) => {
-              if (chord.id === action.id) {
+          const chordIndex = part.chords.findIndex(
+            (chord) => chord.id === action.id
+          );
+          if (chordIndex > -1) {
+            const oldChord = part.chords[chordIndex];
+            const newChord = {
+              ...oldChord,
+              ...action.chord,
+            };
+            switch (action.change) {
+              case 'durationChange':
+                const change =
+                  getNumberOfBeats(newChord.timing.duration) -
+                  getNumberOfBeats(oldChord.timing.duration);
+                console.log('change in beats', change);
                 return {
-                  ...chord,
-                  ...action.chord,
+                  ...part,
+                  chords: [
+                    ...part.chords.slice(0, chordIndex),
+                    newChord,
+                    ...part.chords.slice(chordIndex + 1).map((c) => ({
+                      ...c,
+                      // timing: moveTiming(c.timing, {bar:0, beat: change}, change > 0 ? 'later' : 'earlier')
+                    })),
+                  ],
                 };
+              default: {
+                return part;
               }
-              return chord;
-            }),
-          };
+            }
+          }
+          return part;
         }),
       };
     }
@@ -129,9 +205,19 @@ function reducer(state: SongState, action: Action): SongState {
         ...state,
         parts: state.parts.map((part) => {
           if (part.id === action.partId) {
+            const chordToRemoveIndex = part.chords.findIndex(
+              (c) => c.id === action.id
+            );
+            const chordToRemove = part.chords[chordToRemoveIndex];
+            const newChords = [
+              ...part.chords.slice(0, chordToRemoveIndex),
+              ...part.chords
+                .slice(chordToRemoveIndex + 1)
+                .map(moveChordBy(chordToRemove.timing.duration, 'earlier')),
+            ];
             return {
               ...part,
-              chords: part.chords.filter((c) => c.id !== action.id),
+              chords: newChords,
             };
           }
           return part;
@@ -155,6 +241,8 @@ function reducer(state: SongState, action: Action): SongState {
       };
     }
     case 'addPart': {
+      const prevPart = state.parts[state.parts.length - 1];
+      const prevTiming = prevPart ? prevPart.timing : Timing.init();
       return {
         ...state,
         parts: [
@@ -164,8 +252,15 @@ function reducer(state: SongState, action: Action): SongState {
             title: `Part ${state.parts.length + 1}`,
             chords: [],
             color: getRandomColor(),
+            timing: Timing.init(prevTiming.offset + prevTiming.duration.bar),
           },
         ],
+      };
+    }
+    case 'removePart': {
+      return {
+        ...state,
+        parts: state.parts.filter((part) => part.id !== action.id),
       };
     }
     case 'setPartTitle': {
@@ -220,11 +315,13 @@ export const SongProvider = ({
     state,
     dispatch,
   };
+  // console.log('----');
   // state.parts.forEach((part) => {
-  //   console.log(getChordPattern(part.chords));
-  //   console.log(getChordLines(part.chords));
+  //   console.log(part.timing);
+  //   part.chords.forEach((chord) => {
+  //     console.table({ display: chord.display, ...chord.timing });
+  //   });
   // });
-
   return (
     <SongContext.Provider value={value}>
       <SongSaver />
@@ -265,8 +362,12 @@ export function useSongParts() {
 
 export function useChords() {
   const song = useSong();
-  const editChord = (id: string, chord: Partial<Chord>) => {
-    song.dispatch({ type: 'editChord', id, chord });
+  const editChord = (
+    id: string,
+    chord: Partial<Chord>,
+    change: 'durationChange'
+  ) => {
+    song.dispatch({ type: 'editChord', id, chord, change });
   };
   return {
     editChord,

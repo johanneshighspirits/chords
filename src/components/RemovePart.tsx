@@ -4,19 +4,17 @@ import { useSong } from './providers/SongProvider';
 import styles from './remove-button.module.css';
 import clsx from 'clsx';
 
-export const RemoveChord = ({
+export const RemovePart = ({
   id,
-  partId,
   className,
 }: {
   id: string;
-  partId: string;
   className?: string;
 }) => {
   const { dispatch } = useSong();
 
   const handleClick = () => {
-    dispatch({ type: 'removeChord', id, partId });
+    dispatch({ type: 'removePart', id });
   };
 
   return (

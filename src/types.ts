@@ -21,16 +21,20 @@ export type Chord = {
   major: boolean;
   sign: Sign;
   modifier?: number;
-  bar: number;
+  timing: Timing;
 };
 
-export type Part = {
+export type MetaPart = {
   id: string;
   color: Color;
   title: string;
   pattern?: string;
+};
+
+export type Part = MetaPart & {
   chordLines?: ChordLine[];
   chords: Chord[];
+  timing: Timing;
 };
 
 export type Color = {
@@ -44,4 +48,15 @@ export type ChordLine = {
   chords: Chord[];
   repeatCount?: number;
   isDuplicate?: boolean;
+};
+
+export type Duration = {
+  bar: number;
+  beat: number;
+};
+
+export type Timing = {
+  offset: number;
+  position: Duration;
+  duration: Duration;
 };

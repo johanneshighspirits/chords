@@ -9,6 +9,8 @@ import clsx from 'clsx';
 import { Editable } from './Editable';
 import { AddPart } from './AddPart';
 import { getChordLines, getChordPattern } from '@/helpers/part';
+import { Debug } from './debug/Debug';
+import { RemovePart } from './RemovePart';
 
 export const PartsView = () => {
   const { currentPartId, parts } = useSongParts();
@@ -59,10 +61,13 @@ export const PartView = ({
       <h3>
         <Editable onEdit={handleEditTitle}>{part.title}</Editable>
       </h3>
+      <RemovePart id={part.id}></RemovePart>
+      <Debug>{part.pattern}</Debug>
       {chordLines?.map((line, i) => {
         return (
           <ChordsView
             key={line.pattern + i}
+            lineIndex={i}
             chords={line.chords}
             repeatCount={line.repeatCount}
             isDuplicate={line.isDuplicate}

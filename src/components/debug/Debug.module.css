@@ -1,0 +1,9 @@
+.pre {
+  display: block;
+  color: white;
+  font-size: 12px;
+  padding: 8px 6px;
+  font-family: monospace;
+  background: black;
+  overflow-x: auto;
+}

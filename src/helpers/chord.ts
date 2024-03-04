@@ -1,4 +1,5 @@
 import { Chord, Note, Sign } from '@/types';
+import { Timing } from './timing';
 
 const ChordRegex =
   /^(?<root>[A-H])(?<signMatch>\#|b)?(?<minor>m)?(?<modifier>[0-9]*)?/i;
@@ -27,9 +28,9 @@ export const parseChord = (input: string): Chord | null => {
     major: minor !== 'm',
     sign,
     modifier: isNaN(modNumber) ? undefined : modNumber,
-    bar: 1.0,
+    timing: Timing.withBarLength(),
   };
-
+  console.log(chord);
   return chord;
 };
 

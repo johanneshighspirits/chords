@@ -10,9 +10,5 @@ type SongPageProps = {
 
 export default async function SongPage({ params: { slug } }: SongPageProps) {
   const song = await getSong(slug);
-  return (
-    <PageContainer>
-      <SongView song={song} />
-    </PageContainer>
-  );
+  return <SongView song={song} />;
 }
