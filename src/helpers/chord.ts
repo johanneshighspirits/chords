@@ -1,5 +1,6 @@
 import { Chord, Note, Sign } from '@/types';
 import { Timing } from './timing';
+import { generateId } from './common';
 
 const ChordRegex =
   /^(?<root>[A-H])(?<signMatch>\#|b)?(?<minor>m)?(?<modifier>[0-9]*)?(?<bassMatch>\/[A-H])?(?<bassSignMatch>\#|b?)?/i;
@@ -14,7 +15,7 @@ export const parseChord = (input: string): Chord | null => {
     return null;
   }
   const { root, minor, signMatch, modifier, bassMatch, bassSignMatch } = groups;
-  const id = crypto.randomUUID().substring(0, 8);
+  const uid = generateId();
   const modNumber = Number(modifier);
   const note: Note = root.toUpperCase().replace('H', 'B') as Note;
   const sign = getSign(signMatch);
@@ -23,7 +24,7 @@ export const parseChord = (input: string): Chord | null => {
     : undefined;
   const bassSign = getSign(bassSignMatch);
   const chord: Chord = {
-    id,
+    uid,
     original,
     display: [note, signMatch, minor, modifier]
       .filter((s) => s !== undefined)
@@ -48,6 +49,3 @@ const getSign = (match?: string): Sign => {
   if (match === 'b') return FLAT;
   return '';
 };
-
-export const generateId = (length = 8) =>
-  crypto.randomUUID().substring(0, length);

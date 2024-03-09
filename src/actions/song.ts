@@ -1,7 +1,9 @@
 'use server';
 
+import { querySong, insertSong } from '@/db/actions';
 import { AsyncResult, Result } from '@/helpers/Result';
-import { generateId, parseChord } from '@/helpers/chord';
+import { parseChord } from '@/helpers/chord';
+import { generateId } from '@/helpers/common';
 import { Part } from '@/helpers/part';
 import { slugify } from '@/helpers/string';
 import { deserializeSong, serializeSong } from '@/transfer/serializer';
@@ -13,30 +15,27 @@ import { redirect } from 'next/navigation';
 export const createSong = async (formData: FormData) => {
   const title = formData.get('title') as string;
   if (title) {
-    const id = generateId(16);
     const slug = slugify(title);
-    const song = {
-      id,
-      title,
-      slug,
-      parts: [Part.new()],
-    };
-    await writeFile(`./temp/${slug}.json`, serializeSong(song));
+    const newSong = await insertSong({ uid: generateId(), title, slug });
+    console.log(newSong);
+    // await writeFile(`./temp/${slug}.json`, serializeSong(song));
     redirect(`/song/${slug}`);
   }
 };
 
 export const updateSong = async (song: Song) => {
   const { slug } = song;
-  await writeFile(`./temp/${slug}.json`, serializeSong(song));
+  console.log('-- updateSong ignored --');
+  // await writeFile(`./temp/${slug}.json`, serializeSong(song));
 };
 
-export const getSong = async (slug: string): Promise<Song> => {
-  const songData = await readFile(`./temp/${slug}.json`, {
-    encoding: 'utf8',
-  });
-  const song = deserializeSong(JSON.parse(songData));
-  return song;
+export const getSong = async (slug: string): Promise<any> => {
+  const songData = await querySong(slug);
+  // const songData = await readFile(`./temp/${slug}.json`, {
+  //   encoding: 'utf8',
+  // });
+  // const song = deserializeSong(JSON.parse(songData));
+  return songData;
 };
 
 export const deleteSong = async (
@@ -61,5 +60,5 @@ export const getSongs = async (): AsyncResult<SongMeta[]> => {
       )
     )
   );
-  return Result.ok(songs.map(({ id, title, slug }) => ({ id, title, slug })));
+  return Result.ok(songs.map(({ uid, title, slug }) => ({ uid, title, slug })));
 };

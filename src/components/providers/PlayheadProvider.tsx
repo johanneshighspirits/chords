@@ -21,7 +21,7 @@ const PlayheadContext = createContext<Context | undefined>(undefined);
 
 export const PlayheadProvider = ({ children }: PropsWithChildren) => {
   const [position, setPosition] = useState<Duration>({ bar: 0, beat: 0 });
-  const { currentPartId } = useSong();
+  const { currentPartUID: currentPartId } = useSong();
   const value = {
     currentPartId,
     position,

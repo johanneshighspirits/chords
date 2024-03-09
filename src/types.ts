@@ -5,7 +5,7 @@ export type Song = SongMeta & {
 };
 
 export type SongMeta = {
-  id: string;
+  uid: string;
   slug: string;
   title: string;
 };
@@ -14,7 +14,7 @@ export type Note = 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G';
 export type Sign = typeof SHARP | typeof FLAT | '';
 
 export type Chord = {
-  id: string;
+  uid: string;
   original: string;
   display: string;
   note: Note;
@@ -27,7 +27,7 @@ export type Chord = {
 };
 
 export type MetaPart = {
-  id: string;
+  uid: string;
   color: Color;
   title: string;
   pattern?: string;
@@ -62,3 +62,5 @@ export type Timing = {
   position: Duration;
   duration: Duration;
 };
+
+export type WithMany<T, Many, Key extends string> = T & Record<Key, Many[]>;

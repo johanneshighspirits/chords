@@ -17,11 +17,11 @@ import {
   moveChordBy,
   moveTiming,
 } from '@/helpers/timing';
-import { generateId } from '@/helpers/chord';
+import { generateId } from '@/helpers/common';
 
 type SongState = SongMeta & {
   parts: PartType[];
-  currentPartId?: string;
+  currentPartUID?: string;
   colorsByPattern?: Record<string, Color>;
 };
 
@@ -36,14 +36,14 @@ type Action =
     }
   | {
       type: 'editChord';
-      id: string;
+      uid: string;
       chord: Partial<Chord>;
       change: 'durationChange' | 'positionChange';
     }
-  | { type: 'removeChord'; id: string; partId: string }
+  | { type: 'removeChord'; uid: string; partId: string }
   | { type: 'removeChords'; chordIds: string[]; partId: string }
   | { type: 'addPart'; title?: string; chords?: Chord[] }
-  | { type: 'removePart'; id: string }
+  | { type: 'removePart'; uid: string }
   | { type: 'setPartTitle'; title: string; partId: string }
   | { type: 'setActivePart'; partId: string };
 type Dispatch = (action: Action) => void;
@@ -64,15 +64,15 @@ function reducer(state: SongState, action: Action): SongState {
           ...state,
           colorsByPattern,
           parts: [newPart],
-          currentPartId: newPart.id,
+          currentPartUID: newPart.uid,
         };
       }
       const currentPartId =
-        action.partId || state.currentPartId || state.parts[0]?.id;
+        action.partId || state.currentPartUID || state.parts[0]?.uid;
       return {
         ...state,
         parts: state.parts.map((part) => {
-          if (part.id === currentPartId) {
+          if (part.uid === currentPartId) {
             const lastChordTiming =
               part.chords[part.chords.length - 1]?.timing ?? Timing.init();
             const lastChordBeatOffset =
@@ -114,16 +114,16 @@ function reducer(state: SongState, action: Action): SongState {
           }
           return part;
         }),
-        currentPartId,
+        currentPartUID: currentPartId,
       };
     }
     case 'addChords': {
       return {
         ...state,
         parts: state.parts.map((part) => {
-          if (part.id === action.partId) {
+          if (part.uid === action.partId) {
             const index =
-              part.chords.findIndex((c) => c.id === action.afterChordId) ||
+              part.chords.findIndex((c) => c.uid === action.afterChordId) ||
               part.chords.length;
             const newChords = [
               ...part.chords.slice(0, index + 1),
@@ -157,7 +157,7 @@ function reducer(state: SongState, action: Action): SongState {
         ...state,
         parts: state.parts.map((part) => {
           const chordIndex = part.chords.findIndex(
-            (chord) => chord.id === action.id
+            (chord) => chord.uid === action.uid
           );
           if (chordIndex > -1) {
             const oldChord = part.chords[chordIndex];
@@ -214,9 +214,9 @@ function reducer(state: SongState, action: Action): SongState {
       return {
         ...state,
         parts: state.parts.map((part) => {
-          if (part.id === action.partId) {
+          if (part.uid === action.partId) {
             const chordToRemoveIndex = part.chords.findIndex(
-              (c) => c.id === action.id
+              (c) => c.uid === action.uid
             );
             const chordToRemove = part.chords[chordToRemoveIndex];
             const newChords = [
@@ -238,11 +238,11 @@ function reducer(state: SongState, action: Action): SongState {
       return {
         ...state,
         parts: state.parts.map((part) => {
-          if (part.id === action.partId) {
+          if (part.uid === action.partId) {
             return {
               ...part,
               chords: part.chords.filter(
-                (c) => !action.chordIds.includes(c.id)
+                (c) => !action.chordIds.includes(c.uid)
               ),
             };
           }
@@ -258,7 +258,7 @@ function reducer(state: SongState, action: Action): SongState {
         parts: [
           ...state.parts,
           {
-            id: generateId(),
+            uid: generateId(),
             title: `Part ${state.parts.length + 1}`,
             chords: [],
             color: getRandomColor(),
@@ -270,14 +270,14 @@ function reducer(state: SongState, action: Action): SongState {
     case 'removePart': {
       return {
         ...state,
-        parts: state.parts.filter((part) => part.id !== action.id),
+        parts: state.parts.filter((part) => part.uid !== action.uid),
       };
     }
     case 'setPartTitle': {
       return {
         ...state,
         parts: state.parts.map((part) => {
-          if (part.id === action.partId) {
+          if (part.uid === action.partId) {
             return {
               ...part,
               title: action.title,
@@ -290,7 +290,7 @@ function reducer(state: SongState, action: Action): SongState {
     case 'setActivePart': {
       return {
         ...state,
-        currentPartId: action.partId,
+        currentPartUID: action.partId,
       };
     }
     case 'openSong': {
@@ -299,7 +299,7 @@ function reducer(state: SongState, action: Action): SongState {
         ...state,
         title,
         parts,
-        currentPartId: parts[parts.length - 1].id,
+        currentPartUID: parts[parts.length - 1].uid,
       };
     }
     default: {
@@ -310,7 +310,7 @@ function reducer(state: SongState, action: Action): SongState {
 }
 
 const emptyState: SongState = {
-  id: '',
+  uid: generateId(),
   slug: '',
   title: 'New Song',
   parts: [Part.new([])],
@@ -365,7 +365,7 @@ export function useSong() {
 export function useSongParts() {
   const song = useSong();
   return {
-    currentPartId: song.currentPartId,
+    currentPartId: song.currentPartUID,
     parts: song.parts,
   };
 }
@@ -373,11 +373,11 @@ export function useSongParts() {
 export function useChords() {
   const song = useSong();
   const editChord = (
-    id: string,
+    uid: string,
     chord: Partial<Chord>,
     change: 'durationChange' | 'positionChange'
   ) => {
-    song.dispatch({ type: 'editChord', id, chord, change });
+    song.dispatch({ type: 'editChord', uid, chord, change });
   };
   return {
     editChord,

@@ -1,15 +1,15 @@
 import { Chord, ChordLine, Part as PartType } from '@/types';
 import { Timing, positionAsString } from './timing';
-import { generateId } from './chord';
 import { getRandomColor } from './color';
+import { generateId } from './common';
 
 export const Part = {
   new: (chords = [] as Chord[]): PartType => {
-    const id = generateId();
+    const uid = generateId();
     const color = getRandomColor();
     const pattern = getChordPattern(chords);
     return {
-      id,
+      uid,
       color,
       title: 'New Part',
       chords,
