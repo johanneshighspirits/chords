@@ -9,6 +9,8 @@ export const metadata: Metadata = {
   description: 'Chords',
 };
 
+const testVar = process.env.MY_TEST;
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -18,7 +20,9 @@ export default function RootLayout({
     <html lang="en">
       <body className={sanchez.className}>
         <header>
-          <div className="wrapper">Chords</div>
+          <div className="wrapper">
+            Chords <i>{testVar}</i>
+          </div>
         </header>
         <main className="wrapper">{children}</main>
         <footer>

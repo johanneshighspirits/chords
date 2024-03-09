@@ -1,6 +1,11 @@
 .button {
   position: absolute;
   opacity: 0.3;
+  top: 0;
+  right: 0;
+}
+
+.inset {
   top: calc(0.25 * var(--unit));
   right: calc(0.25 * var(--unit));
 }

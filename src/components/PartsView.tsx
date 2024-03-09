@@ -11,6 +11,7 @@ import { AddPart } from './AddPart';
 import { getChordLines, getChordPattern } from '@/helpers/part';
 import { Debug } from './debug/Debug';
 import { RemovePart } from './RemovePart';
+import { Playhead } from './Playhead';
 
 export const PartsView = () => {
   const { currentPartId, parts } = useSongParts();
@@ -58,23 +59,28 @@ export const PartView = ({
           '--part-color': `hsl(${h} ${s}% ${l}%)`,
         } as CSSProperties
       }>
-      <h3>
-        <Editable onEdit={handleEditTitle}>{part.title}</Editable>
-      </h3>
-      <RemovePart id={part.id}></RemovePart>
-      <Debug>{part.pattern}</Debug>
-      {chordLines?.map((line, i) => {
-        return (
-          <ChordsView
-            key={line.pattern + i}
-            lineIndex={i}
-            chords={line.chords}
-            repeatCount={line.repeatCount}
-            isDuplicate={line.isDuplicate}
-            partId={part.id}
-          />
-        );
-      })}
+      <div className={styles.header}>
+        <h3>
+          <Editable onEdit={handleEditTitle}>{part.title}</Editable>
+        </h3>
+        <RemovePart id={part.id}></RemovePart>
+      </div>
+      {/* <Debug>{part.pattern}</Debug> */}
+      <div className={styles.chordLinesContainer}>
+        <Playhead partId={part.id} />
+        {chordLines?.map((line, i) => {
+          return (
+            <ChordsView
+              key={line.pattern + i}
+              lineIndex={i}
+              chords={line.chords}
+              repeatCount={line.repeatCount}
+              isDuplicate={line.isDuplicate}
+              partId={part.id}
+            />
+          );
+        })}
+      </div>
     </article>
   );
 };

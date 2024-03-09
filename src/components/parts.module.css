@@ -19,6 +19,14 @@
   transition: border 300ms;
 }
 
+.chordLinesContainer {
+  position: relative;
+}
+
+.header {
+  position: relative;
+}
+
 .isActive {
   border-color: rgb(255 255 255 / 0.75);
 }

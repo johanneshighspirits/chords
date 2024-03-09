@@ -1,20 +1,31 @@
-import { Chord, ChordLine } from '@/types';
-import { positionAsString } from './timing';
+import { Chord, ChordLine, Part as PartType } from '@/types';
+import { Timing, positionAsString } from './timing';
+import { generateId } from './chord';
+import { getRandomColor } from './color';
 
+export const Part = {
+  new: (chords = [] as Chord[]): PartType => {
+    const id = generateId();
+    const color = getRandomColor();
+    const pattern = getChordPattern(chords);
+    return {
+      id,
+      color,
+      title: 'New Part',
+      chords,
+      timing: Timing.init(),
+      pattern,
+    };
+  },
+};
 export const getChordPattern = (chords: Chord[]) =>
   chords
     .map(
-      (chord) =>
-        `${chord.display}_${positionAsString(
-          chord.timing.position
-        )}_${positionAsString(chord.timing.duration)}`
+      (chord) => `${chord.display}_${positionAsString(chord.timing.duration)}`
     )
     .join('|');
 
-export const getChordLines = (
-  chords: Chord[],
-  barsPerLine = 4
-): ChordLine[] => {
+export const getChordLines = (chords: Chord[]): ChordLine[] => {
   /**
    * Split chords by lines (4 bars on each line)
    */

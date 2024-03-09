@@ -1,8 +1,10 @@
 'use server';
 
 import { AsyncResult, Result } from '@/helpers/Result';
-import { parseChord } from '@/helpers/chord';
+import { generateId, parseChord } from '@/helpers/chord';
+import { Part } from '@/helpers/part';
 import { slugify } from '@/helpers/string';
+import { deserializeSong, serializeSong } from '@/transfer/serializer';
 import { Song, SongMeta } from '@/types';
 import { readFile, readdir, rm, writeFile } from 'fs/promises';
 import { revalidatePath, revalidateTag } from 'next/cache';
@@ -11,27 +13,30 @@ import { redirect } from 'next/navigation';
 export const createSong = async (formData: FormData) => {
   const title = formData.get('title') as string;
   if (title) {
-    const id = crypto.randomUUID().substring(0, 16);
+    const id = generateId(16);
     const slug = slugify(title);
     const song = {
       id,
       title,
       slug,
-      parts: [],
+      parts: [Part.new()],
     };
-    await writeFile(`./temp/${slug}.json`, JSON.stringify(song, null, 2));
+    await writeFile(`./temp/${slug}.json`, serializeSong(song));
     redirect(`/song/${slug}`);
   }
 };
 
 export const updateSong = async (song: Song) => {
   const { slug } = song;
-  await writeFile(`./temp/${slug}.json`, JSON.stringify(song, null, 2));
+  await writeFile(`./temp/${slug}.json`, serializeSong(song));
 };
 
 export const getSong = async (slug: string): Promise<Song> => {
-  const song = await readFile(`./temp/${slug}.json`, { encoding: 'utf8' });
-  return JSON.parse(song);
+  const songData = await readFile(`./temp/${slug}.json`, {
+    encoding: 'utf8',
+  });
+  const song = deserializeSong(JSON.parse(songData));
+  return song;
 };
 
 export const deleteSong = async (

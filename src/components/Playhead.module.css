@@ -1,0 +1,29 @@
+.Playhead {
+  display: block;
+  position: absolute;
+  width: 2px;
+  background: linear-gradient(rgb(0 255 255), rgb(0 0 0 / 0));
+  margin-left: -1px;
+  transition: all 400ms ease-out;
+  --size: 6px;
+}
+
+/* .Playhead::after, */
+.Playhead::before {
+  display: block;
+  position: absolute;
+  content: '';
+  border: var(--size) solid transparent;
+  cursor: pointer;
+}
+
+.Playhead::before {
+  left: calc(-1 * var(--size) + 1px);
+  top: 0;
+  border-top-color: cyan;
+}
+/* .Playhead::after {
+  left: calc(-1 * var(--size) + 1px);
+  bottom: 0;
+  border-bottom-color: cyan;
+} */

@@ -20,6 +20,8 @@ export type Chord = {
   note: Note;
   major: boolean;
   sign: Sign;
+  bass?: Note;
+  bassSign?: Sign;
   modifier?: number;
   timing: Timing;
 };

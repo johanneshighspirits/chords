@@ -4,6 +4,8 @@ import { SongProvider } from './providers/SongProvider';
 import { PartsView } from './PartsView';
 import styles from './song.module.css';
 import { ArrangementView } from './ArrangementView';
+import { AddPart } from './AddPart';
+import { PlayheadProvider } from './providers/PlayheadProvider';
 
 type SongViewProps = {
   song: Song;
@@ -13,19 +15,22 @@ export const SongView = ({ song }: SongViewProps) => {
   const { title } = song;
   return (
     <SongProvider initialSong={song}>
-      <div className={styles.songView}>
-        <div className={styles.songHeader}>
-          <h1>{title}</h1>
-        </div>
+      <PlayheadProvider>
+        <div className={styles.songView}>
+          <div className={styles.songHeader}>
+            <h1>{title}</h1>
+          </div>
 
-        <div className={styles.chordsAdder}>
-          <p>Add chords</p>
-          <AddChord />
-        </div>
+          <div className={styles.chordsAdder}>
+            <p>Add chords</p>
+            <AddChord />
+            <AddPart />
+          </div>
 
-        <PartsView />
-        <ArrangementView />
-      </div>
+          <PartsView />
+          <ArrangementView />
+        </div>
+      </PlayheadProvider>
     </SongProvider>
   );
 };

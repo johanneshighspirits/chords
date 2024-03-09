@@ -4,13 +4,15 @@
 
 .chords {
   display: grid;
-  gap: var(--spacing);
+  gap: 2px;
   grid-template-columns: repeat(16, 1fr);
   position: relative;
+  margin-top: var(--spacing-y);
 }
 
 .duplicate {
-  opacity: 0.5;
+  opacity: 0.3;
+  margin-top: 2px;
 }
 
 .chord {

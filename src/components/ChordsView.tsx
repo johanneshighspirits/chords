@@ -1,4 +1,4 @@
-import { Chord } from '@/types';
+import { Chord, Sign as SignType } from '@/types';
 import styles from './chords.module.css';
 import { RemoveChord } from './RemoveChord';
 import clsx from 'clsx';
@@ -28,7 +28,7 @@ export const ChordsView = ({
   isDuplicate,
 }: ChordsViewProps) => {
   return (
-    <div className={styles.chordsLine}>
+    <div className={clsx(styles.chordsLine)}>
       <ul className={clsx(styles.chords, isDuplicate && styles.duplicate)}>
         {repeatCount > 0 && (
           <span className={styles.repeatCount}>{repeatCount}x</span>
@@ -55,31 +55,77 @@ type ChordViewProps = {
 
 const ChordView = ({ partId, chord, lineIndex }: ChordViewProps) => {
   const { editChord } = useChords();
-  const xRef = useRef<{ chordX: number; beatWidth: number } | null>(null);
+  const tempRef = useRef<{
+    chordLeft: number;
+    colStart: number;
+    beatWidth: number;
+  } | null>(null);
   const chordRef = useRef<HTMLLIElement | null>(null);
 
-  const calculateBeats = (clientX: number) => {
-    if (xRef.current) {
-      const newWidth = clientX - xRef.current.chordX;
-      const numberOfBeats = newWidth / xRef.current.beatWidth;
+  const calculateBeatsMoved = (clientX: number) => {
+    if (tempRef.current) {
+      const distance = clientX - tempRef.current.chordLeft;
+      const numberOfBeats = distance / tempRef.current.beatWidth;
       return Math.round(numberOfBeats);
     }
   };
+  const handlePositionMouseMove = (e: MouseEvent) => {
+    if (chordRef.current && tempRef.current !== null) {
+      const distanceMoved = calculateBeatsMoved(e.clientX);
+      if (distanceMoved !== undefined) {
+        console.log(
+          'distanceMoved',
+          distanceMoved,
+          `colStart: ${tempRef.current.colStart}`
+        );
+        chordRef.current.style.gridColumnStart = `${
+          tempRef.current.colStart + distanceMoved
+        }`;
+      }
+    }
+  };
+  const handlePositionMouseUp = (e: MouseEvent) => {
+    window.removeEventListener('mousemove', handlePositionMouseMove);
+    window.removeEventListener('mouseup', handlePositionMouseUp);
+    if (tempRef.current !== null) {
+      const newBeats = calculateBeatsMoved(e.clientX);
+      if (newBeats !== 0 && newBeats !== undefined) {
+        editChord(
+          chord.id,
+          {
+            timing: moveTiming(
+              chord.timing,
+              { bar: 0, beat: Math.abs(newBeats) },
+              newBeats > 0 ? 'later' : 'earlier'
+            ),
+          },
+          'positionChange'
+        );
+      }
+      tempRef.current = null;
+    }
+  };
 
-  const handleMouseMove = (e: MouseEvent) => {
-    if (chordRef.current && xRef.current !== null) {
-      const newBeats = calculateBeats(e.clientX);
+  const calculateDurationBeats = (clientX: number) => {
+    if (tempRef.current) {
+      const newWidth = clientX - tempRef.current.chordLeft;
+      const numberOfBeats = newWidth / tempRef.current.beatWidth;
+      return Math.round(numberOfBeats);
+    }
+  };
+  const handleDurationMouseMove = (e: MouseEvent) => {
+    if (chordRef.current && tempRef.current !== null) {
+      const newBeats = calculateDurationBeats(e.clientX);
       if (newBeats) {
         chordRef.current.style.gridColumnEnd = `span ${newBeats}`;
       }
     }
   };
-
-  const handleMouseUp = (e: MouseEvent) => {
-    window.removeEventListener('mousemove', handleMouseMove);
-    window.removeEventListener('mouseup', handleMouseUp);
-    if (xRef.current !== null) {
-      const newBeats = calculateBeats(e.clientX);
+  const handleDurationMouseUp = (e: MouseEvent) => {
+    window.removeEventListener('mousemove', handleDurationMouseMove);
+    window.removeEventListener('mouseup', handleDurationMouseUp);
+    if (tempRef.current !== null) {
+      const newBeats = calculateDurationBeats(e.clientX);
       if (newBeats) {
         editChord(
           chord.id,
@@ -92,20 +138,35 @@ const ChordView = ({ partId, chord, lineIndex }: ChordViewProps) => {
           'durationChange'
         );
       }
-      xRef.current = null;
+      tempRef.current = null;
     }
   };
 
-  const handleMouseDown: MouseEventHandler<HTMLButtonElement> = (e) => {
+  const handlePositionMouseDown: MouseEventHandler<HTMLButtonElement> = (e) => {
     const rect = chordRef.current?.getBoundingClientRect();
     if (rect) {
       const { x, width } = rect;
-      xRef.current = {
-        chordX: x,
+      tempRef.current = {
+        chordLeft: x,
+        colStart: gridColumnStart,
         beatWidth: width / getNumberOfBeats(chord.timing.duration),
       };
-      window.addEventListener('mousemove', handleMouseMove);
-      window.addEventListener('mouseup', handleMouseUp);
+      window.addEventListener('mousemove', handlePositionMouseMove);
+      window.addEventListener('mouseup', handlePositionMouseUp);
+    }
+  };
+
+  const handleDurationMouseDown: MouseEventHandler<HTMLButtonElement> = (e) => {
+    const rect = chordRef.current?.getBoundingClientRect();
+    if (rect) {
+      const { x, width } = rect;
+      tempRef.current = {
+        chordLeft: x,
+        colStart: gridColumnStart,
+        beatWidth: width / getNumberOfBeats(chord.timing.duration),
+      };
+      window.addEventListener('mousemove', handleDurationMouseMove);
+      window.addEventListener('mouseup', handleDurationMouseUp);
     }
   };
 
@@ -125,21 +186,22 @@ const ChordView = ({ partId, chord, lineIndex }: ChordViewProps) => {
       <RemoveChord
         id={chord.id}
         partId={partId}
-        className={styles.removeChord}
+        className={clsx(styles.removeChord, styles.inset)}
       />
       <FormattedChord className={styles.display} {...chord}></FormattedChord>
-      <Debug>
+      {/* <Debug>
+        Id: {chord.id}
+        <br />
         Pos: {chord.timing.position.bar}.{chord.timing.position.beat}.0
         <br />
         Len: {chord.timing.duration.bar}.{chord.timing.duration.beat}.0
-      </Debug>
-      {/* <button
+      </Debug> */}
+      <button
         className={styles.dragHandleLeft}
-        onMouseDown={handleMouseDown}
-        onClick={handleClick(false)}></button> */}
+        onMouseDown={handlePositionMouseDown}></button>
       <button
         className={styles.dragHandleRight}
-        onMouseDown={handleMouseDown}></button>
+        onMouseDown={handleDurationMouseDown}></button>
     </li>
   );
 };
@@ -150,19 +212,30 @@ export const FormattedChord = ({
   sign,
   major,
   modifier,
+  bass,
+  bassSign,
 }: Chord & {
   className?: string;
 }) => {
   return (
     <span className={className}>
       {note}
-      {sign && (
-        <span
-          style={{ fontFamily: 'math' }}
-          dangerouslySetInnerHTML={{ __html: sign }}></span>
-      )}
+      <Sign sign={sign} />
       {!major && 'm'}
       {modifier && <sup>{modifier}</sup>}
+      {bass && (
+        <span style={{ opacity: 0.8 }}>
+          &nbsp;/&nbsp;{bass}
+          <Sign sign={bassSign} />
+        </span>
+      )}
     </span>
   );
 };
+
+const Sign = ({ sign }: { sign?: SignType }) =>
+  sign ? (
+    <span
+      style={{ fontFamily: 'math' }}
+      dangerouslySetInnerHTML={{ __html: sign }}></span>
+  ) : null;

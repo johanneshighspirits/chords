@@ -21,7 +21,7 @@ export const RemoveChord = ({
 
   return (
     <button
-      className={clsx('blank', styles.button, className)}
+      className={clsx('blank', styles.button, styles.inset, className)}
       onClick={handleClick}>
       X
     </button>

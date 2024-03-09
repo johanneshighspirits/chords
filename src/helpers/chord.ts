@@ -2,7 +2,7 @@ import { Chord, Note, Sign } from '@/types';
 import { Timing } from './timing';
 
 const ChordRegex =
-  /^(?<root>[A-H])(?<signMatch>\#|b)?(?<minor>m)?(?<modifier>[0-9]*)?/i;
+  /^(?<root>[A-H])(?<signMatch>\#|b)?(?<minor>m)?(?<modifier>[0-9]*)?(?<bassMatch>\/[A-H])?(?<bassSignMatch>\#|b?)?/i;
 
 export const parseChord = (input: string): Chord | null => {
   const original = input.trim();
@@ -13,12 +13,16 @@ export const parseChord = (input: string): Chord | null => {
   if (!groups) {
     return null;
   }
-  const { root, minor, signMatch, modifier } = groups;
+  const { root, minor, signMatch, modifier, bassMatch, bassSignMatch } = groups;
   const id = crypto.randomUUID().substring(0, 8);
   const modNumber = Number(modifier);
   const note: Note = root.toUpperCase().replace('H', 'B') as Note;
   const sign = getSign(signMatch);
-  const chord = {
+  const bass: Note | undefined = bassMatch
+    ? (bassMatch.replace('/', '').toUpperCase().replace('H', 'B') as Note)
+    : undefined;
+  const bassSign = getSign(bassSignMatch);
+  const chord: Chord = {
     id,
     original,
     display: [note, signMatch, minor, modifier]
@@ -28,9 +32,11 @@ export const parseChord = (input: string): Chord | null => {
     major: minor !== 'm',
     sign,
     modifier: isNaN(modNumber) ? undefined : modNumber,
+    bass,
+    bassSign,
     timing: Timing.withBarLength(),
   };
-  console.log(chord);
+  // console.log(chord);
   return chord;
 };
 
@@ -42,3 +48,6 @@ const getSign = (match?: string): Sign => {
   if (match === 'b') return FLAT;
   return '';
 };
+
+export const generateId = (length = 8) =>
+  crypto.randomUUID().substring(0, length);
