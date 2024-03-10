@@ -11,16 +11,16 @@ export const ArrangementView = () => {
     <aside className={styles.arrangement}>
       {parts.map((part) => {
         const {
-          color: { h, s, l },
+          color: { h, s, l, a },
           title,
         } = part;
         return (
           <li
-            key={part.id}
+            key={part.uid}
             className={partsStyles.part}
             style={
               {
-                '--part-color': `hsl(${h} ${s}% ${l}%)`,
+                '--part-color': `hsl(${h} ${s}% ${l}% / ${a})`,
               } as CSSProperties
             }>
             {title}

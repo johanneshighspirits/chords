@@ -1,0 +1,20 @@
+.container {
+  animation: pulse 1s linear infinite alternate;
+  filter: blur(2px);
+  border-radius: 4px;
+  background: rgb(255 255 255 / 0.1);
+}
+
+.text {
+  filter: blur(2px);
+  opacity: 0.5;
+}
+
+@keyframes pulse {
+  from {
+    opacity: 0.6;
+  }
+  to {
+    opacity: 0.9;
+  }
+}

@@ -1,17 +1,25 @@
 'use client';
 
 import { parseChord } from '@/helpers/chord';
-import { Chord } from '@/types';
+import { ChordDetails } from '@/types';
 import { ChangeEventHandler, FormEventHandler, useState } from 'react';
-import { useSong } from './providers/SongProvider';
+import { useChords } from './providers/SongProvider';
+import { insertChord } from '@/db/actions';
 
 export const AddChord = () => {
   const [value, setValue] = useState('');
-  const { dispatch } = useSong();
+  const { currentPartUID, addChord } = useChords();
 
-  const addChord = (chord: Chord | null) => {
-    if (chord !== null) {
-      dispatch({ type: 'addChord', chord });
+  const addChordDetails = (chordDetails: ChordDetails | null) => {
+    if (chordDetails !== null) {
+      const chord = addChord(chordDetails);
+      if (currentPartUID) {
+        insertChord(currentPartUID, chord).then((c) => {
+          console.log('chord added', c);
+        });
+      } else {
+        console.log('no chord added');
+      }
     }
     setValue('');
   };
@@ -19,7 +27,7 @@ export const AddChord = () => {
   const handleChange: ChangeEventHandler<HTMLInputElement> = (e) => {
     const inputValue = e.target.value;
     if (inputValue.endsWith(' ')) {
-      addChord(parseChord(inputValue));
+      addChordDetails(parseChord(inputValue));
     } else {
       setValue(inputValue);
     }
@@ -27,15 +35,19 @@ export const AddChord = () => {
 
   const handleSubmit: FormEventHandler<HTMLFormElement> = (e) => {
     e.preventDefault();
-    const chord = parseChord(value);
-    if (chord) {
-      addChord(chord);
+    const chordDetails = parseChord(value);
+    if (chordDetails) {
+      addChordDetails(chordDetails);
     }
   };
 
   return (
     <form onSubmit={handleSubmit}>
-      <input type="text" value={value} onChange={handleChange}></input>
+      <input
+        disabled={currentPartUID === undefined}
+        type="text"
+        value={value}
+        onChange={handleChange}></input>
     </form>
   );
 };

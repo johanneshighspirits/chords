@@ -13,27 +13,30 @@ export type SongMeta = {
 export type Note = 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G';
 export type Sign = typeof SHARP | typeof FLAT | '';
 
-export type Chord = {
+export type ChordMeta = {
   uid: string;
-  original: string;
-  display: string;
+  timing: Timing;
+};
+
+export type ChordDetails = {
   note: Note;
   major: boolean;
   sign: Sign;
   bass?: Note;
   bassSign?: Sign;
   modifier?: number;
-  timing: Timing;
 };
 
-export type MetaPart = {
+export type Chord = ChordMeta & ChordDetails;
+
+export type PartMeta = {
   uid: string;
   color: Color;
   title: string;
   pattern?: string;
 };
 
-export type Part = MetaPart & {
+export type Part = PartMeta & {
   chordLines?: ChordLine[];
   chords: Chord[];
   timing: Timing;
@@ -43,6 +46,7 @@ export type Color = {
   h: number;
   s: number;
   l: number;
+  a: number;
 };
 
 export type ChordLine = {

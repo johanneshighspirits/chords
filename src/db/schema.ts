@@ -1,5 +1,12 @@
 import { relations } from 'drizzle-orm';
-import { integer, json, pgTable, text, uuid } from 'drizzle-orm/pg-core';
+import {
+  integer,
+  boolean,
+  pgTable,
+  text,
+  uuid,
+  varchar,
+} from 'drizzle-orm/pg-core';
 
 export const songs = pgTable('songs', {
   uid: uuid('uid').primaryKey(),
@@ -16,6 +23,7 @@ export type NewSong = typeof songs.$inferInsert;
 export const parts = pgTable('parts', {
   uid: uuid('uid').primaryKey(),
   title: text('title').notNull(),
+  color: varchar('color', { length: 255 }),
   position: integer('position').notNull(),
   duration: integer('duration').notNull(),
   offset: integer('offset').notNull(),
@@ -42,12 +50,17 @@ export const chords = pgTable('chords', {
   position: integer('position').notNull(),
   duration: integer('duration').notNull(),
   offset: integer('offset').notNull(),
+  note: varchar('note', { length: 1 }).notNull(),
+  major: boolean('major').notNull().default(true),
+  sign: varchar('sign', { length: 8 }).notNull(),
+  bass: varchar('bass', { length: 1 }),
+  bassSign: varchar('bass_sign', { length: 8 }),
+  modifier: integer('modifier'),
   partId: uuid('part_id')
     .notNull()
     .references(() => parts.uid, {
       onDelete: 'cascade',
     }),
-  json: json('json'),
 });
 
 export const chordsRelations = relations(chords, ({ one }) => ({

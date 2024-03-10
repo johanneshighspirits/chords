@@ -43,15 +43,16 @@
   padding: 0;
   height: 100%;
   transition: opacity 150ms ease-in;
-  cursor: ew-resize;
 }
 .dragHandleLeft {
   left: 0;
   border-radius: var(--radius) 0 0 var(--radius);
+  cursor: move;
 }
 .dragHandleRight {
   right: 0;
   border-radius: 0 var(--radius) var(--radius) 0;
+  cursor: ew-resize;
 }
 .dragHandleRight:hover,
 .dragHandleLeft:hover {

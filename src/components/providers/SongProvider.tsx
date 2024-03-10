@@ -2,7 +2,14 @@
 
 import { getRandomColor } from '@/helpers/color';
 import { Part, getChordLines, getChordPattern } from '@/helpers/part';
-import { Part as PartType, Chord, Song, Color, SongMeta } from '@/types';
+import {
+  Part as PartType,
+  Chord,
+  Song,
+  Color,
+  SongMeta,
+  ChordDetails,
+} from '@/types';
 import {
   createContext,
   useContext,
@@ -21,13 +28,13 @@ import { generateId } from '@/helpers/common';
 
 type SongState = SongMeta & {
   parts: PartType[];
-  currentPartUID?: string;
+  currentPartUID: string;
   colorsByPattern?: Record<string, Color>;
 };
 
 type Action =
   | { type: 'openSong'; song: Song }
-  | { type: 'addChord'; chord: Chord; partId?: string }
+  | { type: 'addChord'; chord: Chord; partId: string }
   | {
       type: 'addChords';
       chords: Chord[];
@@ -55,66 +62,22 @@ const SongContext = createContext<
 function reducer(state: SongState, action: Action): SongState {
   switch (action.type) {
     case 'addChord': {
-      if (state.parts.length === 0) {
-        const newPart = Part.new([action.chord]);
-        const colorsByPattern = {
-          [newPart.pattern!]: newPart.color,
-        };
-        return {
-          ...state,
-          colorsByPattern,
-          parts: [newPart],
-          currentPartUID: newPart.uid,
-        };
-      }
-      const currentPartId =
-        action.partId || state.currentPartUID || state.parts[0]?.uid;
       return {
         ...state,
         parts: state.parts.map((part) => {
-          if (part.uid === currentPartId) {
-            const lastChordTiming =
-              part.chords[part.chords.length - 1]?.timing ?? Timing.init();
-            const lastChordBeatOffset =
-              (lastChordTiming.position.beat + lastChordTiming.duration.beat) %
-              4;
+          if (part.uid === action.partId) {
             return {
               ...part,
               chords: [
                 ...part.chords,
                 {
                   ...action.chord,
-                  timing: {
-                    ...action.chord.timing,
-                    duration: {
-                      ...(lastChordBeatOffset > 0
-                        ? {
-                            bar: 0,
-                            beat: 4 - lastChordBeatOffset,
-                          }
-                        : action.chord.timing.duration),
-                    },
-                    position: {
-                      ...(lastChordBeatOffset > 0
-                        ? {
-                            bar: lastChordTiming.position.bar,
-                            beat: lastChordBeatOffset,
-                          }
-                        : {
-                            bar: part.chords[part.chords.length - 1]
-                              ? lastChordTiming.position.bar + 1
-                              : 0,
-                            beat: 0,
-                          }),
-                    },
-                  },
                 },
               ],
             };
           }
           return part;
         }),
-        currentPartUID: currentPartId,
       };
     }
     case 'addChords': {
@@ -253,24 +216,32 @@ function reducer(state: SongState, action: Action): SongState {
     case 'addPart': {
       const prevPart = state.parts[state.parts.length - 1];
       const prevTiming = prevPart ? prevPart.timing : Timing.init();
+      const newPart = Part.new();
       return {
         ...state,
         parts: [
           ...state.parts,
           {
-            uid: generateId(),
+            ...newPart,
             title: `Part ${state.parts.length + 1}`,
-            chords: [],
-            color: getRandomColor(),
             timing: Timing.init(prevTiming.offset + prevTiming.duration.bar),
           },
         ],
+        currentPartUID: newPart.uid,
       };
     }
     case 'removePart': {
+      const partToRemoveIndex = state.parts.findIndex(
+        (p) => p.uid === action.uid
+      );
+      const currentPartUID =
+        state.currentPartUID === action.uid
+          ? state.parts[Math.max(0, partToRemoveIndex - 1)].uid
+          : state.parts[0].uid;
       return {
         ...state,
         parts: state.parts.filter((part) => part.uid !== action.uid),
+        currentPartUID,
       };
     }
     case 'setPartTitle': {
@@ -309,18 +280,27 @@ function reducer(state: SongState, action: Action): SongState {
   }
 }
 
-const emptyState: SongState = {
-  uid: generateId(),
-  slug: '',
-  title: 'New Song',
-  parts: [Part.new([])],
+const emptyState = (): SongState => {
+  const newPart = Part.new([]);
+  return {
+    currentPartUID: newPart.uid,
+    uid: generateId(),
+    slug: '',
+    title: 'New Song',
+    parts: [newPart],
+  };
 };
 
 export const SongProvider = ({
   initialSong,
   children,
 }: PropsWithChildren<{ initialSong?: Song }>) => {
-  const [state, dispatch] = useReducer(reducer, initialSong ?? emptyState);
+  const [state, dispatch] = useReducer(
+    reducer,
+    initialSong
+      ? { ...initialSong, currentPartUID: initialSong.parts[0]?.uid ?? '' }
+      : emptyState()
+  );
   const value = {
     state,
     dispatch,
@@ -329,7 +309,7 @@ export const SongProvider = ({
   // state.parts.forEach((part) => {
   //   console.log(part.timing);
   //   part.chords.forEach((chord) => {
-  //     console.table({ display: chord.display, ...chord.timing });
+  //     console.table({ timing: chord.note, ...chord.timing });
   //   });
   // });
   return (
@@ -371,15 +351,60 @@ export function useSongParts() {
 }
 
 export function useChords() {
-  const song = useSong();
+  const { currentPartUID, parts, dispatch } = useSong();
+  const addChord = (chordDetails: ChordDetails) => {
+    const part = parts.find((p) => p.uid === currentPartUID);
+    if (!part) {
+      throw new Error('No active part selected');
+    }
+    const lastChordTiming =
+      part.chords[part.chords.length - 1]?.timing ?? Timing.init();
+    const lastChordBeatOffset =
+      (lastChordTiming.position.beat + lastChordTiming.duration.beat) % 4;
+    const fallbackTiming = Timing.withBarLength();
+    const chord: Chord = {
+      ...chordDetails,
+      uid: generateId(),
+      timing: {
+        duration: {
+          ...(lastChordBeatOffset > 0
+            ? {
+                bar: 0,
+                beat: 4 - lastChordBeatOffset,
+              }
+            : fallbackTiming.duration),
+        },
+        position: {
+          ...(lastChordBeatOffset > 0
+            ? {
+                bar: lastChordTiming.position.bar,
+                beat: lastChordBeatOffset,
+              }
+            : {
+                bar: part.chords[part.chords.length - 1]
+                  ? lastChordTiming.position.bar + 1
+                  : 0,
+                beat: 0,
+              }),
+        },
+        offset: 0,
+      },
+    };
+
+    dispatch({ type: 'addChord', chord, partId: currentPartUID });
+    return chord;
+  };
+
   const editChord = (
     uid: string,
     chord: Partial<Chord>,
     change: 'durationChange' | 'positionChange'
   ) => {
-    song.dispatch({ type: 'editChord', uid, chord, change });
+    dispatch({ type: 'editChord', uid, chord, change });
   };
   return {
+    currentPartUID,
+    addChord,
     editChord,
   };
 }

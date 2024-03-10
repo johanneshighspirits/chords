@@ -36,7 +36,7 @@ export const ChordsView = ({
         {chords.map((chord) => (
           <ChordView
             chord={chord}
-            key={chord.id}
+            key={chord.uid}
             lineIndex={lineIndex}
             partId={partId}
           />
@@ -91,7 +91,7 @@ const ChordView = ({ partId, chord, lineIndex }: ChordViewProps) => {
       const newBeats = calculateBeatsMoved(e.clientX);
       if (newBeats !== 0 && newBeats !== undefined) {
         editChord(
-          chord.id,
+          chord.uid,
           {
             timing: moveTiming(
               chord.timing,
@@ -128,7 +128,7 @@ const ChordView = ({ partId, chord, lineIndex }: ChordViewProps) => {
       const newBeats = calculateDurationBeats(e.clientX);
       if (newBeats) {
         editChord(
-          chord.id,
+          chord.uid,
           {
             timing: {
               ...chord.timing,
@@ -184,13 +184,13 @@ const ChordView = ({ partId, chord, lineIndex }: ChordViewProps) => {
         gridColumnEnd: `span ${getNumberOfBeats(chord.timing.duration)}`,
       }}>
       <RemoveChord
-        id={chord.id}
+        id={chord.uid}
         partId={partId}
         className={clsx(styles.removeChord, styles.inset)}
       />
       <FormattedChord className={styles.display} {...chord}></FormattedChord>
       {/* <Debug>
-        Id: {chord.id}
+        Id: {chord.uid}
         <br />
         Pos: {chord.timing.position.bar}.{chord.timing.position.beat}.0
         <br />

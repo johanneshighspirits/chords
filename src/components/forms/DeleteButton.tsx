@@ -3,21 +3,21 @@
 import { PropsWithChildren } from 'react';
 import { useFormStatus } from 'react-dom';
 import styles from './Button.module.css';
-import { deleteSong } from '@/actions/song';
 import { usePathname } from 'next/navigation';
+import { deleteSong } from '@/db/actions';
 
 export const DeleteSongButton = ({
   title,
-  slug,
+  songId,
   children,
-}: PropsWithChildren<{ title: string; slug: string }>) => {
+}: PropsWithChildren<{ title: string; songId: string }>) => {
   const { pending } = useFormStatus();
   const pathname = usePathname();
 
   const handleClick = async (e: any) => {
     const shouldDelete = confirm(`Do you want to delete ${title}`);
     if (shouldDelete) {
-      await deleteSong(slug, pathname);
+      await deleteSong(songId, pathname);
     }
   };
 

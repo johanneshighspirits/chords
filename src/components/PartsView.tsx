@@ -20,8 +20,8 @@ export const PartsView = () => {
       {parts.map((part) => {
         return (
           <PartView
-            key={part.id}
-            isActive={currentPartId === part.id}
+            key={part.uid}
+            isActive={currentPartId === part.uid}
             part={part}
           />
         );
@@ -43,11 +43,11 @@ export const PartView = ({
   const { h, s, l } = part.color;
 
   const handleClick = () => {
-    dispatch({ type: 'setActivePart', partId: part.id });
+    dispatch({ type: 'setActivePart', partId: part.uid });
   };
 
   const handleEditTitle = (title: string) => {
-    dispatch({ type: 'setPartTitle', title, partId: part.id });
+    dispatch({ type: 'setPartTitle', title, partId: part.uid });
   };
 
   return (
@@ -63,11 +63,11 @@ export const PartView = ({
         <h3>
           <Editable onEdit={handleEditTitle}>{part.title}</Editable>
         </h3>
-        <RemovePart id={part.id}></RemovePart>
+        <RemovePart id={part.uid}></RemovePart>
       </div>
       {/* <Debug>{part.pattern}</Debug> */}
       <div className={styles.chordLinesContainer}>
-        <Playhead partId={part.id} />
+        <Playhead partId={part.uid} />
         {chordLines?.map((line, i) => {
           return (
             <ChordsView
@@ -76,7 +76,7 @@ export const PartView = ({
               chords={line.chords}
               repeatCount={line.repeatCount}
               isDuplicate={line.isDuplicate}
-              partId={part.id}
+              partId={part.uid}
             />
           );
         })}

@@ -1,7 +1,8 @@
 import { Chord, ChordLine, Part as PartType } from '@/types';
 import { Timing, positionAsString } from './timing';
-import { getRandomColor } from './color';
+import { getRandomColor, deserializeColor } from './color';
 import { generateId } from './common';
+import { DBPart } from '@/db/schema';
 
 export const Part = {
   new: (chords = [] as Chord[]): PartType => {

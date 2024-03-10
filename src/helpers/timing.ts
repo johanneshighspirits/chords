@@ -78,3 +78,25 @@ export const moveTiming = (
     position,
   };
 };
+
+export const serializeTiming = (timing: TimingType): SerializedTiming => {
+  const { position, duration, offset } = timing;
+  return [serializeDuration(position), serializeDuration(duration), offset];
+};
+type SerializedTiming = [position: number, duration: number, offset: number];
+
+export const deserializeTiming = (t: SerializedTiming): TimingType => {
+  return {
+    position: deserializeDuration(t[0]),
+    duration: deserializeDuration(t[1]),
+    offset: t[2],
+  };
+};
+
+export const serializeDuration = (duration: Duration) =>
+  (duration.bar << 4) + duration.beat;
+
+export const deserializeDuration = (input: number): Duration => ({
+  bar: input >> 4,
+  beat: input % 16,
+});
