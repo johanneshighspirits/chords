@@ -41,3 +41,16 @@ const getSign = (match?: string): Sign => {
   if (match === 'b') return FLAT;
   return '';
 };
+
+export const formatChord = ({
+  note,
+  sign,
+  major,
+  bass,
+  bassSign,
+  modifier,
+}: Chord) => {
+  return [note, sign, major ? '' : 'm', modifier, bass, bassSign]
+    .map(Boolean)
+    .join('');
+};

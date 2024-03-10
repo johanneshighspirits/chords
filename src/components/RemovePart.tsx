@@ -5,16 +5,16 @@ import styles from './remove-button.module.css';
 import clsx from 'clsx';
 
 export const RemovePart = ({
-  id,
+  uid,
   className,
 }: {
-  id: string;
+  uid: string;
   className?: string;
 }) => {
   const { dispatch } = useSong();
 
   const handleClick = () => {
-    dispatch({ type: 'removePart', id });
+    dispatch({ type: 'removePart', uid });
   };
 
   return (

@@ -3,6 +3,7 @@ import { Timing, positionAsString } from './timing';
 import { getRandomColor, deserializeColor } from './color';
 import { generateId } from './common';
 import { DBPart } from '@/db/schema';
+import { formatChord } from './chord';
 
 export const Part = {
   new: (chords = [] as Chord[]): PartType => {
@@ -22,7 +23,8 @@ export const Part = {
 export const getChordPattern = (chords: Chord[]) =>
   chords
     .map(
-      (chord) => `${chord.display}_${positionAsString(chord.timing.duration)}`
+      (chord) =>
+        `${formatChord(chord)}_${positionAsString(chord.timing.duration)}`
     )
     .join('|');
 

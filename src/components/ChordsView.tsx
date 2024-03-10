@@ -184,7 +184,7 @@ const ChordView = ({ partId, chord, lineIndex }: ChordViewProps) => {
         gridColumnEnd: `span ${getNumberOfBeats(chord.timing.duration)}`,
       }}>
       <RemoveChord
-        id={chord.uid}
+        uid={chord.uid}
         partId={partId}
         className={clsx(styles.removeChord, styles.inset)}
       />

@@ -63,7 +63,7 @@ export const PartView = ({
         <h3>
           <Editable onEdit={handleEditTitle}>{part.title}</Editable>
         </h3>
-        <RemovePart id={part.uid}></RemovePart>
+        <RemovePart uid={part.uid}></RemovePart>
       </div>
       {/* <Debug>{part.pattern}</Debug> */}
       <div className={styles.chordLinesContainer}>

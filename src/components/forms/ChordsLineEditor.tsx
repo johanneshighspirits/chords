@@ -15,7 +15,7 @@ export const ChordsLineEditor = ({
   const handleDelete = () => {
     dispatch({
       type: 'removeChords',
-      chordIds: chords.map((chord) => chord.id),
+      chordIds: chords.map((chord) => chord.uid),
       partId,
     });
   };
@@ -24,7 +24,7 @@ export const ChordsLineEditor = ({
       type: 'addChords',
       chords,
       partId,
-      afterChordId: chords[chords.length - 1].id,
+      afterChordId: chords[chords.length - 1].uid,
     });
   };
 
