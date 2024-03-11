@@ -12,6 +12,7 @@ import { getChordLines, getChordPattern } from '@/helpers/part';
 import { Debug } from './debug/Debug';
 import { RemovePart } from './RemovePart';
 import { Playhead } from './Playhead';
+import { updatePart } from '@/db/actions';
 
 export const PartsView = () => {
   const { currentPartId, parts } = useSongParts();
@@ -47,7 +48,10 @@ export const PartView = ({
   };
 
   const handleEditTitle = (title: string) => {
-    dispatch({ type: 'setPartTitle', title, partId: part.uid });
+    if (title !== part.title) {
+      updatePart({ ...part, title });
+      dispatch({ type: 'setPartTitle', title, partId: part.uid });
+    }
   };
 
   return (

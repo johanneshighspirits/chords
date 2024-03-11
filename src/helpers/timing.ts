@@ -81,15 +81,19 @@ export const moveTiming = (
 
 export const serializeTiming = (timing: TimingType): SerializedTiming => {
   const { position, duration, offset } = timing;
-  return [serializeDuration(position), serializeDuration(duration), offset];
+  return {
+    position: serializeDuration(position),
+    duration: serializeDuration(duration),
+    offset,
+  };
 };
-type SerializedTiming = [position: number, duration: number, offset: number];
+type SerializedTiming = { position: number; duration: number; offset: number };
 
 export const deserializeTiming = (t: SerializedTiming): TimingType => {
   return {
-    position: deserializeDuration(t[0]),
-    duration: deserializeDuration(t[1]),
-    offset: t[2],
+    position: deserializeDuration(t.position),
+    duration: deserializeDuration(t.duration),
+    offset: t.offset,
   };
 };
 

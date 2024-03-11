@@ -1,5 +1,6 @@
 'use client';
 
+import { deletePart } from '@/db/actions';
 import { useSong } from './providers/SongProvider';
 import styles from './remove-button.module.css';
 import clsx from 'clsx';
@@ -15,6 +16,7 @@ export const RemovePart = ({
 
   const handleClick = () => {
     dispatch({ type: 'removePart', uid });
+    deletePart(uid);
   };
 
   return (

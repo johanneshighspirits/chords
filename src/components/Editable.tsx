@@ -9,6 +9,7 @@ export const Editable = ({
   const handleBlur: FormEventHandler<HTMLSpanElement> = () => {
     const text = ref.current?.innerText;
     onEdit(text ?? '');
+    ref.current?.blur();
   };
 
   return (

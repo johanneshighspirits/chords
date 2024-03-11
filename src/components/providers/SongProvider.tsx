@@ -17,7 +17,7 @@ import {
   PropsWithChildren,
   useMemo,
 } from 'react';
-import { SongSaver } from './SongSaver';
+// import { SongSaver } from './SongSaver';
 import {
   Timing,
   getNumberOfBeats,
@@ -37,15 +37,17 @@ type Action =
   | { type: 'addChord'; chord: Chord; partId: string }
   | {
       type: 'addChords';
-      chords: Chord[];
-      partId?: string;
-      afterChordId?: string;
+      index: number;
+      newChords: Chord[];
+      modifiedChords: Chord[];
+      partId: string;
     }
   | {
       type: 'editChord';
-      uid: string;
-      chord: Partial<Chord>;
-      change: 'durationChange' | 'positionChange';
+      partId: string;
+      chordId: string;
+      modifiedChord: Chord;
+      chordIndex: number;
     }
   | { type: 'removeChord'; uid: string; partId: string }
   | { type: 'removeChords'; chordIds: string[]; partId: string }
@@ -85,26 +87,10 @@ function reducer(state: SongState, action: Action): SongState {
         ...state,
         parts: state.parts.map((part) => {
           if (part.uid === action.partId) {
-            const index =
-              part.chords.findIndex((c) => c.uid === action.afterChordId) ||
-              part.chords.length;
             const newChords = [
-              ...part.chords.slice(0, index + 1),
-              ...action.chords.map((chord) => ({
-                ...chord,
-                id: generateId(),
-                timing: moveTiming(
-                  chord.timing,
-                  {
-                    bar: 4,
-                    beat: 0,
-                  },
-                  'later'
-                ),
-              })),
-              ...part.chords
-                .slice(index + 1)
-                .map(moveChordBy({ bar: 4, beat: 0 }, 'later')),
+              ...part.chords.slice(0, action.index + 1),
+              ...action.newChords,
+              ...action.modifiedChords,
             ];
             return {
               ...part,
@@ -119,57 +105,20 @@ function reducer(state: SongState, action: Action): SongState {
       return {
         ...state,
         parts: state.parts.map((part) => {
-          const chordIndex = part.chords.findIndex(
-            (chord) => chord.uid === action.uid
-          );
-          if (chordIndex > -1) {
-            const oldChord = part.chords[chordIndex];
-            const newChord = {
-              ...oldChord,
-              ...action.chord,
-            };
-            switch (action.change) {
-              case 'durationChange': {
-                const change =
-                  getNumberOfBeats(newChord.timing.duration) -
-                  getNumberOfBeats(oldChord.timing.duration);
-                console.log('duration change in beats', change);
-                return {
-                  ...part,
-                  chords: [
-                    ...part.chords.slice(0, chordIndex),
-                    newChord,
-                    ...part.chords.slice(chordIndex + 1).map((c) => ({
-                      ...c,
-                      // timing: moveTiming(c.timing, {bar:0, beat: change}, change > 0 ? 'later' : 'earlier')
-                    })),
-                  ],
-                };
-              }
-              case 'positionChange': {
-                const change =
-                  getNumberOfBeats(newChord.timing.position) -
-                  getNumberOfBeats(oldChord.timing.position);
-                console.log('position change in beats', change);
-                return {
-                  ...part,
-                  chords: [
-                    ...part.chords.slice(0, chordIndex),
-                    newChord,
-                    ...part.chords.slice(chordIndex + 1).map((c) => ({
-                      ...c,
-                      // timing: moveTiming(c.timing, {bar:0, beat: change}, change > 0 ? 'later' : 'earlier')
-                    })),
-                  ],
-                };
-              }
-
-              default: {
-                return part;
-              }
-            }
+          if (part.uid !== action.partId) {
+            return part;
           }
-          return part;
+          return {
+            ...part,
+            chords: [
+              ...part.chords.slice(0, action.chordIndex),
+              action.modifiedChord,
+              ...part.chords.slice(action.chordIndex + 1).map((c) => ({
+                ...c,
+                // timing: moveTiming(c.timing, {bar:0, beat: change}, change > 0 ? 'later' : 'earlier')
+              })),
+            ],
+          };
         }),
       };
     }
@@ -314,7 +263,7 @@ export const SongProvider = ({
   // });
   return (
     <SongContext.Provider value={value}>
-      <SongSaver />
+      {/* <SongSaver /> */}
       {children}
     </SongContext.Provider>
   );
@@ -352,6 +301,7 @@ export function useSongParts() {
 
 export function useChords() {
   const { currentPartUID, parts, dispatch } = useSong();
+
   const addChord = (chordDetails: ChordDetails) => {
     const part = parts.find((p) => p.uid === currentPartUID);
     if (!part) {
@@ -390,21 +340,107 @@ export function useChords() {
         offset: 0,
       },
     };
-
     dispatch({ type: 'addChord', chord, partId: currentPartUID });
     return chord;
+  };
+
+  const duplicateChords = (
+    partId: string,
+    chordsToDuplicate: Chord[],
+    afterChordId: string
+  ) => {
+    const part = parts.find((p) => p.uid === partId);
+    if (part) {
+      const index =
+        part.chords.findIndex((c) => c.uid === afterChordId) ||
+        part.chords.length;
+      const newChords = chordsToDuplicate.map((chord) => ({
+        ...chord,
+        uid: generateId(),
+        timing: moveTiming(
+          chord.timing,
+          {
+            bar: 4,
+            beat: 0,
+          },
+          'later'
+        ),
+      }));
+
+      const modifiedChords = part.chords
+        .slice(index + 1)
+        .map(moveChordBy({ bar: 4, beat: 0 }, 'later'));
+
+      dispatch({
+        type: 'addChords',
+        index,
+        newChords,
+        modifiedChords,
+        partId: part.uid,
+      });
+      return { newChords, modifiedChords };
+    }
   };
 
   const editChord = (
     uid: string,
     chord: Partial<Chord>,
     change: 'durationChange' | 'positionChange'
-  ) => {
-    dispatch({ type: 'editChord', uid, chord, change });
+  ): Chord | undefined => {
+    const part = parts.find((p) => p.chords.some((c) => c.uid === uid));
+    if (part) {
+      const newChord = modifyChord(uid, chord, change, part.chords);
+      if (newChord) {
+        dispatch({
+          type: 'editChord',
+          partId: part.uid,
+          chordId: uid,
+          ...newChord,
+        });
+        return newChord.modifiedChord;
+      }
+    }
   };
+
   return {
     currentPartUID,
     addChord,
     editChord,
+    duplicateChords,
+    removeChords: () => {},
   };
 }
+
+const modifyChord = (
+  uid: string,
+  chord: Partial<Chord>,
+  change: 'durationChange' | 'positionChange',
+  chords: Chord[]
+) => {
+  const chordIndex = chords.findIndex((chord) => chord.uid === uid);
+  if (chordIndex > -1) {
+    const oldChord = chords[chordIndex];
+    const newChord: Chord = {
+      ...oldChord,
+      ...chord,
+    };
+    switch (change) {
+      case 'durationChange': {
+        const durationChange =
+          getNumberOfBeats(newChord.timing.duration) -
+          getNumberOfBeats(oldChord.timing.duration);
+        console.log('duration change in beats', durationChange);
+      }
+      case 'positionChange': {
+        const positionChange =
+          getNumberOfBeats(newChord.timing.position) -
+          getNumberOfBeats(oldChord.timing.position);
+        console.log('position change in beats', positionChange);
+      }
+    }
+    return {
+      modifiedChord: newChord,
+      chordIndex,
+    };
+  }
+};

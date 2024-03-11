@@ -11,6 +11,7 @@ import {
   getPositionFromBeats,
   moveTiming,
 } from '@/helpers/timing';
+import { updateChordTiming } from '@/db/actions';
 
 type ChordsViewProps = {
   partId: string;
@@ -90,7 +91,7 @@ const ChordView = ({ partId, chord, lineIndex }: ChordViewProps) => {
     if (tempRef.current !== null) {
       const newBeats = calculateBeatsMoved(e.clientX);
       if (newBeats !== 0 && newBeats !== undefined) {
-        editChord(
+        const editedChord = editChord(
           chord.uid,
           {
             timing: moveTiming(
@@ -101,6 +102,9 @@ const ChordView = ({ partId, chord, lineIndex }: ChordViewProps) => {
           },
           'positionChange'
         );
+        if (editedChord) {
+          updateChordTiming(editedChord);
+        }
       }
       tempRef.current = null;
     }
@@ -127,7 +131,7 @@ const ChordView = ({ partId, chord, lineIndex }: ChordViewProps) => {
     if (tempRef.current !== null) {
       const newBeats = calculateDurationBeats(e.clientX);
       if (newBeats) {
-        editChord(
+        const editedChord = editChord(
           chord.uid,
           {
             timing: {
@@ -137,6 +141,9 @@ const ChordView = ({ partId, chord, lineIndex }: ChordViewProps) => {
           },
           'durationChange'
         );
+        if (editedChord) {
+          updateChordTiming(editedChord);
+        }
       }
       tempRef.current = null;
     }
