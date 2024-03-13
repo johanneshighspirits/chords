@@ -2,13 +2,26 @@
 
 import { parseChord } from '@/helpers/chord';
 import { ChordDetails } from '@/types';
-import { ChangeEventHandler, FormEventHandler, useState } from 'react';
+import {
+  ChangeEventHandler,
+  FormEventHandler,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import { useChords } from './providers/SongProvider';
 import { insertChord } from '@/db/actions';
 
 export const AddChord = () => {
   const [value, setValue] = useState('');
   const { currentPartUID, addChord } = useChords();
+  const ref = useRef<HTMLInputElement | null>(null);
+
+  useEffect(() => {
+    if (ref.current && currentPartUID) {
+      ref.current.focus();
+    }
+  }, [currentPartUID]);
 
   const addChordDetails = (chordDetails: ChordDetails | null) => {
     if (chordDetails !== null) {
@@ -46,6 +59,7 @@ export const AddChord = () => {
       <input
         disabled={currentPartUID === undefined}
         type="text"
+        ref={ref}
         value={value}
         onChange={handleChange}></input>
     </form>

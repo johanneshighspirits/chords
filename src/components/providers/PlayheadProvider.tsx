@@ -1,6 +1,6 @@
 'use client';
 
-import { Duration } from '@/types';
+import { Color, Duration } from '@/types';
 import {
   createContext,
   Dispatch,
@@ -16,17 +16,29 @@ type Context = {
   currentPartId?: string;
   position: Duration;
   setPosition: Dispatch<SetStateAction<Duration>>;
+  color?: Color;
 };
 const PlayheadContext = createContext<Context | undefined>(undefined);
 
 export const PlayheadProvider = ({ children }: PropsWithChildren) => {
   const [position, setPosition] = useState<Duration>({ bar: 0, beat: 0 });
-  const { currentPartUID: currentPartId } = useSong();
+  const { currentPartUID: currentPartId, parts } = useSong();
+  const currentPart = parts.find((p) => p.uid === currentPartId);
+  const color = currentPart
+    ? {
+        h: currentPart.color.h,
+        s: 80,
+        l: currentPart.color.l,
+        a: 1,
+      }
+    : undefined;
   const value = {
     currentPartId,
     position,
     setPosition,
+    color,
   };
+
   return (
     <PlayheadContext.Provider value={value}>
       {/* <Debug>{JSON.stringify(position, null, 2)}</Debug> */}

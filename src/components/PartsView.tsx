@@ -40,7 +40,7 @@ export const PartView = ({
   part: Part;
 }) => {
   const { dispatch } = useSong();
-  const { chordLines } = part;
+  const { chordLines = [] } = part;
   const { h, s, l } = part.color;
 
   const handleClick = () => {
@@ -71,8 +71,8 @@ export const PartView = ({
       </div>
       {/* <Debug>{part.pattern}</Debug> */}
       <div className={styles.chordLinesContainer}>
-        <Playhead partId={part.uid} />
-        {chordLines?.map((line, i) => {
+        {chordLines.length > 0 ? <Playhead partId={part.uid} /> : null}
+        {chordLines.map((line, i) => {
           return (
             <ChordsView
               key={line.pattern + i}

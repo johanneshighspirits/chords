@@ -110,20 +110,9 @@ export async function insertChord(
     .returning();
 }
 
-const serializeChord = (partId: string, chord: Chord): NewChord => {
-  const { uid, timing, ...details } = chord;
-  const dbChord = {
-    ...details,
-    ...serializeTiming(timing),
-    uid,
-    partId,
-  } satisfies NewChord;
-  return dbChord;
-};
-
 export async function updateChordTiming(chordMeta: ChordMeta | ChordMeta[]) {
   const items = Array.isArray(chordMeta) ? chordMeta : [chordMeta];
-  return Promise.all(
+  await Promise.all(
     items.map((item) => {
       return db
         .update(chords)
@@ -134,7 +123,7 @@ export async function updateChordTiming(chordMeta: ChordMeta | ChordMeta[]) {
 }
 
 export async function deleteChord(uid: string | string[]) {
-  return db
+  await db
     .delete(chords)
     .where(Array.isArray(uid) ? inArray(chords.uid, uid) : eq(chords.uid, uid));
 }
@@ -226,4 +215,15 @@ const convertChords = (chords: DBChord[]): Chord[] => {
       } satisfies Chord;
     }
   );
+};
+
+const serializeChord = (partId: string, chord: Chord): NewChord => {
+  const { uid, timing, ...details } = chord;
+  const dbChord = {
+    ...details,
+    ...serializeTiming(timing),
+    uid,
+    partId,
+  } satisfies NewChord;
+  return dbChord;
 };
