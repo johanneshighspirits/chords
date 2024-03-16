@@ -24,7 +24,11 @@ import {
   WithMany,
 } from '@/types';
 import { deserializeColor, serializeColor } from '@/helpers/color';
-import { deserializeTiming, serializeTiming } from '@/helpers/timing';
+import {
+  deserializeTiming,
+  isTimingEarlier,
+  serializeTiming,
+} from '@/helpers/timing';
 import { Part } from '@/helpers/part';
 import { revalidatePath } from 'next/cache';
 
@@ -200,31 +204,35 @@ const convertParts = (
 };
 
 const convertChords = (chords: DBChord[]): Chord[] => {
-  return chords.map(
-    ({
-      uid,
-      position,
-      duration,
-      offset,
-      note,
-      major,
-      sign,
-      bass,
-      bassSign,
-      modifier,
-    }) => {
-      return {
+  return chords
+    .map(
+      ({
         uid,
-        timing: deserializeTiming({ position, duration, offset }),
-        note: note as Note,
+        position,
+        duration,
+        offset,
+        note,
         major,
-        sign: sign as Sign,
-        bass: bass ? (bass as Note) : undefined,
-        bassSign: bassSign ? (bassSign as Sign) : undefined,
-        modifier: modifier || undefined,
-      } satisfies Chord;
-    }
-  );
+        sign,
+        bass,
+        bassSign,
+        modifier,
+      }) => {
+        return {
+          uid,
+          timing: deserializeTiming({ position, duration, offset }),
+          note: note as Note,
+          major,
+          sign: sign as Sign,
+          bass: bass ? (bass as Note) : undefined,
+          bassSign: bassSign ? (bassSign as Sign) : undefined,
+          modifier: modifier || undefined,
+        } satisfies Chord;
+      }
+    )
+    .sort((a, b) => {
+      return isTimingEarlier(a.timing, b.timing) ? -1 : 1;
+    });
 };
 
 const serializeChord = (partId: string, chord: Chord): NewChord => {

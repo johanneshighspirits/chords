@@ -5,6 +5,7 @@ import { PartsView } from './PartsView';
 import styles from './song.module.css';
 import { ArrangementView } from './ArrangementView';
 import { AddPart } from './AddPart';
+import { Display } from './Display';
 
 type SongViewProps = {
   song: Song;
@@ -20,6 +21,7 @@ export const SongView = ({ song }: SongViewProps) => {
           <h1>{title}</h1>
         </div>
 
+        <Display />
         <div className={styles.chordsAdder}>
           <p>Add chords</p>
           <AddChord />

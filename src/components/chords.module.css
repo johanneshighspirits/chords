@@ -32,6 +32,21 @@
   pointer-events: all;
 }
 
+.hoverInfo {
+  display: block;
+  position: absolute;
+  background: black;
+  font-size: 0.7em;
+  padding: 0.3em;
+  border-radius: var(--radius);
+  right: calc(0.5 * var(--spacing-x));
+  bottom: calc(0.5 * var(--spacing-y));
+  opacity: 0;
+}
+.chord:hover .hoverInfo {
+  opacity: 1;
+}
+
 .dragHandleRight,
 .dragHandleLeft {
   display: block;

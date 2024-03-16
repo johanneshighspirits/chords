@@ -68,21 +68,22 @@ export const PartView = ({
         <RemovePart uid={part.uid}></RemovePart>
       </div>
       {/* <Debug>{part.pattern}</Debug> */}
-      <div className={styles.chordLinesContainer}>
-        {chordLines.length > 0 ? <Playhead partId={part.uid} /> : null}
-        {chordLines.map((line, i) => {
-          return (
-            <ChordsView
-              key={line.pattern + i}
-              lineIndex={i}
-              chords={line.chords}
-              repeatCount={line.repeatCount}
-              isDuplicate={line.isDuplicate}
-              partId={part.uid}
-            />
-          );
-        })}
-      </div>
+      {chordLines.length > 0 ? (
+        <Playhead partId={part.uid} className={styles.chordLinesContainer}>
+          {chordLines.map((line, i) => {
+            return (
+              <ChordsView
+                key={line.pattern + i}
+                lineIndex={i}
+                chords={line.chords}
+                repeatCount={line.repeatCount}
+                isDuplicate={line.isDuplicate}
+                partId={part.uid}
+              />
+            );
+          })}
+        </Playhead>
+      ) : null}
     </article>
   );
 };

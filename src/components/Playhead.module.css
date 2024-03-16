@@ -2,13 +2,17 @@
   display: block;
   position: absolute;
   width: 2px;
-  --playhead-color: white;
+  height: 4rem;
+  --playhead-hue: 100;
+  --playhead-saturation: 100%;
   background: linear-gradient(
-    var(--playhead-color, white),
-    rgb(255 255 255 / 0)
+    hsl(var(--playhead-hue) var(--playhead-saturation) 50%) 0%,
+    hsl(var(--playhead-hue) var(--playhead-saturation) 50% / 0.4) 25%,
+    hsl(var(--playhead-hue) var(--playhead-saturation) 50% / 0) 100%
   );
+  margin-top: var(--spacing-y);
   margin-left: -1px;
-  transition: all 400ms ease-out;
+  transition: all 200ms ease-out;
   --size: 6px;
 }
 
@@ -24,7 +28,7 @@
 .Playhead::before {
   left: calc(-1 * var(--size) + 1px);
   top: 0;
-  border-top-color: var(--playhead-color, white);
+  border-top-color: hsl(var(--playhead-hue) var(--playhead-saturation) 50%);
 }
 /* .Playhead::after {
   left: calc(-1 * var(--size) + 1px);

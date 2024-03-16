@@ -13,6 +13,7 @@ import {
 } from '@/helpers/timing';
 import { updateChordTiming } from '@/db/actions';
 import { TimingBar } from './TimingBar';
+import { FormattedDuration } from './Display';
 
 type ChordsViewProps = {
   partId: string;
@@ -205,6 +206,9 @@ const ChordView = ({ partId, chord, lineIndex }: ChordViewProps) => {
         <br />
         Len: {chord.timing.duration.bar}.{chord.timing.duration.beat}.0
       </Debug> */}
+      <div className={styles.hoverInfo}>
+        <FormattedDuration duration={chord.timing.position} />
+      </div>
       <button
         className={styles.dragHandleLeft}
         onMouseDown={handlePositionMouseDown}></button>

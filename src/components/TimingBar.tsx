@@ -54,6 +54,7 @@ const Bar = ({ partId, position }: { partId: string; position: Duration }) => {
     pendingPosition?.bar === position.bar + 1 && (position.bar + 1) % 4 === 0;
   return (
     <div
+      data-bar-id={`part_${partId}_${position.bar}.${position.beat}`}
       className={clsx(styles.bar, {
         [styles.isPendingBefore]: isPendingBefore,
         [styles.isPendingAfter]: isPendingAfter,
