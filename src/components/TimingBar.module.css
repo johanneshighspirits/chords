@@ -1,0 +1,27 @@
+.TimingBar {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  margin-bottom: 2px;
+}
+
+.bar {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+}
+.bar:hover {
+  background: rgb(255 255 255 / 0.2);
+}
+
+.isPendingBefore {
+  border-left: 2px solid cyan;
+}
+.isPendingAfter {
+  border-right: 2px solid cyan;
+}
+
+.beat {
+  height: var(--spacing-y);
+}
+.beat:hover {
+  background: rgb(255 255 255 / 0.2);
+}

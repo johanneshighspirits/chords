@@ -3,11 +3,14 @@ import { querySong } from '@/db/actions';
 
 type SongPageProps = {
   params: {
+    artist: string;
     slug: string;
   };
 };
 
-export default async function SongPage({ params: { slug } }: SongPageProps) {
-  const song = await querySong(slug);
+export default async function SongPage({
+  params: { artist, slug },
+}: SongPageProps) {
+  const song = await querySong({ artistSlug: artist, slug });
   return <SongView song={song} />;
 }

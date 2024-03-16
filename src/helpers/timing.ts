@@ -79,6 +79,22 @@ export const moveTiming = (
   };
 };
 
+export const isTimingEarlier = (
+  timing: TimingType,
+  compareWith: TimingType
+) => {
+  if (timing.position.bar < compareWith.position.bar) {
+    return true;
+  }
+  if (
+    timing.position.bar === compareWith.position.bar &&
+    timing.position.beat < compareWith.position.beat
+  ) {
+    return true;
+  }
+  return false;
+};
+
 export const serializeTiming = (timing: TimingType): SerializedTiming => {
   const { position, duration, offset } = timing;
   return {

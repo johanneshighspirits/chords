@@ -8,6 +8,8 @@ export type SongMeta = {
   uid: string;
   slug: string;
   title: string;
+  artist: string;
+  artistSlug: string;
 };
 
 export type Note = 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G';

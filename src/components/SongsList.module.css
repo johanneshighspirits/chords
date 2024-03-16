@@ -20,3 +20,7 @@
 .song:hover {
   background: rgb(0 0 0 / 0.7);
 }
+
+.artist {
+  font-weight: bold;
+}

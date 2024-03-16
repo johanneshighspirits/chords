@@ -10,3 +10,11 @@
 .form input {
   padding: 1em 2em;
 }
+
+.form:invalid button[type='submit'] {
+  opacity: 0.5;
+}
+
+.errorMessages {
+  color: rgb(200 0 0);
+}

@@ -1,6 +1,6 @@
 'use server';
 
-import { eq, inArray } from 'drizzle-orm';
+import { eq, and, inArray } from 'drizzle-orm';
 import { db } from '.';
 import {
   NewSong,
@@ -128,9 +128,15 @@ export async function deleteChord(uid: string | string[]) {
     .where(Array.isArray(uid) ? inArray(chords.uid, uid) : eq(chords.uid, uid));
 }
 
-export async function querySong(slug: string): Promise<Song> {
+export async function querySong({
+  slug,
+  artistSlug,
+}: {
+  slug: string;
+  artistSlug: string;
+}): Promise<Song> {
   const result = await db.query.songs.findFirst({
-    where: eq(songs.slug, slug),
+    where: and(eq(songs.slug, slug), eq(songs.artistSlug, artistSlug)),
     with: {
       parts: {
         with: {
@@ -152,6 +158,8 @@ export async function querySongsMeta(): Promise<SongMeta[]> {
       uid: true,
       slug: true,
       title: true,
+      artist: true,
+      artistSlug: true,
     },
   });
   if (!result) {
@@ -163,11 +171,13 @@ export async function querySongsMeta(): Promise<SongMeta[]> {
 const convertSong = (
   dbSong: WithMany<DBSong, WithMany<DBPart, DBChord, 'chords'>, 'parts'>
 ): Song => {
-  const { uid, title, slug, parts } = dbSong;
+  const { uid, title, artist, artistSlug, slug, parts } = dbSong;
   const song: Song = {
     uid,
     title,
     slug,
+    artist,
+    artistSlug,
     parts: convertParts(parts),
   };
   return song;

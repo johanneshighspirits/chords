@@ -1,4 +1,5 @@
-import { FormEventHandler, PropsWithChildren, useEffect, useRef } from 'react';
+import { FormEventHandler, PropsWithChildren, useRef } from 'react';
+import styles from './Editable.module.css';
 
 export const Editable = ({
   onEdit,
@@ -14,6 +15,7 @@ export const Editable = ({
 
   return (
     <span
+      className={styles.Editable}
       ref={ref}
       contentEditable={true}
       suppressContentEditableWarning={true}

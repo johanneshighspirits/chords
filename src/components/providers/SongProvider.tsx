@@ -9,6 +9,7 @@ import {
   Color,
   SongMeta,
   ChordDetails,
+  Duration,
 } from '@/types';
 import {
   createContext,
@@ -21,6 +22,7 @@ import {
 import {
   Timing,
   getNumberOfBeats,
+  isTimingEarlier,
   moveChordBy,
   moveTiming,
 } from '@/helpers/timing';
@@ -30,6 +32,8 @@ type SongState = SongMeta & {
   parts: PartType[];
   currentPartUID: string;
   colorsByPattern?: Record<string, Color>;
+  position: Duration;
+  pendingPosition: Duration | null;
 };
 
 type Action =
@@ -54,7 +58,9 @@ type Action =
   | { type: 'addPart'; title?: string; chords?: Chord[] }
   | { type: 'removePart'; uid: string }
   | { type: 'setPartTitle'; title: string; partId: string }
-  | { type: 'setActivePart'; partId: string };
+  | { type: 'setActivePart'; partId: string }
+  | { type: 'setPendingPosition'; pendingPosition: Duration | null }
+  | { type: 'setPosition'; position: Duration };
 type Dispatch = (action: Action) => void;
 
 const SongContext = createContext<
@@ -68,13 +74,30 @@ function reducer(state: SongState, action: Action): SongState {
         ...state,
         parts: state.parts.map((part) => {
           if (part.uid === action.partId) {
+            const beforeChords = part.chords.filter((c) =>
+              isTimingEarlier(c.timing, action.chord.timing)
+            );
+            const afterChords = part.chords
+              .filter(
+                (c): c is Chord =>
+                  !isTimingEarlier(c.timing, action.chord.timing)
+              )
+              .map((c) => ({
+                ...c,
+                timing: moveTiming(
+                  c.timing,
+                  action.chord.timing.duration,
+                  'later'
+                ),
+              }));
             return {
               ...part,
               chords: [
-                ...part.chords,
+                ...beforeChords,
                 {
                   ...action.chord,
                 },
+                ...afterChords,
               ],
             };
           }
@@ -222,6 +245,18 @@ function reducer(state: SongState, action: Action): SongState {
         currentPartUID: parts[parts.length - 1].uid,
       };
     }
+    case 'setPosition': {
+      return {
+        ...state,
+        position: action.position,
+      };
+    }
+    case 'setPendingPosition': {
+      return {
+        ...state,
+        pendingPosition: action.pendingPosition,
+      };
+    }
     default: {
       console.warn(`Action ${(action as any).type} not implemented yet`);
       return state;
@@ -236,7 +271,11 @@ const emptyState = (): SongState => {
     uid: generateId(),
     slug: '',
     title: 'New Song',
+    artist: 'Artist',
+    artistSlug: 'artist',
     parts: [newPart],
+    position: { bar: 0, beat: 0 },
+    pendingPosition: null,
   };
 };
 
@@ -247,7 +286,11 @@ export const SongProvider = ({
   const [state, dispatch] = useReducer(
     reducer,
     initialSong
-      ? { ...initialSong, currentPartUID: initialSong.parts[0]?.uid ?? '' }
+      ? {
+          ...emptyState(),
+          ...initialSong,
+          currentPartUID: initialSong.parts[0]?.uid ?? '',
+        }
       : emptyState()
   );
   const value = {
@@ -300,43 +343,32 @@ export function useSongParts() {
 }
 
 export function useChords() {
-  const { currentPartUID, parts, dispatch } = useSong();
+  const {
+    currentPartUID,
+    parts,
+    position: playheadPosition,
+    dispatch,
+  } = useSong();
 
   const addChord = (chordDetails: ChordDetails) => {
     const part = parts.find((p) => p.uid === currentPartUID);
     if (!part) {
       throw new Error('No active part selected');
     }
-    const lastChordTiming =
-      part.chords[part.chords.length - 1]?.timing ?? Timing.init();
-    const lastChordBeatOffset =
-      (lastChordTiming.position.beat + lastChordTiming.duration.beat) % 4;
-    const fallbackTiming = Timing.withBarLength();
+    const beatOffset = playheadPosition.beat % 4;
+    const duration = {
+      bar: beatOffset > 0 ? 0 : 1,
+      beat: beatOffset > 0 ? 4 - beatOffset : 0,
+    };
+    const position = {
+      ...playheadPosition,
+    };
     const chord: Chord = {
       ...chordDetails,
       uid: generateId(),
       timing: {
-        duration: {
-          ...(lastChordBeatOffset > 0
-            ? {
-                bar: 0,
-                beat: 4 - lastChordBeatOffset,
-              }
-            : fallbackTiming.duration),
-        },
-        position: {
-          ...(lastChordBeatOffset > 0
-            ? {
-                bar: lastChordTiming.position.bar,
-                beat: lastChordBeatOffset,
-              }
-            : {
-                bar: part.chords[part.chords.length - 1]
-                  ? lastChordTiming.position.bar + 1
-                  : 0,
-                beat: 0,
-              }),
-        },
+        duration,
+        position,
         offset: 0,
       },
     };
@@ -444,3 +476,22 @@ const modifyChord = (
     };
   }
 };
+
+export function usePlayhead() {
+  const { currentPartUID, position, pendingPosition, dispatch } = useSong();
+
+  const setPosition = (position: Duration) => {
+    dispatch({ type: 'setPosition', position });
+  };
+  const setPendingPosition = (pendingPosition: Duration | null) => {
+    dispatch({ type: 'setPendingPosition', pendingPosition });
+  };
+
+  return {
+    currentPartUID,
+    position,
+    pendingPosition,
+    setPendingPosition,
+    setPosition,
+  };
+}

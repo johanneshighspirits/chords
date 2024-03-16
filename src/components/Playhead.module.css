@@ -2,7 +2,11 @@
   display: block;
   position: absolute;
   width: 2px;
-  background: linear-gradient(var(--playhead-color, cyan), rgb(0 0 0 / 0));
+  --playhead-color: white;
+  background: linear-gradient(
+    var(--playhead-color, white),
+    rgb(255 255 255 / 0)
+  );
   margin-left: -1px;
   transition: all 400ms ease-out;
   --size: 6px;
@@ -20,10 +24,10 @@
 .Playhead::before {
   left: calc(-1 * var(--size) + 1px);
   top: 0;
-  border-top-color: var(--playhead-color, cyan);
+  border-top-color: var(--playhead-color, white);
 }
 /* .Playhead::after {
   left: calc(-1 * var(--size) + 1px);
   bottom: 0;
-  border-bottom-color: cyan;
+  border-bottom-color: white;
 } */

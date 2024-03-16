@@ -9,10 +9,12 @@ export const SongsList = async () => {
   return (
     <ul className={styles.SongsList}>
       {songs.map((song) => {
-        const { title, slug, uid } = song;
+        const { uid, title, slug, artist, artistSlug } = song;
         return (
           <li key={song.uid} className={styles.song}>
-            <Link href={`/song/${slug}`}>{title}</Link>
+            <Link href={`/song/${artistSlug}/${slug}`}>
+              <span className={styles.artist}>{artist}</span> - {title}
+            </Link>
             <DeleteSongButton title={title} songId={uid}>
               X
             </DeleteSongButton>

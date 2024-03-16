@@ -8,9 +8,23 @@ import {
   varchar,
 } from 'drizzle-orm/pg-core';
 
+export const users = pgTable('users', {
+  uid: uuid('uid').primaryKey(),
+  firstName: text('first_name').notNull(),
+  lastName: text('last_name').notNull(),
+});
+export const usersRelations = relations(users, ({ many }) => ({
+  songs: many(songs),
+}));
+
+export type DBUser = typeof users.$inferSelect;
+export type NewUser = typeof users.$inferInsert;
+
 export const songs = pgTable('songs', {
   uid: uuid('uid').primaryKey(),
   title: text('title').notNull(),
+  artist: text('artist').notNull(),
+  artistSlug: text('artistSlug').notNull(),
   slug: text('slug').notNull(),
 });
 export const songsRelations = relations(songs, ({ many }) => ({

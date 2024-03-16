@@ -1,2 +1,10 @@
 export const slugify = (str: string) =>
-  str.toLowerCase().replace(/([^a-z0-9]+)/gi, '-');
+  str
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/\s+/g, '-')
+    .replace(/[^\w\-]+/g, '')
+    .replace(/\-\-+/g, '-')
+    .replace(/^-+/, '')
+    .replace(/-+$/, '');

@@ -12,6 +12,7 @@ import {
   moveTiming,
 } from '@/helpers/timing';
 import { updateChordTiming } from '@/db/actions';
+import { TimingBar } from './TimingBar';
 
 type ChordsViewProps = {
   partId: string;
@@ -30,6 +31,7 @@ export const ChordsView = ({
 }: ChordsViewProps) => {
   return (
     <div className={clsx(styles.chordsLine)}>
+      <TimingBar partId={partId} lineIndex={lineIndex} />
       <ul className={clsx(styles.chords, isDuplicate && styles.duplicate)}>
         {repeatCount > 0 && (
           <span className={styles.repeatCount}>{repeatCount}x</span>

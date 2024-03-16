@@ -8,8 +8,6 @@ import { CSSProperties } from 'react';
 import clsx from 'clsx';
 import { Editable } from './Editable';
 import { AddPart } from './AddPart';
-import { getChordLines, getChordPattern } from '@/helpers/part';
-import { Debug } from './debug/Debug';
 import { RemovePart } from './RemovePart';
 import { Playhead } from './Playhead';
 import { updatePart } from '@/db/actions';
