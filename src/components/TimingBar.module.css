@@ -1,27 +1,40 @@
 .TimingBar {
+  --timing-line-color: 255 255 255;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   margin-bottom: 2px;
+  cursor: s-resize;
+  opacity: 0;
+  transition: opacity 500ms ease-out;
+}
+.TimingBar:hover {
+  opacity: 1;
+  transition: opacity 100ms ease-out;
 }
 
 .bar {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
+  border-top: 1px solid rgb(var(--timing-line-color));
+  border-left: 1px solid rgb(var(--timing-line-color));
+  margin-top: 2px;
+  padding-bottom: 2px;
 }
-.bar:hover {
-  background: rgb(255 255 255 / 0.2);
+.bar:last-child {
+  border-right: 1px solid rgb(var(--timing-line-color));
 }
-
-.isPendingBefore {
-  border-left: 2px solid cyan;
-}
-.isPendingAfter {
-  border-right: 2px solid cyan;
-}
-
 .beat {
-  height: var(--spacing-y);
+  height: var(--timing-line-height, 12px);
 }
 .beat:hover {
-  background: rgb(255 255 255 / 0.2);
+  background: rgb(var(--timing-line-color) / 0.2);
+}
+.beat:after {
+  display: block;
+  content: '';
+  height: 50%;
+  border-right: 1px solid rgb(var(--timing-line-color));
+}
+.beat:last-child:after {
+  border-right: none;
 }

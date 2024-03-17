@@ -1,0 +1,12 @@
+.PendingPlayhead {
+  position: absolute;
+  --pending-width: 2px;
+  border-right: var(--pending-width) dotted var(--playhead-color, cyan);
+  height: 100%;
+}
+.PendingLeft {
+  left: calc(-1 * var(--pending-width));
+}
+.PendingRight {
+  right: calc(-1 * var(--pending-width));
+}

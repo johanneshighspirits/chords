@@ -1,8 +1,27 @@
 import { Duration, Timing } from '@/types';
 import { describe, expect, it } from 'vitest';
-import { getTotalDuration, moveChordBy, moveTiming } from './timing';
+import { getBarEnd, getTotalDuration, moveChordBy, moveTiming } from './timing';
 
 describe('timing', () => {
+  describe('getBarEnd', () => {
+    it('should return a Duration object representing the end of a bar', () => {
+      const barTiming: Timing = {
+        position: {
+          bar: 2,
+          beat: 1,
+        },
+        duration: {
+          bar: 1,
+          beat: 3,
+        },
+        offset: 0,
+      };
+      expect(getBarEnd(barTiming)).toEqual({
+        bar: 4,
+        beat: 0,
+      });
+    });
+  });
   describe('move position', () => {
     it('should decrease timing by 1.1', () => {
       const moveBy: Duration = {
@@ -98,7 +117,7 @@ describe('timing', () => {
     });
     it('should never go below zero', () => {
       const moveBy: Duration = {
-        bar: 2,
+        bar: 3,
         beat: 3,
       };
       const timing: Timing = {
@@ -115,7 +134,7 @@ describe('timing', () => {
 
       const result = moveTiming(timing, moveBy, 'earlier');
       expect(result.position).toEqual({
-        bar: 1,
+        bar: 0,
         beat: 0,
       });
     });

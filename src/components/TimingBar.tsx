@@ -1,11 +1,19 @@
 import { Duration } from '@/types';
 import styles from './TimingBar.module.css';
-import clsx from 'clsx';
 import { usePlayhead } from './providers/SongProvider';
+import { CSSProperties } from 'react';
 
-export type TimingBarProps = { partId: string; lineIndex: number };
+export type TimingBarProps = {
+  partId: string;
+  lineIndex: number;
+  isDuplicate?: boolean;
+};
 
-export const TimingBar = ({ partId, lineIndex }: TimingBarProps) => {
+export const TimingBar = ({
+  partId,
+  lineIndex,
+  isDuplicate,
+}: TimingBarProps) => {
   const { setPendingPosition } = usePlayhead();
   const barPositions = Array.from({ length: 4 }, (_, b) => ({
     bar: b + lineIndex * 4,
@@ -13,6 +21,11 @@ export const TimingBar = ({ partId, lineIndex }: TimingBarProps) => {
   }));
   return (
     <div
+      style={
+        {
+          ['--timing-line-height']: isDuplicate ? '6px' : '12px',
+        } as CSSProperties
+      }
       className={styles.TimingBar}
       onMouseOut={() => setPendingPosition(null)}>
       {barPositions.map((position) => {
@@ -29,7 +42,7 @@ export const TimingBar = ({ partId, lineIndex }: TimingBarProps) => {
 };
 
 const Bar = ({ partId, position }: { partId: string; position: Duration }) => {
-  const { pendingPosition, setPendingPosition, setPosition } = usePlayhead();
+  const { setPendingPosition, setPosition } = usePlayhead();
   const beats = Array.from({ length: 4 }, (_, b) => b);
   const getTargetBar = (beat: number) =>
     beat >= 2 ? { ...position, bar: position.bar + 1 } : position;
@@ -41,24 +54,12 @@ const Bar = ({ partId, position }: { partId: string; position: Duration }) => {
   const handleBeatClick = (beat: number) => () => {
     const targetBar = getTargetBar(beat);
     setPosition(targetBar);
-    // console.log(
-    //   'Move cursor to bar',
-    //   beat >= 2 ? position.bar + 1 : position.bar,
-    //   '\n',
-    //   partId
-    // );
   };
 
-  const isPendingBefore = pendingPosition?.bar === position.bar;
-  const isPendingAfter =
-    pendingPosition?.bar === position.bar + 1 && (position.bar + 1) % 4 === 0;
   return (
     <div
       data-bar-id={`part_${partId}_${position.bar}.${position.beat}`}
-      className={clsx(styles.bar, {
-        [styles.isPendingBefore]: isPendingBefore,
-        [styles.isPendingAfter]: isPendingAfter,
-      })}>
+      className={styles.bar}>
       {beats.map((beat) => (
         <span
           key={beat}

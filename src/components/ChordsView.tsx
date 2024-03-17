@@ -14,6 +14,7 @@ import {
 import { updateChordTiming } from '@/db/actions';
 import { TimingBar } from './TimingBar';
 import { FormattedDuration } from './Display';
+import { PendingPlayhead } from './PendingPlayhead';
 
 type ChordsViewProps = {
   partId: string;
@@ -32,7 +33,11 @@ export const ChordsView = ({
 }: ChordsViewProps) => {
   return (
     <div className={clsx(styles.chordsLine)}>
-      <TimingBar partId={partId} lineIndex={lineIndex} />
+      <TimingBar
+        partId={partId}
+        lineIndex={lineIndex}
+        isDuplicate={isDuplicate}
+      />
       <ul className={clsx(styles.chords, isDuplicate && styles.duplicate)}>
         {repeatCount > 0 && (
           <span className={styles.repeatCount}>{repeatCount}x</span>
@@ -198,6 +203,7 @@ const ChordView = ({ partId, chord, lineIndex }: ChordViewProps) => {
         partId={partId}
         className={clsx(styles.removeChord, styles.inset)}
       />
+      <PendingPlayhead timing={chord.timing} />
       <FormattedChord className={styles.display} {...chord}></FormattedChord>
       {/* <Debug>
         Id: {chord.uid}
@@ -209,6 +215,7 @@ const ChordView = ({ partId, chord, lineIndex }: ChordViewProps) => {
       <div className={styles.hoverInfo}>
         <FormattedDuration duration={chord.timing.position} />
       </div>
+
       <button
         className={styles.dragHandleLeft}
         onMouseDown={handlePositionMouseDown}></button>

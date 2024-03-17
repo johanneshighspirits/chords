@@ -83,16 +83,29 @@ export const isTimingEarlier = (
   timing: TimingType,
   compareWith: TimingType
 ) => {
-  if (timing.position.bar < compareWith.position.bar) {
+  return isPositionEarlier(timing.position, compareWith.position);
+};
+
+export const isPositionEarlier = (
+  position: Duration,
+  compareWith: Duration
+) => {
+  if (position.bar < compareWith.bar) {
     return true;
   }
-  if (
-    timing.position.bar === compareWith.position.bar &&
-    timing.position.beat < compareWith.position.beat
-  ) {
+  if (position.bar === compareWith.bar && position.beat < compareWith.beat) {
     return true;
   }
   return false;
+};
+
+export const isDurationEqual = (duration: Duration, compareWith: Duration) =>
+  duration.bar === compareWith.bar && duration.beat === compareWith.beat;
+
+export const getBarEnd = (timing: TimingType) => {
+  const pos = getNumberOfBeats(timing.position);
+  const dur = getNumberOfBeats(timing.duration);
+  return getPositionFromBeats(pos + dur);
 };
 
 export const serializeTiming = (timing: TimingType): SerializedTiming => {
