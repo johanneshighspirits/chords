@@ -1,9 +1,15 @@
-.songView {
-  display: grid;
-  grid-template-columns: 4fr 1fr;
-  grid-template-rows: min-content 1fr;
+.SongView {
+  display: flex;
+  flex-direction: column;
   row-gap: var(--spacing-y);
-  justify-items: stretch;
+}
+@media screen and (min-width: 960px) {
+  .SongView {
+    display: grid;
+    grid-template-columns: 4fr 1fr;
+    grid-template-rows: min-content 1fr;
+    justify-items: stretch;
+  }
 }
 
 .songHeader {
@@ -48,4 +54,10 @@
 .chordsAdder input:focus {
   background: rgb(255 255 255 / 0.1);
   border-bottom: 1px solid white;
+}
+
+@media screen and (max-width: 959px) {
+  .ArrangementView {
+    display: none;
+  }
 }

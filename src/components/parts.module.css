@@ -5,7 +5,12 @@
   row-gap: var(--spacing-y);
   height: 80vh;
   overflow-y: auto;
-  padding-right: var(--spacing-x);
+}
+
+@media screen and (min-width: 960px) {
+  .parts {
+    padding-right: var(--spacing-x);
+  }
 }
 
 .part {
@@ -25,6 +30,12 @@
 
 .header {
   position: relative;
+}
+
+.header h3 {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
 }
 
 .isActive {

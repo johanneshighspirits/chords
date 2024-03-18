@@ -45,9 +45,13 @@ export type Part = PartMeta & {
 };
 
 export type Color = {
+  // 0-360
   h: number;
+  // 0-100
   s: number;
+  // 0-100
   l: number;
+  // 0-1
   a: number;
 };
 

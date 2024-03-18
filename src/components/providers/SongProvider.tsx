@@ -58,6 +58,7 @@ type Action =
   | { type: 'addPart'; title?: string; chords?: Chord[] }
   | { type: 'removePart'; uid: string }
   | { type: 'setPartTitle'; title: string; partId: string }
+  | { type: 'setPartColor'; color: Color; partId: string }
   | { type: 'setActivePart'; partId: string }
   | { type: 'setPendingPosition'; pendingPosition: Duration | null }
   | { type: 'setPosition'; position: Duration };
@@ -224,6 +225,20 @@ function reducer(state: SongState, action: Action): SongState {
             return {
               ...part,
               title: action.title,
+            };
+          }
+          return part;
+        }),
+      };
+    }
+    case 'setPartColor': {
+      return {
+        ...state,
+        parts: state.parts.map((part) => {
+          if (part.uid === action.partId) {
+            return {
+              ...part,
+              color: action.color,
             };
           }
           return part;

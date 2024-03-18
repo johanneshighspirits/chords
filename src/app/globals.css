@@ -1,5 +1,5 @@
 :root {
-  --unit: 1rem;
+  --unit: 0.6rem;
 
   --spacing-y: var(--unit);
   --spacing-x: calc(1.25 * var(--unit));
@@ -60,7 +60,11 @@
   --card-rgb: 180, 185, 188;
   --card-border-rgb: 131, 134, 135; */
 }
-
+@media screen and (min-width: 960px) {
+  :root {
+    --unit: 1rem;
+  }
+}
 @media (prefers-color-scheme: dark) {
   :root {
     /* --foreground-rgb: 255, 255, 255;
@@ -140,8 +144,14 @@ a {
 .wrapper {
   margin: 0 auto;
   width: 100%;
-  max-width: 90vw;
+  max-width: 94vw;
   flex: 1 0 100%;
+}
+
+@media (min-width: 680px) {
+  .wrapper {
+    max-width: 90vw;
+  }
 }
 
 @media (min-width: 960px) {

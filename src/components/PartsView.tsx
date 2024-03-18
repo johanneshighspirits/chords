@@ -2,7 +2,7 @@
 
 import { ChordsView } from './ChordsView';
 import { useSong, useSongParts } from './providers/SongProvider';
-import { Part } from '@/types';
+import { Color, Part } from '@/types';
 import styles from './parts.module.css';
 import { CSSProperties } from 'react';
 import clsx from 'clsx';
@@ -11,6 +11,10 @@ import { AddPart } from './AddPart';
 import { RemovePart } from './RemovePart';
 import { Playhead } from './Playhead';
 import { updatePart } from '@/db/actions';
+import { serializeColor } from '@/helpers/color';
+import { ColorPicker } from './ColorPicker';
+import { ArgumentsType } from 'vitest';
+import { debounce } from '@/helpers/common';
 
 export const PartsView = () => {
   const { currentPartId, parts } = useSongParts();
@@ -29,6 +33,10 @@ export const PartsView = () => {
     </section>
   );
 };
+
+const debouncedUpdate = debounce((part: Part, color: Color) => {
+  updatePart({ ...part, color });
+});
 
 export const PartView = ({
   isActive,
@@ -52,6 +60,13 @@ export const PartView = ({
     }
   };
 
+  const handleEditColor = (color: Color) => {
+    if (serializeColor(color) !== serializeColor(part.color)) {
+      dispatch({ type: 'setPartColor', color, partId: part.uid });
+      debouncedUpdate(part, color);
+    }
+  };
+
   return (
     <article
       className={clsx(styles.part, isActive && styles.isActive)}
@@ -64,6 +79,9 @@ export const PartView = ({
       <div className={styles.header}>
         <h3>
           <Editable onEdit={handleEditTitle}>{part.title}</Editable>
+          <ColorPicker
+            color={part.color}
+            onEdit={handleEditColor}></ColorPicker>
         </h3>
         <RemovePart uid={part.uid}></RemovePart>
       </div>

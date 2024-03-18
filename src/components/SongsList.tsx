@@ -12,7 +12,7 @@ export const SongsList = async () => {
         const { uid, title, slug, artist, artistSlug } = song;
         return (
           <li key={song.uid} className={styles.song}>
-            <Link href={`/song/${artistSlug}/${slug}`}>
+            <Link href={`/songs/${artistSlug}/${slug}`}>
               <span className={styles.artist}>{artist}</span> - {title}
             </Link>
             <DeleteSongButton title={title} songId={uid}>
