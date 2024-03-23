@@ -4,3 +4,30 @@
   gap: calc(0.5 * var(--spacing-y));
   grid-column: 2 / span 1;
 }
+
+.ArrangementItem {
+  position: relative;
+}
+
+.MoveButton {
+  position: absolute;
+  right: calc(0.5 * var(--spacing-x));
+  height: 40%;
+  font-size: 10px;
+  opacity: 0;
+  transition: opacity 400ms ease-out;
+}
+
+.arrangement:hover .MoveButton {
+  opacity: 1;
+  transition: opacity 200ms 400ms ease-out;
+}
+
+.MoveButtonUp {
+  top: 10%;
+  cursor: n-resize;
+}
+.MoveButtonDown {
+  bottom: 10%;
+  cursor: s-resize;
+}

@@ -15,7 +15,7 @@ export const Display = () => {
 
 export const FormattedDuration = ({ duration }: { duration: Duration }) => {
   return (
-    <span>
+    <span className={styles.Display}>
       {duration.bar + 1}.{duration.beat + 1}.0
     </span>
   );

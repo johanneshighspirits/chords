@@ -13,7 +13,6 @@ import { Playhead } from './Playhead';
 import { updatePart } from '@/db/actions';
 import { serializeColor } from '@/helpers/color';
 import { ColorPicker } from './ColorPicker';
-import { ArgumentsType } from 'vitest';
 import { debounce } from '@/helpers/common';
 
 export const PartsView = () => {
@@ -80,6 +79,7 @@ export const PartView = ({
         <h3>
           <Editable onEdit={handleEditTitle}>{part.title}</Editable>
           <ColorPicker
+            className={styles.ColorPicker}
             color={part.color}
             onEdit={handleEditColor}></ColorPicker>
         </h3>

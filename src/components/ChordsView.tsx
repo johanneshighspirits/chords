@@ -11,7 +11,6 @@ import {
   getPositionFromBeats,
   moveTiming,
 } from '@/helpers/timing';
-import { updateChordTiming } from '@/db/actions';
 import { TimingBar } from './TimingBar';
 import { FormattedDuration } from './Display';
 import { PendingPlayhead } from './PendingPlayhead';
@@ -99,7 +98,7 @@ const ChordView = ({ partId, chord, lineIndex }: ChordViewProps) => {
     if (tempRef.current !== null) {
       const newBeats = calculateBeatsMoved(e.clientX);
       if (newBeats !== 0 && newBeats !== undefined) {
-        const editedChord = editChord(
+        editChord(
           chord.uid,
           {
             timing: moveTiming(
@@ -110,9 +109,6 @@ const ChordView = ({ partId, chord, lineIndex }: ChordViewProps) => {
           },
           'positionChange'
         );
-        if (editedChord) {
-          updateChordTiming(editedChord);
-        }
       }
       tempRef.current = null;
     }
@@ -139,7 +135,7 @@ const ChordView = ({ partId, chord, lineIndex }: ChordViewProps) => {
     if (tempRef.current !== null) {
       const newBeats = calculateDurationBeats(e.clientX);
       if (newBeats) {
-        const editedChord = editChord(
+        editChord(
           chord.uid,
           {
             timing: {
@@ -149,9 +145,6 @@ const ChordView = ({ partId, chord, lineIndex }: ChordViewProps) => {
           },
           'durationChange'
         );
-        if (editedChord) {
-          updateChordTiming(editedChord);
-        }
       }
       tempRef.current = null;
     }

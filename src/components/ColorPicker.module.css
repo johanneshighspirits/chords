@@ -2,7 +2,7 @@
   display: inline-block;
   background: var(--part-color);
   border: 1px dotted white;
-  padding: 2px 4px;
+  padding: 2px 8px;
   font-size: 0.7em;
   border-radius: var(--radius-2);
   cursor: pointer;

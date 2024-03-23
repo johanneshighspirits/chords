@@ -1,15 +1,38 @@
 import type { Metadata } from 'next';
-import { Sanchez } from 'next/font/google';
+import {
+  Expletus_Sans,
+  Noto_Sans_Mono,
+  Poppins,
+  Sanchez,
+} from 'next/font/google';
 import './globals.css';
+import clsx from 'clsx';
 
-const sanchez = Sanchez({ weight: '400', subsets: ['latin'] });
+const expletus = Expletus_Sans({
+  weight: '500',
+  subsets: ['latin'],
+  variable: '--font-headline',
+});
+const sanchez = Sanchez({
+  weight: '400',
+  subsets: ['latin'],
+  variable: '--font-chord',
+});
+const poppins = Poppins({
+  weight: ['100', '400'],
+  subsets: ['latin'],
+  variable: '--font-body',
+});
+const noto = Noto_Sans_Mono({
+  weight: '400',
+  subsets: ['latin'],
+  variable: '--font-monospace',
+});
 
 export const metadata: Metadata = {
   title: 'Chords',
   description: 'Chords',
 };
-
-const testVar = process.env.MY_TEST;
 
 export default function RootLayout({
   children,
@@ -18,15 +41,21 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={sanchez.className}>
+      <body
+        className={clsx(
+          expletus.variable,
+          sanchez.variable,
+          noto.variable,
+          poppins.variable
+        )}>
         <header>
           <div className="wrapper">
-            Chords <i>{testVar}</i>
+            <h1>Chords</h1>
           </div>
         </header>
         <main className="wrapper">{children}</main>
         <footer>
-          <div className="wrapper">&copy; 2024</div>
+          <div className="wrapper">&copy; {new Date().getFullYear()}</div>
         </footer>
       </body>
     </html>

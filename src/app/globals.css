@@ -123,11 +123,25 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  font-family: var(--font-body);
 }
 
 header,
 footer {
   padding: var(--spacing-y) 0;
+  font-family: var(--font-body);
+}
+
+h1,
+h2 {
+  font-family: var(--font-headline);
+}
+
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-body);
 }
 
 a {
@@ -142,6 +156,8 @@ a {
 }
 
 .wrapper {
+  display: flex;
+  flex-direction: column;
   margin: 0 auto;
   width: 100%;
   max-width: 94vw;

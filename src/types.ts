@@ -31,6 +31,10 @@ export type ChordDetails = {
 
 export type Chord = ChordMeta & ChordDetails;
 
+export const isChord = (input: Chord | ChordMeta): input is Chord => {
+  return typeof input === 'object' && 'note' in input;
+};
+
 export type PartMeta = {
   uid: string;
   color: Color;

@@ -1,6 +1,6 @@
 'use server';
 
-import { eq, and, inArray } from 'drizzle-orm';
+import { eq, and, inArray, sql } from 'drizzle-orm';
 import { db } from '.';
 import {
   NewSong,
@@ -22,6 +22,7 @@ import {
   Song,
   SongMeta,
   WithMany,
+  isChord,
 } from '@/types';
 import { deserializeColor, serializeColor } from '@/helpers/color';
 import {
@@ -31,7 +32,76 @@ import {
 } from '@/helpers/timing';
 import { Part } from '@/helpers/part';
 import { revalidatePath } from 'next/cache';
+import { debounce } from '@/helpers/common';
 
+const debouncedUpsertChords = debounce(writeChordsToDB, 5000);
+
+type DBAction = 'upsertChords';
+type UpsertChordsProps = {
+  songId: string;
+  part: PartType;
+  entries: (Chord | ChordMeta)[];
+  removedEntryUids?: string[];
+};
+
+export async function saveToDB(action: DBAction, payload: UpsertChordsProps) {
+  console.log(`⏳ QUEUEING ${action} action`);
+  if (action === 'upsertChords') {
+    return debouncedUpsertChords(payload);
+  }
+}
+
+const preparedGetChord = db.query.chords
+  .findFirst({
+    where: (chords, { eq }) => eq(chords.uid, sql.placeholder('uid')),
+  })
+  .prepare('query_get_chord');
+
+const preparedGetPart = db.query.parts
+  .findFirst({
+    where: (parts, { eq }) => eq(parts.uid, sql.placeholder('uid')),
+  })
+  .prepare('query_get_part');
+
+function writeChordsToDB({
+  songId,
+  part,
+  entries,
+  removedEntryUids,
+}: UpsertChordsProps) {
+  console.log(`🔥 WRITING ${entries.length} entries to DB`);
+  return db.transaction(async (tx) => {
+    const existingPart = await preparedGetPart.execute({ uid: part.uid });
+    if (!existingPart) {
+      const dbPart = convertDBPart(songId, part);
+      await tx.insert(parts).values(dbPart);
+    }
+    for (const entry of entries) {
+      const existingEntry = await preparedGetChord.execute({
+        uid: entry.uid,
+      });
+      if (isChord(entry)) {
+        if (existingEntry) {
+          await tx.update(chords).set(entry).where(eq(chords.uid, entry.uid));
+        } else {
+          await tx.insert(chords).values([serializeChord(part.uid, entry)]);
+        }
+      } else if (existingEntry) {
+        await tx
+          .update(chords)
+          .set(serializeTiming(entry.timing))
+          .where(eq(chords.uid, entry.uid));
+      }
+    }
+    if (removedEntryUids) {
+      await tx.delete(chords).where(inArray(chords.uid, removedEntryUids));
+    }
+  });
+}
+
+/**
+ * PRIVATE BELOW?
+ */
 export async function insertSong(song: SongMeta): Promise<void> {
   return db.transaction(async (tx) => {
     const dbSong = await tx
@@ -100,37 +170,39 @@ export async function deletePart(uid: string) {
   return db.delete(parts).where(eq(parts.uid, uid));
 }
 
-export async function insertChord(
-  partId: string,
-  data: Chord | Chord[]
-): Promise<DBChord[]> {
-  return db
-    .insert(chords)
-    .values(
-      Array.isArray(data)
-        ? data.map((c) => serializeChord(partId, c))
-        : [serializeChord(partId, data)]
-    )
-    .returning();
-}
+// export async function insertChord(
+//   partId: string,
+//   data: Chord | Chord[]
+// ): Promise<DBChord[]> {
+//   return db
+//     .insert(chords)
+//     .values(
+//       Array.isArray(data)
+//         ? data.map((c) => serializeChord(partId, c))
+//         : [serializeChord(partId, data)]
+//     )
+//     .returning();
+// }
 
-export async function updateChordTiming(chordMeta: ChordMeta | ChordMeta[]) {
-  const items = Array.isArray(chordMeta) ? chordMeta : [chordMeta];
-  await Promise.all(
-    items.map((item) => {
-      return db
-        .update(chords)
-        .set(serializeTiming(item.timing))
-        .where(eq(chords.uid, item.uid));
-    })
-  );
-}
+// export async function updateChordTiming(chordMeta: ChordMeta | ChordMeta[]) {
+//   return [];
+//   const items = Array.isArray(chordMeta) ? chordMeta : [chordMeta];
+//   await Promise.all(
+//     items.map((item) => {
+//       return db
+//         .update(chords)
+//         .set(serializeTiming(item.timing))
+//         .where(eq(chords.uid, item.uid));
+//     })
+//   );
+// }
 
-export async function deleteChord(uid: string | string[]) {
-  await db
-    .delete(chords)
-    .where(Array.isArray(uid) ? inArray(chords.uid, uid) : eq(chords.uid, uid));
-}
+// export async function deleteChord(uid: string | string[]) {
+//   return;
+//   await db
+//     .delete(chords)
+//     .where(Array.isArray(uid) ? inArray(chords.uid, uid) : eq(chords.uid, uid));
+// }
 
 export async function querySong({
   slug,
@@ -237,11 +309,11 @@ const convertChords = (chords: DBChord[]): Chord[] => {
 
 const serializeChord = (partId: string, chord: Chord): NewChord => {
   const { uid, timing, ...details } = chord;
-  const dbChord = {
+  const dbChord: NewChord = {
     ...details,
     ...serializeTiming(timing),
     uid,
     partId,
-  } satisfies NewChord;
+  };
   return dbChord;
 };

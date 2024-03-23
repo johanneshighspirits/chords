@@ -10,7 +10,6 @@ import {
   useState,
 } from 'react';
 import { useChords } from './providers/SongProvider';
-import { insertChord } from '@/db/actions';
 
 export const AddChord = () => {
   const [value, setValue] = useState('');
@@ -25,14 +24,7 @@ export const AddChord = () => {
 
   const addChordDetails = (chordDetails: ChordDetails | null) => {
     if (chordDetails !== null) {
-      const chord = addChord(chordDetails);
-      if (currentPartUID) {
-        insertChord(currentPartUID, chord).then((c) => {
-          console.log('chord added', c);
-        });
-      } else {
-        console.log('no chord added');
-      }
+      addChord(chordDetails);
     }
     setValue('');
   };

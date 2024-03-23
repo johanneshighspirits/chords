@@ -1,7 +1,6 @@
 'use client';
 
-import { deleteChord } from '@/db/actions';
-import { useSong } from './providers/SongProvider';
+import { useChords } from './providers/SongProvider';
 import styles from './remove-button.module.css';
 import clsx from 'clsx';
 
@@ -14,11 +13,10 @@ export const RemoveChord = ({
   partId: string;
   className?: string;
 }) => {
-  const { dispatch } = useSong();
+  const { removeChords } = useChords();
 
   const handleClick = () => {
-    dispatch({ type: 'removeChord', uid, partId });
-    deleteChord(uid);
+    removeChords([uid], partId);
   };
 
   return (

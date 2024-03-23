@@ -24,6 +24,15 @@
   transition: border 300ms;
 }
 
+.header .ColorPicker {
+  opacity: 0;
+  transition: opacity 400ms ease-out;
+}
+.header:hover .ColorPicker {
+  opacity: 1;
+  transition: opacity 200ms 400ms ease-out;
+}
+
 .chordLinesContainer {
   position: relative;
 }
