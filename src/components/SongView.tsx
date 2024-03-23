@@ -6,6 +6,7 @@ import styles from './SongView.module.css';
 import { ArrangementView } from './ArrangementView';
 import { AddPart } from './AddPart';
 import { Display } from './Display';
+import clsx from 'clsx';
 
 type SongViewProps = {
   song: Song;
@@ -22,7 +23,7 @@ export const SongView = ({ song }: SongViewProps) => {
         </div>
 
         {/* <Display /> */}
-        <div className={styles.chordsAdder}>
+        <div className={clsx('print-hidden', styles.chordsAdder)}>
           <p>Add chords</p>
           <AddChord />
           <AddPart />

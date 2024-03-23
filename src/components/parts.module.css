@@ -5,6 +5,7 @@
   row-gap: var(--spacing-y);
   height: 80vh;
   overflow-y: auto;
+  color: var(--chord-text-color);
 }
 
 @media screen and (min-width: 960px) {

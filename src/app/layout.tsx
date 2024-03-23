@@ -6,6 +6,7 @@ import {
   Sanchez,
 } from 'next/font/google';
 import './globals.css';
+import './print.css';
 import clsx from 'clsx';
 
 const expletus = Expletus_Sans({

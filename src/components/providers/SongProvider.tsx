@@ -21,6 +21,7 @@ import {
 // import { SongSaver } from './SongSaver';
 import {
   Timing,
+  getBarEnd,
   getNumberOfBeats,
   isTimingEarlier,
   moveChordBy,
@@ -41,7 +42,7 @@ type SongState = SongMeta & {
 type Action =
   | { type: 'openSong'; song: Song }
   | { type: 'updateChords'; chords: Chord[]; partId: string } // DB ✅
-  | { type: 'addChord'; chord: Chord; partId: string }
+  // | { type: 'addChord'; chord: Chord; partId: string }
   // | { type: 'removeChord'; uid: string; partId: string }
   // | { type: 'removeChords'; chordIds: string[]; partId: string }
   | { type: 'addPart'; title?: string; chords?: Chord[] }
@@ -59,42 +60,6 @@ const SongContext = createContext<
 
 function reducer(state: SongState, action: Action): SongState {
   switch (action.type) {
-    case 'addChord': {
-      return {
-        ...state,
-        parts: state.parts.map((part) => {
-          if (part.uid === action.partId) {
-            const beforeChords = part.chords.filter((c) =>
-              isTimingEarlier(c.timing, action.chord.timing)
-            );
-            const afterChords = part.chords
-              .filter(
-                (c): c is Chord =>
-                  !isTimingEarlier(c.timing, action.chord.timing)
-              )
-              .map((c) => ({
-                ...c,
-                timing: moveTiming(
-                  c.timing,
-                  action.chord.timing.duration,
-                  'later'
-                ),
-              }));
-            return {
-              ...part,
-              chords: [
-                ...beforeChords,
-                {
-                  ...action.chord,
-                },
-                ...afterChords,
-              ],
-            };
-          }
-          return part;
-        }),
-      };
-    }
     case 'updateChords': {
       return {
         ...state,
@@ -109,6 +74,42 @@ function reducer(state: SongState, action: Action): SongState {
         }),
       };
     }
+    // case 'addChord': {
+    //   return {
+    //     ...state,
+    //     parts: state.parts.map((part) => {
+    //       if (part.uid === action.partId) {
+    //         const beforeChords = part.chords.filter((c) =>
+    //           isTimingEarlier(c.timing, action.chord.timing)
+    //         );
+    //         const afterChords = part.chords
+    //           .filter(
+    //             (c): c is Chord =>
+    //               !isTimingEarlier(c.timing, action.chord.timing)
+    //           )
+    //           .map((c) => ({
+    //             ...c,
+    //             timing: moveTiming(
+    //               c.timing,
+    //               action.chord.timing.duration,
+    //               'later'
+    //             ),
+    //           }));
+    //         return {
+    //           ...part,
+    //           chords: [
+    //             ...beforeChords,
+    //             {
+    //               ...action.chord,
+    //             },
+    //             ...afterChords,
+    //           ],
+    //         };
+    //       }
+    //       return part;
+    //     }),
+    //   };
+    // }
     // case 'removeChord': {
     //   return {
     //     ...state,
@@ -349,6 +350,7 @@ export function useChords() {
 
     const chords = [...beforeChords, chord, ...afterChords];
     dispatch({ type: 'updateChords', chords, partId: currentPartUID });
+    dispatch({ type: 'setPosition', position: getBarEnd(chord.timing) });
     saveToDB('upsertChords', {
       songId: currentSongUID,
       part,
@@ -395,6 +397,13 @@ export function useChords() {
         partId: part.uid,
         chords,
       });
+      const lastChord = newChords.at(-1);
+      if (lastChord) {
+        dispatch({
+          type: 'setPosition',
+          position: getBarEnd(lastChord.timing),
+        });
+      }
       saveToDB('upsertChords', {
         songId: currentSongUID,
         part,

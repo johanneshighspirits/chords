@@ -12,7 +12,7 @@ import { updatePart } from '@/db/actions';
 export const ArrangementView = ({ className }: { className?: string }) => {
   const { parts } = useSongParts();
   return (
-    <aside className={clsx(styles.arrangement, className)}>
+    <aside className={clsx('print-hidden', styles.arrangement, className)}>
       {parts.map((part) => {
         return <ArrangementItem key={part.uid} part={part} />;
       })}

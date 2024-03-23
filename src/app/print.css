@@ -1,0 +1,13 @@
+@media print {
+  body {
+    background: white;
+    color: black;
+    --chord-text-color: white;
+  }
+  .print-hidden,
+  a,
+  form,
+  button {
+    display: none !important;
+  }
+}

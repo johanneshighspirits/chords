@@ -3,14 +3,14 @@
   position: absolute;
   width: 2px;
   height: 4rem;
-  --playhead-hue: 100;
+  --playhead-hue: 175;
   --playhead-saturation: 100%;
   background: linear-gradient(
     hsl(var(--playhead-hue) var(--playhead-saturation) 50%) 0%,
-    hsl(var(--playhead-hue) var(--playhead-saturation) 50% / 0.4) 25%,
+    hsl(var(--playhead-hue) var(--playhead-saturation) 50% / 0.4) 33%,
     hsl(var(--playhead-hue) var(--playhead-saturation) 50% / 0) 100%
   );
-  margin-top: var(--spacing-y);
+  margin-top: 0;
   margin-left: -1px;
   transition: all 200ms ease-out;
   --size: 6px;

@@ -4,6 +4,7 @@ import { PropsWithChildren, useRef } from 'react';
 import styles from './Playhead.module.css';
 import { Duration } from '@/types';
 import { usePlayhead } from './providers/SongProvider';
+import clsx from 'clsx';
 
 export type PlayheadProps = PropsWithChildren<{
   partId: string;
@@ -28,7 +29,7 @@ export const Playhead = ({ partId, className, children }: PlayheadProps) => {
             left,
             top,
           }}
-          className={styles.Playhead}></div>
+          className={clsx('print-hidden', styles.Playhead)}></div>
       ) : null}
       {children}
     </div>
