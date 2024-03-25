@@ -1,27 +1,41 @@
 'use client';
 
 import { CSSProperties } from 'react';
-import { useSong, useSongParts } from './providers/SongProvider';
+import { useSongParts } from './providers/SongProvider';
 import partsStyles from './parts.module.css';
-import styles from './arrangement.module.css';
+import styles from './ArrangementView.module.css';
 import clsx from 'clsx';
 import { Editable } from './Editable';
 import { Part } from '@/types';
-import { updatePart } from '@/db/actions';
 
 export const ArrangementView = ({ className }: { className?: string }) => {
   const { parts } = useSongParts();
   return (
-    <aside className={clsx('print-hidden', styles.arrangement, className)}>
-      {parts.map((part) => {
-        return <ArrangementItem key={part.uid} part={part} />;
+    <aside className={clsx('print-hidden', styles.Arrangement, className)}>
+      {parts.map((part, index) => {
+        return (
+          <ArrangementItem
+            key={part.uid}
+            isFirst={index === 0}
+            isLast={index === parts.length - 1}
+            part={part}
+          />
+        );
       })}
     </aside>
   );
 };
 
-const ArrangementItem = ({ part }: { part: Part }) => {
-  const { dispatch } = useSong();
+const ArrangementItem = ({
+  part,
+  isFirst,
+  isLast,
+}: {
+  part: Part;
+  isFirst: boolean;
+  isLast: boolean;
+}) => {
+  const { movePart, setPartTitle } = useSongParts();
   const {
     color: { h, s, l, a },
     title,
@@ -29,10 +43,14 @@ const ArrangementItem = ({ part }: { part: Part }) => {
 
   const handleEditTitle = (title: string) => {
     if (title !== part.title) {
-      updatePart({ ...part, title });
-      dispatch({ type: 'setPartTitle', title, partId: part.uid });
+      setPartTitle(part, title);
     }
   };
+
+  const handleMovePart = (direction: 'before' | 'after') => () => {
+    movePart(direction, part.uid);
+  };
+
   return (
     <li
       key={part.uid}
@@ -43,12 +61,20 @@ const ArrangementItem = ({ part }: { part: Part }) => {
         } as CSSProperties
       }>
       <Editable onEdit={handleEditTitle}>{title}</Editable>
-      <button className={clsx(styles.MoveButton, styles.MoveButtonUp)}>
-        ⬆
-      </button>
-      <button className={clsx(styles.MoveButton, styles.MoveButtonDown)}>
-        ⬇
-      </button>
+      {!isFirst && (
+        <button
+          className={clsx('blank', styles.MoveButton, styles.MoveButtonUp)}
+          onClick={handleMovePart('before')}>
+          ↑
+        </button>
+      )}
+      {!isLast && (
+        <button
+          className={clsx('blank', styles.MoveButton, styles.MoveButtonDown)}
+          onClick={handleMovePart('after')}>
+          ↓
+        </button>
+      )}
     </li>
   );
 };

@@ -45,7 +45,7 @@ export type PartMeta = {
 export type Part = PartMeta & {
   chordLines?: ChordLine[];
   chords: Chord[];
-  timing: Timing;
+  index: number;
 };
 
 export type Color = {

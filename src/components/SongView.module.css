@@ -66,4 +66,7 @@
   .songHeader {
     flex-direction: row;
   }
+  .songHeader p {
+    display: none;
+  }
 }

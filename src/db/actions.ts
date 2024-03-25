@@ -32,24 +32,156 @@ import {
 } from '@/helpers/timing';
 import { Part } from '@/helpers/part';
 import { revalidatePath } from 'next/cache';
-import { debounce } from '@/helpers/common';
 
-const debouncedUpsertChords = debounce(writeChordsToDB, 5000);
-
-type DBAction = 'upsertChords';
 type UpsertChordsProps = {
+  action: 'upsertChords';
   songId: string;
   part: PartType;
   entries: (Chord | ChordMeta)[];
   removedEntryUids?: string[];
 };
 
-export async function saveToDB(action: DBAction, payload: UpsertChordsProps) {
-  console.log(`⏳ QUEUEING ${action} action`);
-  if (action === 'upsertChords') {
-    return debouncedUpsertChords(payload);
+type UpsertPartsProps = {
+  action: 'upsertParts';
+  songId: string;
+  entries: PartType[];
+  removedEntryUids?: string[];
+};
+
+export type DBActionPayload = UpsertChordsProps | UpsertPartsProps;
+
+export async function saveToDB(payloads: DBActionPayload[]): Promise<void> {
+  console.log('----- saveToDB() ------', payloads.length);
+  const entries = mergePayloads(payloads);
+  for (const entry of entries) {
+    console.log('WRITING:', entry);
+    // if (payload.action === 'upsertChords') {
+    //   return writeChordsToDB(payload);
+    // }
+    // if (payload.action === 'upsertParts') {
+    //   return writePartsToDB(payload);
+    // }
   }
 }
+
+export const mergePayloads = (payloads: DBActionPayload[]) => {
+  const mergedChordPayloads: Record<string, UpsertChordsProps> = {};
+  const chordsDictionary: Record<string, Chord | ChordMeta> = {};
+
+  const mergedPartPayloads: Record<string, UpsertPartsProps> = {};
+  const partsDictionary: Record<string, PartType> = {};
+
+  for (const payload of payloads) {
+    const key = getPayloadKey(payload);
+    if (payload.action === 'upsertChords') {
+      if (!mergedChordPayloads[key]) {
+        mergedChordPayloads[key] = payload;
+      } else {
+        mergedChordPayloads[key].entries.push(...payload.entries);
+        if (payload.removedEntryUids) {
+          mergedChordPayloads[key].removedEntryUids?.push(
+            ...payload.removedEntryUids
+          );
+        }
+      }
+
+      for (const entry of payload.entries) {
+        if (!chordsDictionary[entry.uid]) {
+          chordsDictionary[entry.uid] = entry;
+        } else {
+          chordsDictionary[entry.uid] = {
+            ...chordsDictionary[entry.uid],
+            ...entry,
+          };
+        }
+      }
+    }
+
+    if (payload.action === 'upsertParts') {
+      if (!mergedPartPayloads[key]) {
+        mergedPartPayloads[key] = payload;
+      } else {
+        mergedPartPayloads[key].entries.push(...payload.entries);
+        if (payload.removedEntryUids) {
+          mergedPartPayloads[key].removedEntryUids?.push(
+            ...payload.removedEntryUids
+          );
+        }
+      }
+
+      for (const entry of payload.entries) {
+        if (!partsDictionary[entry.uid]) {
+          partsDictionary[entry.uid] = entry;
+        } else {
+          partsDictionary[entry.uid] = {
+            ...partsDictionary[entry.uid],
+            ...entry,
+          };
+        }
+      }
+    }
+  }
+
+  const chordPayloads = Object.values(mergedChordPayloads).map((payload) => {
+    const existingUids = new Set<string>();
+    payload.entries = payload.entries
+      .toReversed()
+      .map((entry) => {
+        if (existingUids.has(entry.uid)) {
+          return null;
+        }
+        existingUids.add(entry.uid);
+        if (chordsDictionary[entry.uid]) {
+          return {
+            ...entry,
+            ...chordsDictionary[entry.uid],
+          };
+        }
+        return entry;
+      })
+      .filter((e): e is Chord | ChordMeta => e !== null)
+      .toReversed();
+    if (payload.removedEntryUids) {
+      payload.removedEntryUids = [...new Set(payload.removedEntryUids)];
+    }
+    return payload;
+  });
+
+  const partPayloads = Object.values(mergedPartPayloads).map((payload) => {
+    const existingUids = new Set<string>();
+    payload.entries = payload.entries
+      .toReversed()
+      .map((entry) => {
+        if (existingUids.has(entry.uid)) {
+          return null;
+        }
+        existingUids.add(entry.uid);
+        if (partsDictionary[entry.uid]) {
+          return {
+            ...entry,
+            ...partsDictionary[entry.uid],
+          };
+        }
+        return entry;
+      })
+      .filter((e): e is PartType => e !== null)
+      .toReversed();
+    if (payload.removedEntryUids) {
+      payload.removedEntryUids = [...new Set(payload.removedEntryUids)];
+    }
+    return payload;
+  });
+
+  return [...chordPayloads, ...partPayloads];
+};
+
+const getPayloadKey = (payload: DBActionPayload) => {
+  const segments = [payload.action, payload.songId];
+  if (payload.action === 'upsertChords') {
+    segments.push(payload.part.uid);
+  }
+  return segments.join('|');
+};
 
 const preparedGetChord = db.query.chords
   .findFirst({
@@ -63,13 +195,42 @@ const preparedGetPart = db.query.parts
   })
   .prepare('query_get_part');
 
+function writePartsToDB({
+  songId,
+  entries,
+  removedEntryUids,
+}: UpsertPartsProps) {
+  console.log(`🔥 WRITING ${entries.length} entries (Part) to DB`);
+  return db.transaction(async (tx) => {
+    for (const entry of entries) {
+      const existingEntry = await preparedGetPart.execute({
+        uid: entry.uid,
+      });
+      if (existingEntry) {
+        const { color, index, title, uid } = entry;
+        const dbPart: Partial<DBPart> = {
+          index,
+          title,
+          ...(color ? { color: serializeColor(color) } : {}),
+        };
+        await tx.update(parts).set(dbPart).where(eq(parts.uid, uid));
+      } else {
+        await tx.insert(parts).values(convertDBPart(songId, entry));
+      }
+    }
+    if (removedEntryUids) {
+      await tx.delete(parts).where(inArray(parts.uid, removedEntryUids));
+    }
+  });
+}
+
 function writeChordsToDB({
   songId,
   part,
   entries,
   removedEntryUids,
 }: UpsertChordsProps) {
-  console.log(`🔥 WRITING ${entries.length} entries to DB`);
+  console.log(`🔥 WRITING ${entries.length} entries (Chord) to DB`);
   return db.transaction(async (tx) => {
     const existingPart = await preparedGetPart.execute({ uid: part.uid });
     if (!existingPart) {
@@ -99,9 +260,6 @@ function writeChordsToDB({
   });
 }
 
-/**
- * PRIVATE BELOW?
- */
 export async function insertSong(song: SongMeta): Promise<void> {
   return db.transaction(async (tx) => {
     const dbSong = await tx
@@ -120,12 +278,12 @@ export async function insertSong(song: SongMeta): Promise<void> {
   });
 }
 
-export async function updateSong(song: Partial<SongMeta> & { uid: string }) {
-  return db
-    .update(songs)
-    .set({ ...song })
-    .where(eq(songs.uid, song.uid));
-}
+// export async function updateSong(song: Partial<SongMeta> & { uid: string }) {
+//   return db
+//     .update(songs)
+//     .set({ ...song })
+//     .where(eq(songs.uid, song.uid));
+// }
 
 export async function deleteSong(
   uid: string,
@@ -136,12 +294,12 @@ export async function deleteSong(
 }
 
 const convertDBPart = (songId: string, part: PartType) => {
-  const { uid, title, timing, color } = part;
+  const { uid, title, index, color } = part;
   return {
     uid,
     title,
     color: serializeColor(color),
-    ...serializeTiming(timing),
+    index,
     songId,
   } satisfies NewPart;
 };
@@ -155,20 +313,20 @@ export async function insertPart(
 }
 
 export async function updatePart(
-  part: Partial<Pick<PartType, 'color' | 'timing' | 'title'>> & { uid: string }
+  part: Partial<Pick<PartType, 'color' | 'index' | 'title'>> & { uid: string }
 ) {
-  const { color, timing, title, uid } = part;
+  const { color, index, title, uid } = part;
   const dbPart: Partial<DBPart> = {
+    index,
     title,
     ...(color ? { color: serializeColor(color) } : {}),
-    ...(timing ? { ...serializeTiming(timing) } : {}),
   };
   return db.update(parts).set(dbPart).where(eq(parts.uid, uid)).returning();
 }
 
-export async function deletePart(uid: string) {
-  return db.delete(parts).where(eq(parts.uid, uid));
-}
+// export async function deletePart(uid: string) {
+//   return db.delete(parts).where(eq(parts.uid, uid));
+// }
 
 // export async function insertChord(
 //   partId: string,
@@ -262,17 +420,19 @@ const convertSong = (
 const convertParts = (
   parts: WithMany<DBPart, DBChord, 'chords'>[]
 ): PartType[] => {
-  return parts.map(
-    ({ uid, title, color, chords, position, duration, offset }) => {
+  return parts
+    .map(({ uid, title, color, chords, index }) => {
       return {
         uid,
+        index,
         title,
         color: deserializeColor(color),
         chords: convertChords(chords),
-        timing: deserializeTiming({ position, duration, offset }),
       } satisfies PartType;
-    }
-  );
+    })
+    .sort((a, b) => {
+      return b.index - a.index;
+    });
 };
 
 const convertChords = (chords: DBChord[]): Chord[] => {

@@ -12,7 +12,7 @@ import {
   moveTiming,
 } from '@/helpers/timing';
 import { TimingBar } from './TimingBar';
-import { FormattedDuration } from './Display';
+import { FormattedDuration, FormattedPosition } from './Display';
 import { PendingPlayhead } from './PendingPlayhead';
 
 type ChordsViewProps = {
@@ -206,7 +206,20 @@ const ChordView = ({ partId, chord, lineIndex }: ChordViewProps) => {
         Len: {chord.timing.duration.bar}.{chord.timing.duration.beat}.0
       </Debug> */}
       <div className={styles.hoverInfo}>
-        <FormattedDuration duration={chord.timing.position} />
+        <div>
+          <span className={styles.timingLabel}>Position</span>
+          <FormattedPosition
+            className={styles.timing}
+            position={chord.timing.position}
+          />
+        </div>
+        <div>
+          <span className={styles.timingLabel}>Position</span>
+          <FormattedDuration
+            className={styles.timing}
+            duration={chord.timing.duration}
+          />
+        </div>
       </div>
 
       <button

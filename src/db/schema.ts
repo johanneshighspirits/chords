@@ -38,9 +38,7 @@ export const parts = pgTable('parts', {
   uid: uuid('uid').primaryKey(),
   title: text('title').notNull(),
   color: varchar('color', { length: 255 }),
-  position: integer('position').notNull(),
-  duration: integer('duration').notNull(),
-  offset: integer('offset').notNull(),
+  index: integer('index').notNull(),
   songId: uuid('song_id')
     .notNull()
     .references(() => songs.uid, {

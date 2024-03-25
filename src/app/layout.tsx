@@ -8,6 +8,8 @@ import {
 import './globals.css';
 import './print.css';
 import clsx from 'clsx';
+import { Header } from '@/components/Header';
+import { DBProvider } from '@/components/providers/DBProvider';
 
 const expletus = Expletus_Sans({
   weight: '500',
@@ -49,12 +51,10 @@ export default function RootLayout({
           noto.variable,
           poppins.variable
         )}>
-        <header>
-          <div className="wrapper">
-            <h1>Chords</h1>
-          </div>
-        </header>
-        <main className="wrapper">{children}</main>
+        <Header />
+        <DBProvider>
+          <main className="wrapper">{children}</main>
+        </DBProvider>
         <footer>
           <div className="wrapper">&copy; {new Date().getFullYear()}</div>
         </footer>

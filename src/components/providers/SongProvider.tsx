@@ -23,12 +23,15 @@ import {
   Timing,
   getBarEnd,
   getNumberOfBeats,
+  getPartEnd,
   isTimingEarlier,
   moveChordBy,
   moveTiming,
+  updateTimingPositions,
 } from '@/helpers/timing';
 import { generateId } from '@/helpers/common';
-import { saveToDB } from '@/db/actions';
+import { insertPart } from '@/db/actions';
+import { useDB } from './DBProvider';
 
 type SongState = SongMeta & {
   currentSongUID: string;
@@ -42,10 +45,11 @@ type SongState = SongMeta & {
 type Action =
   | { type: 'openSong'; song: Song }
   | { type: 'updateChords'; chords: Chord[]; partId: string } // DB ✅
+  | { type: 'updateParts'; parts: PartType[] } // DB ✅
   // | { type: 'addChord'; chord: Chord; partId: string }
   // | { type: 'removeChord'; uid: string; partId: string }
   // | { type: 'removeChords'; chordIds: string[]; partId: string }
-  | { type: 'addPart'; title?: string; chords?: Chord[] }
+  | { type: 'addPart'; part: PartType }
   | { type: 'removePart'; uid: string }
   | { type: 'setPartTitle'; title: string; partId: string }
   | { type: 'setPartColor'; color: Color; partId: string }
@@ -74,81 +78,17 @@ function reducer(state: SongState, action: Action): SongState {
         }),
       };
     }
-    // case 'addChord': {
-    //   return {
-    //     ...state,
-    //     parts: state.parts.map((part) => {
-    //       if (part.uid === action.partId) {
-    //         const beforeChords = part.chords.filter((c) =>
-    //           isTimingEarlier(c.timing, action.chord.timing)
-    //         );
-    //         const afterChords = part.chords
-    //           .filter(
-    //             (c): c is Chord =>
-    //               !isTimingEarlier(c.timing, action.chord.timing)
-    //           )
-    //           .map((c) => ({
-    //             ...c,
-    //             timing: moveTiming(
-    //               c.timing,
-    //               action.chord.timing.duration,
-    //               'later'
-    //             ),
-    //           }));
-    //         return {
-    //           ...part,
-    //           chords: [
-    //             ...beforeChords,
-    //             {
-    //               ...action.chord,
-    //             },
-    //             ...afterChords,
-    //           ],
-    //         };
-    //       }
-    //       return part;
-    //     }),
-    //   };
-    // }
-    // case 'removeChord': {
-    //   return {
-    //     ...state,
-    //     parts: state.parts.map((part) => {
-    //       if (part.uid === action.partId) {
-    //         const chordToRemoveIndex = part.chords.findIndex(
-    //           (c) => c.uid === action.uid
-    //         );
-    //         const chordToRemove = part.chords[chordToRemoveIndex];
-    //         const newChords = [
-    //           ...part.chords.slice(0, chordToRemoveIndex),
-    //           ...part.chords
-    //             .slice(chordToRemoveIndex + 1)
-    //             .map(moveChordBy(chordToRemove.timing.duration, 'earlier')),
-    //         ];
-    //         return {
-    //           ...part,
-    //           chords: newChords,
-    //         };
-    //       }
-    //       return part;
-    //     }),
-    //   };
-    // }
-    case 'addPart': {
-      const prevPart = state.parts[state.parts.length - 1];
-      const prevTiming = prevPart ? prevPart.timing : Timing.init();
-      const newPart = Part.new();
+    case 'updateParts': {
       return {
         ...state,
-        parts: [
-          ...state.parts,
-          {
-            ...newPart,
-            title: `Part ${state.parts.length + 1}`,
-            timing: Timing.init(prevTiming.offset + prevTiming.duration.bar),
-          },
-        ],
-        currentPartUID: newPart.uid,
+        parts: [...action.parts],
+      };
+    }
+    case 'addPart': {
+      return {
+        ...state,
+        parts: [...state.parts, action.part],
+        currentPartUID: action.part.uid,
       };
     }
     case 'removePart': {
@@ -194,19 +134,30 @@ function reducer(state: SongState, action: Action): SongState {
       };
     }
     case 'setActivePart': {
+      const activePart = state.parts.find((p) => p.uid === action.partId);
+      const position = getPartEnd(activePart);
+      if (!position) {
+        return state;
+      }
       return {
         ...state,
         currentPartUID: action.partId,
+        position,
       };
     }
     case 'openSong': {
       const { uid, title, parts } = action.song;
+      const currentPartUID = parts[parts.length - 1].uid;
+      const activePart = parts.find((p) => p.uid === currentPartUID);
+      const position = getPartEnd(activePart) ?? Timing.init().position;
+
       return {
         ...state,
         title,
         parts,
         currentSongUID: uid,
         currentPartUID: parts[parts.length - 1].uid,
+        position,
       };
     }
     case 'setPosition': {
@@ -248,6 +199,10 @@ export const SongProvider = ({
   initialSong,
   children,
 }: PropsWithChildren<{ initialSong?: Song }>) => {
+  const currentPartUID = initialSong?.parts.at(-1)?.uid ?? '';
+  const activePart = initialSong?.parts.find((p) => p.uid === currentPartUID);
+  const position = getPartEnd(activePart) ?? Timing.init().position;
+
   const [state, dispatch] = useReducer(
     reducer,
     initialSong
@@ -255,6 +210,7 @@ export const SongProvider = ({
           ...emptyState(),
           ...initialSong,
           currentPartUID: initialSong.parts[0]?.uid ?? '',
+          position,
         }
       : emptyState()
   );
@@ -262,19 +218,8 @@ export const SongProvider = ({
     state,
     dispatch,
   };
-  // console.log('----');
-  // state.parts.forEach((part) => {
-  //   console.log(part.timing);
-  //   part.chords.forEach((chord) => {
-  //     console.table({ timing: chord.note, ...chord.timing });
-  //   });
-  // });
-  return (
-    <SongContext.Provider value={value}>
-      {/* <SongSaver /> */}
-      {children}
-    </SongContext.Provider>
-  );
+
+  return <SongContext.Provider value={value}>{children}</SongContext.Provider>;
 };
 
 export function useSong() {
@@ -300,10 +245,69 @@ export function useSong() {
 }
 
 export function useSongParts() {
-  const song = useSong();
+  const { parts, currentSongUID, currentPartUID, dispatch } = useSong();
+  const { addToQueue } = useDB();
+
+  const addPart = async (part: PartType) => {
+    dispatch({ type: 'addPart', part });
+    insertPart(currentSongUID, part);
+  };
+
+  const movePart = (direction: 'before' | 'after', partId: string) => {
+    const currentIndex = parts.findIndex((p) => p.uid === partId);
+    if (currentIndex === -1) {
+      return;
+    }
+    const part = parts.find((p) => p.uid === partId);
+    if (!part) {
+      return;
+    }
+    const targetIndex = currentIndex + (direction === 'before' ? -1 : 2);
+    const newParts = [
+      ...parts.slice(0, targetIndex).filter((p) => p.uid !== partId),
+      part,
+      ...parts.slice(targetIndex).filter((p) => p.uid !== partId),
+    ];
+
+    dispatch({ type: 'updateParts', parts: newParts });
+    addToQueue([
+      {
+        action: 'upsertParts',
+        songId: currentSongUID,
+        entries: newParts,
+      },
+    ]);
+  };
+
+  const setPartTitle = (part: PartType, title: string) => {
+    dispatch({ type: 'setPartTitle', title, partId: part.uid });
+    addToQueue([
+      {
+        action: 'upsertParts',
+        songId: currentSongUID,
+        entries: [{ ...part, title }],
+      },
+    ]);
+  };
+
+  const removePart = (uid: string) => {
+    dispatch({ type: 'removePart', uid });
+    addToQueue([
+      {
+        action: 'upsertParts',
+        songId: currentSongUID,
+        entries: [],
+        removedEntryUids: [uid],
+      },
+    ]);
+  };
   return {
-    currentPartId: song.currentPartUID,
-    parts: song.parts,
+    currentPartUID,
+    parts,
+    addPart,
+    movePart,
+    removePart,
+    setPartTitle,
   };
 }
 
@@ -315,6 +319,7 @@ export function useChords() {
     position: playheadPosition,
     dispatch,
   } = useSong();
+  const { addToQueue } = useDB();
 
   const addChord = (chordDetails: ChordDetails) => {
     const part = parts.find((p) => p.uid === currentPartUID);
@@ -351,11 +356,14 @@ export function useChords() {
     const chords = [...beforeChords, chord, ...afterChords];
     dispatch({ type: 'updateChords', chords, partId: currentPartUID });
     dispatch({ type: 'setPosition', position: getBarEnd(chord.timing) });
-    saveToDB('upsertChords', {
-      songId: currentSongUID,
-      part,
-      entries: [chord, ...afterChords],
-    });
+    addToQueue([
+      {
+        action: 'upsertChords',
+        songId: currentSongUID,
+        part,
+        entries: [chord, ...afterChords],
+      },
+    ]);
     return chord;
   };
 
@@ -404,11 +412,14 @@ export function useChords() {
           position: getBarEnd(lastChord.timing),
         });
       }
-      saveToDB('upsertChords', {
-        songId: currentSongUID,
-        part,
-        entries: [...newChords, ...modifiedChords],
-      });
+      addToQueue([
+        {
+          action: 'upsertChords',
+          songId: currentSongUID,
+          part,
+          entries: [...newChords, ...modifiedChords],
+        },
+      ]);
 
       return { newChords, modifiedChords };
     }
@@ -433,11 +444,14 @@ export function useChords() {
           partId: part.uid,
           chords,
         });
-        saveToDB('upsertChords', {
-          songId: currentSongUID,
-          part,
-          entries: [newChord.modifiedChord],
-        });
+        addToQueue([
+          {
+            action: 'upsertChords',
+            songId: currentSongUID,
+            part,
+            entries: [newChord.modifiedChord],
+          },
+        ]);
 
         return newChord.modifiedChord;
       }
@@ -468,12 +482,15 @@ export function useChords() {
         partId: part.uid,
         chords: newChords,
       });
-      saveToDB('upsertChords', {
-        songId: currentSongUID,
-        part,
-        entries: newChords,
-        removedEntryUids: chordIds,
-      });
+      addToQueue([
+        {
+          action: 'upsertChords',
+          songId: currentSongUID,
+          part,
+          entries: newChords,
+          removedEntryUids: chordIds,
+        },
+      ]);
       return newChords;
     }
   };

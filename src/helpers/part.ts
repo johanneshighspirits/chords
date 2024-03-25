@@ -5,7 +5,7 @@ import { generateId } from './common';
 import { formatChord } from './chord';
 
 export const Part = {
-  new: (chords = [] as Chord[]): PartType => {
+  new: (chords = [] as Chord[], index = 0): PartType => {
     const uid = generateId();
     const color = getRandomColor();
     const pattern = getChordPattern(chords);
@@ -14,7 +14,7 @@ export const Part = {
       color,
       title: 'New Part',
       chords,
-      timing: Timing.init(),
+      index,
       pattern,
     };
   },

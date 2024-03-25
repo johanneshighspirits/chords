@@ -16,14 +16,14 @@ import { ColorPicker } from './ColorPicker';
 import { debounce } from '@/helpers/common';
 
 export const PartsView = () => {
-  const { currentPartId, parts } = useSongParts();
+  const { currentPartUID, parts } = useSongParts();
   return (
     <section className={styles.parts}>
       {parts.map((part) => {
         return (
           <PartView
             key={part.uid}
-            isActive={currentPartId === part.uid}
+            isActive={currentPartUID === part.uid}
             part={part}
           />
         );

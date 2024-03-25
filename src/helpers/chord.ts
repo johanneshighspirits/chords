@@ -51,6 +51,6 @@ export const formatChord = ({
   modifier,
 }: Chord) => {
   return [note, sign, major ? '' : 'm', modifier, bass, bassSign]
-    .map(Boolean)
+    .filter(Boolean)
     .join('');
 };

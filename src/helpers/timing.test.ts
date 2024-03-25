@@ -1,6 +1,12 @@
 import { Duration, Timing } from '@/types';
 import { describe, expect, it } from 'vitest';
-import { getBarEnd, getTotalDuration, moveChordBy, moveTiming } from './timing';
+import {
+  getBarEnd,
+  getTotalDuration,
+  moveChordBy,
+  moveTiming,
+  updateTimingPositions,
+} from './timing';
 
 describe('timing', () => {
   describe('getBarEnd', () => {
@@ -186,6 +192,92 @@ describe('timing', () => {
         bar: 12,
         beat: 2,
       });
+    });
+  });
+  describe('updateTimingPositions', () => {
+    it('should update timings in a sorted array', () => {
+      const items = [
+        {
+          timing: {
+            position: {
+              bar: 2,
+              beat: 1,
+            },
+            duration: {
+              bar: 1,
+              beat: 0,
+            },
+            offset: 0,
+          },
+        },
+        {
+          timing: {
+            position: {
+              bar: 2,
+              beat: 1,
+            },
+            duration: {
+              bar: 4,
+              beat: 0,
+            },
+            offset: 0,
+          },
+        },
+        {
+          timing: {
+            position: {
+              bar: 5,
+              beat: 1,
+            },
+            duration: {
+              bar: 8,
+              beat: 2,
+            },
+            offset: 0,
+          },
+        },
+      ];
+      expect(updateTimingPositions(items)).toEqual([
+        {
+          timing: {
+            position: {
+              bar: 0,
+              beat: 0,
+            },
+            duration: {
+              bar: 1,
+              beat: 0,
+            },
+            offset: 0,
+          },
+        },
+        {
+          timing: {
+            position: {
+              bar: 1,
+              beat: 0,
+            },
+            duration: {
+              bar: 4,
+              beat: 0,
+            },
+            offset: 0,
+          },
+        },
+        {
+          timing: {
+            position: {
+              bar: 5,
+              beat: 0,
+            },
+            duration: {
+              bar: 8,
+              beat: 2,
+            },
+            offset: 0,
+          },
+        },
+      ]);
     });
   });
 });

@@ -1,4 +1,4 @@
-import { Chord, Duration, type Timing as TimingType } from '@/types';
+import { Chord, Duration, Part, type Timing as TimingType } from '@/types';
 
 export const Timing = {
   init: (offset = 0): TimingType => ({
@@ -28,6 +28,14 @@ export const getPartLength = (chords: Chord[]): Duration =>
     },
     { bar: 0, beat: 0 } as Duration
   );
+
+export const getPartEnd = (part?: Part): Duration | undefined => {
+  const lastChord = part?.chords.at(-1);
+  if (lastChord) {
+    return getBarEnd(lastChord.timing);
+  }
+  return undefined;
+};
 
 export const getNumberOfBeats = (position: Duration) => {
   return position.bar * 4 + position.beat;
@@ -106,6 +114,31 @@ export const getBarEnd = (timing: TimingType) => {
   const pos = getNumberOfBeats(timing.position);
   const dur = getNumberOfBeats(timing.duration);
   return getPositionFromBeats(pos + dur);
+};
+
+export const updateTimingPositions = <T extends { timing: TimingType }>(
+  items: T[],
+  initialOffset = Timing.init()
+): T[] => {
+  return items.reduce((result, item) => {
+    if (result.length === 0) {
+      return [{ ...item, timing: initialOffset }];
+    }
+    const lastItem = result.at(-1);
+    if (!lastItem) {
+      return result;
+    }
+    return [
+      ...result,
+      {
+        ...item,
+        timing: {
+          ...item.timing,
+          position: getBarEnd(lastItem.timing),
+        },
+      },
+    ];
+  }, [] as T[]);
 };
 
 export const serializeTiming = (timing: TimingType): SerializedTiming => {

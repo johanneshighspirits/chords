@@ -7,7 +7,14 @@
   .print-hidden,
   a,
   form,
-  button {
+  button,
+  footer {
+    display: none !important;
+  }
+}
+
+@media screen {
+  .print-only {
     display: none !important;
   }
 }

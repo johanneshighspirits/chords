@@ -14,12 +14,13 @@ type SongViewProps = {
 
 export const SongView = ({ song }: SongViewProps) => {
   const { title, artist } = song;
+  console.log(song.uid);
   return (
     <SongProvider initialSong={song}>
       <div className={styles.SongView}>
         <div className={styles.songHeader}>
           <p>{artist}</p>
-          <h1>{title}</h1>
+          <h2>{title}</h2>
         </div>
 
         {/* <Display /> */}
