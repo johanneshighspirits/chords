@@ -14,10 +14,11 @@ import {
 import { TimingBar } from './TimingBar';
 import { FormattedDuration, FormattedPosition } from './Display';
 import { PendingPlayhead } from './PendingPlayhead';
+import { BreakType } from '@/helpers/break';
 
 type ChordsViewProps = {
   partId: string;
-  chords: Chord[];
+  chords: (Chord | BreakType)[];
   lineIndex: number;
   repeatCount?: number;
   isDuplicate?: boolean;
@@ -56,7 +57,7 @@ export const ChordsView = ({
 };
 
 type ChordViewProps = {
-  chord: Chord;
+  chord: Chord | BreakType;
   lineIndex: number;
   partId: string;
 };
@@ -183,7 +184,8 @@ const ChordView = ({ partId, chord, lineIndex }: ChordViewProps) => {
     chord.timing.position.bar * 4 +
     chord.timing.position.beat -
     lineIndex * 16;
-  return (
+
+  return chord.type === 'chord' ? (
     <li
       ref={chordRef}
       className={styles.chord}
@@ -197,7 +199,7 @@ const ChordView = ({ partId, chord, lineIndex }: ChordViewProps) => {
         className={clsx(styles.removeChord, styles.inset)}
       />
       <PendingPlayhead timing={chord.timing} />
-      <FormattedChord className={styles.display} {...chord}></FormattedChord>
+      <FormattedChord className={styles.display} chord={chord}></FormattedChord>
       {/* <Debug>
         Id: {chord.uid}
         <br />
@@ -206,15 +208,15 @@ const ChordView = ({ partId, chord, lineIndex }: ChordViewProps) => {
         Len: {chord.timing.duration.bar}.{chord.timing.duration.beat}.0
       </Debug> */}
       <div className={styles.hoverInfo}>
-        <div>
+        <div className={styles.info}>
           <span className={styles.timingLabel}>Position</span>
           <FormattedPosition
             className={styles.timing}
             position={chord.timing.position}
           />
         </div>
-        <div>
-          <span className={styles.timingLabel}>Position</span>
+        <div className={styles.info}>
+          <span className={styles.timingLabel}>Duration</span>
           <FormattedDuration
             className={styles.timing}
             duration={chord.timing.duration}
@@ -229,20 +231,31 @@ const ChordView = ({ partId, chord, lineIndex }: ChordViewProps) => {
         className={styles.dragHandleRight}
         onMouseDown={handleDurationMouseDown}></button>
     </li>
+  ) : (
+    <li
+      ref={chordRef}
+      className={styles.Break}
+      style={{
+        gridColumnStart,
+        gridColumnEnd: `span ${getNumberOfBeats(chord.timing.duration)}`,
+      }}>
+      <PendingPlayhead timing={chord.timing} />
+      <FormattedChord className={styles.display} chord={chord}></FormattedChord>
+    </li>
   );
 };
 
 export const FormattedChord = ({
   className,
-  note,
-  sign,
-  major,
-  modifier,
-  bass,
-  bassSign,
-}: Chord & {
+  chord,
+}: {
+  chord: Chord | BreakType;
   className?: string;
 }) => {
+  if (chord.type === 'break') {
+    return <span className={className}>✧</span>;
+  }
+  const { note, sign, major, modifier, bass, bassSign } = chord;
   return (
     <span className={className}>
       {note}

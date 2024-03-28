@@ -107,6 +107,15 @@ export const isPositionEarlier = (
   return false;
 };
 
+export const getDurationBetweenPositions = (
+  fromPosition: Duration,
+  toPosition: Duration
+) => {
+  const from = getNumberOfBeats(fromPosition);
+  const to = getNumberOfBeats(toPosition);
+  return getPositionFromBeats(to - from);
+};
+
 export const isDurationEqual = (duration: Duration, compareWith: Duration) =>
   duration.bar === compareWith.bar && duration.beat === compareWith.beat;
 

@@ -1,14 +1,15 @@
 'use client';
 
 import styles from './ChordsLineEditor.module.css';
-import { Chord } from '@/types';
+import { Chord, isChord } from '@/types';
 import { useChords, useSong } from '../providers/SongProvider';
+import { BreakType } from '@/helpers/break';
 
 export const ChordsLineEditor = ({
   chords,
   partId,
 }: {
-  chords: Chord[];
+  chords: (Chord | BreakType)[];
   partId: string;
 }) => {
   const { duplicateChords, removeChords } = useChords();
@@ -17,7 +18,11 @@ export const ChordsLineEditor = ({
     removeChords(chordIds, partId);
   };
   const handleRepeat = () => {
-    duplicateChords(partId, chords, chords[chords.length - 1].uid);
+    duplicateChords(
+      partId,
+      chords.filter(isChord),
+      chords[chords.length - 1].uid
+    );
   };
 
   return (

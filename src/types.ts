@@ -1,3 +1,4 @@
+import { BreakType } from './helpers/break';
 import { FLAT, SHARP } from './helpers/chord';
 
 export type Song = SongMeta & {
@@ -21,6 +22,7 @@ export type ChordMeta = {
 };
 
 export type ChordDetails = {
+  type: 'chord';
   note: Note;
   major: boolean;
   sign: Sign;
@@ -31,8 +33,10 @@ export type ChordDetails = {
 
 export type Chord = ChordMeta & ChordDetails;
 
-export const isChord = (input: Chord | ChordMeta): input is Chord => {
-  return typeof input === 'object' && 'note' in input;
+export const isChord = (
+  input: Chord | ChordMeta | BreakType
+): input is Chord => {
+  return typeof input === 'object' && 'type' in input && input.type === 'chord';
 };
 
 export type PartMeta = {
@@ -61,7 +65,7 @@ export type Color = {
 
 export type ChordLine = {
   pattern: string;
-  chords: Chord[];
+  chords: (Chord | BreakType)[];
   repeatCount?: number;
   isDuplicate?: boolean;
 };

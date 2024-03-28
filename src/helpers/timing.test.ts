@@ -2,6 +2,7 @@ import { Duration, Timing } from '@/types';
 import { describe, expect, it } from 'vitest';
 import {
   getBarEnd,
+  getDurationBetweenPositions,
   getTotalDuration,
   moveChordBy,
   moveTiming,
@@ -278,6 +279,36 @@ describe('timing', () => {
           },
         },
       ]);
+    });
+  });
+  describe('getDurationBetweenPositions', () => {
+    it('should return a distance between two positions', () => {
+      const from = {
+        bar: 10,
+        beat: 2,
+      };
+      const to = {
+        bar: 13,
+        beat: 1,
+      };
+      expect(getDurationBetweenPositions(from, to)).toEqual({
+        bar: 2,
+        beat: 3,
+      });
+    });
+    it('should return a distance between two positions in the same bar', () => {
+      const from = {
+        bar: 8,
+        beat: 0,
+      };
+      const to = {
+        bar: 8,
+        beat: 3,
+      };
+      expect(getDurationBetweenPositions(from, to)).toEqual({
+        bar: 0,
+        beat: 3,
+      });
     });
   });
 });

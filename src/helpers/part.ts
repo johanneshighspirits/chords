@@ -1,8 +1,17 @@
 import { Chord, ChordLine, Part as PartType } from '@/types';
-import { Timing, positionAsString } from './timing';
+import {
+  Timing,
+  getBarEnd,
+  getDurationBetweenPositions,
+  getNumberOfBeats,
+  isPositionEarlier,
+  isTimingEarlier,
+  positionAsString,
+} from './timing';
 import { getRandomColor, deserializeColor } from './color';
 import { generateId } from './common';
 import { formatChord } from './chord';
+import { Break, BreakType } from './break';
 
 export const Part = {
   new: (chords = [] as Chord[], index = 0): PartType => {
@@ -19,7 +28,7 @@ export const Part = {
     };
   },
 };
-export const getChordPattern = (chords: Chord[]) =>
+export const getChordPattern = (chords: (Chord | BreakType)[]) =>
   chords
     .map(
       (chord) =>
@@ -32,16 +41,30 @@ export const getChordLines = (chords: Chord[]): ChordLine[] => {
    * Split chords by lines (4 bars on each line)
    */
   const lines: ChordLine[] = [];
-  let currentChords: Chord[] = [];
+  let currentChords: (Chord | BreakType)[] = [];
+  let prevChord: Chord | undefined = undefined;
   for (const chord of chords) {
     if (chord.timing.position.bar < (lines.length + 1) * 4) {
+      if (prevChord) {
+        const breakDuration = getDurationBetweenPositions(
+          getBarEnd(prevChord.timing),
+          chord.timing.position
+        );
+        if (getNumberOfBeats(breakDuration)) {
+          currentChords.push(
+            Break.new(getBarEnd(prevChord.timing), breakDuration)
+          );
+        }
+      }
       currentChords.push(chord);
+      prevChord = chord;
     } else {
       lines.push({
         pattern: getChordPattern(currentChords),
         chords: currentChords,
       });
       currentChords = [chord];
+      prevChord = undefined;
     }
   }
   if (currentChords.length) {
@@ -50,28 +73,6 @@ export const getChordLines = (chords: Chord[]): ChordLine[] => {
       chords: currentChords,
     });
   }
-
-  // let currentNumberOfBeats = 0;
-  // let currentChords: Chord[] = [];
-  // for (const chord of chords) {
-  //   currentNumberOfBeats +=
-  //     4 * chord.timing.duration.bar + chord.timing.duration.beat;
-  //   if (currentNumberOfBeats <= barsPerLine * 4) {
-  //     currentChords.push(chord);
-  //   } else {
-  //     lines.push({
-  //       pattern: getChordPattern(currentChords),
-  //       chords: currentChords,
-  //     });
-  //     currentNumberOfBeats =
-  //       4 * chord.timing.duration.bar + chord.timing.duration.beat;
-  //     currentChords = [chord];
-  //   }
-  // }
-  // lines.push({
-  //   pattern: getChordPattern(currentChords),
-  //   chords: currentChords,
-  // });
 
   /**
    * Find duplicate lines and group them

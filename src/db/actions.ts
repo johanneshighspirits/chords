@@ -52,15 +52,16 @@ export type DBActionPayload = UpsertChordsProps | UpsertPartsProps;
 
 export async function saveToDB(payloads: DBActionPayload[]): Promise<void> {
   console.log('----- saveToDB() ------', payloads.length);
-  const entries = mergePayloads(payloads);
-  for (const entry of entries) {
-    console.log('WRITING:', entry);
-    // if (payload.action === 'upsertChords') {
-    //   return writeChordsToDB(payload);
-    // }
-    // if (payload.action === 'upsertParts') {
-    //   return writePartsToDB(payload);
-    // }
+  const merged = await mergePayloads(payloads);
+  console.log(merged);
+  for (const payload of merged) {
+    console.log('WRITING:', payload.action);
+    if (payload.action === 'upsertChords') {
+      await writeChordsToDB(payload);
+    }
+    if (payload.action === 'upsertParts') {
+      await writePartsToDB(payload);
+    }
   }
 }
 
@@ -234,20 +235,27 @@ function writeChordsToDB({
   return db.transaction(async (tx) => {
     const existingPart = await preparedGetPart.execute({ uid: part.uid });
     if (!existingPart) {
+      console.log(`🔥 part doesnt exist`);
       const dbPart = convertDBPart(songId, part);
       await tx.insert(parts).values(dbPart);
     }
+    console.log(`🔥 part exists`);
     for (const entry of entries) {
       const existingEntry = await preparedGetChord.execute({
         uid: entry.uid,
       });
       if (isChord(entry)) {
         if (existingEntry) {
-          await tx.update(chords).set(entry).where(eq(chords.uid, entry.uid));
+          console.log(`🔥 chord exists`, entry);
+          await tx
+            .update(chords)
+            .set(serializeChord(part.uid, entry))
+            .where(eq(chords.uid, entry.uid));
         } else {
           await tx.insert(chords).values([serializeChord(part.uid, entry)]);
         }
       } else if (existingEntry) {
+        console.log(`🔥 entry exists`);
         await tx
           .update(chords)
           .set(serializeTiming(entry.timing))
@@ -255,6 +263,7 @@ function writeChordsToDB({
       }
     }
     if (removedEntryUids) {
+      console.log(`🔥 removing`);
       await tx.delete(chords).where(inArray(chords.uid, removedEntryUids));
     }
   });
@@ -451,6 +460,7 @@ const convertChords = (chords: DBChord[]): Chord[] => {
         modifier,
       }) => {
         return {
+          type: 'chord',
           uid,
           timing: deserializeTiming({ position, duration, offset }),
           note: note as Note,
@@ -468,7 +478,7 @@ const convertChords = (chords: DBChord[]): Chord[] => {
 };
 
 const serializeChord = (partId: string, chord: Chord): NewChord => {
-  const { uid, timing, ...details } = chord;
+  const { uid, timing, type, ...details } = chord;
   const dbChord: NewChord = {
     ...details,
     ...serializeTiming(timing),

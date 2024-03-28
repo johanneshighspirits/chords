@@ -15,12 +15,19 @@
   margin-top: 2px;
 }
 
-.chord {
+.chord,
+.Break {
   display: grid;
   position: relative;
   padding: 2rem 0;
   border-radius: var(--radius);
+}
+.chord {
   background: var(--chord-color);
+}
+.Break {
+  box-shadow: 0 0 20px rgb(255 255 255 / 0.3) inset;
+  color: rgb(255 255 255 / 0.5);
 }
 
 .removeChord {
@@ -44,8 +51,14 @@
   bottom: calc(0.5 * var(--spacing-y));
   opacity: 0;
 }
+.info {
+  display: flex;
+  flex-direction: column;
+}
 .timingLabel {
-  color: red;
+  color: black;
+  text-transform: uppercase;
+  font-size: 8px;
 }
 .timing {
   background: black;

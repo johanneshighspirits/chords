@@ -22,9 +22,10 @@ export const DBProvider = ({ children }: PropsWithChildren) => {
   const updateDB = () => {
     console.log('emptying Q', queue.current);
     if (queue.current.length) {
-      saveToDB(queue.current);
-      queue.current = [];
       clearTimeout(timerRef.current);
+      saveToDB(queue.current).then(() => {
+        queue.current = [];
+      });
     }
   };
 

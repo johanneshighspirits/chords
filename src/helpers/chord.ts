@@ -1,6 +1,7 @@
 import { Chord, ChordDetails, ChordMeta, Note, Sign } from '@/types';
-import { Timing } from './timing';
+import { Timing, getNumberOfBeats } from './timing';
 import { generateId } from './common';
+import { BreakType } from './break';
 
 const ChordRegex =
   /^(?<root>[A-H])(?<signMatch>\#|b)?(?<minor>m)?(?<modifier>[0-9]*)?(?<bassMatch>\/[A-H])?(?<bassSignMatch>\#|b?)?/i;
@@ -23,6 +24,7 @@ export const parseChord = (input: string): ChordDetails | null => {
     : undefined;
   const bassSign = getSign(bassSignMatch);
   const chord: ChordDetails = {
+    type: 'chord',
     note: note.toUpperCase() as Note,
     major: minor !== 'm',
     sign,
@@ -42,15 +44,20 @@ const getSign = (match?: string): Sign => {
   return '';
 };
 
-export const formatChord = ({
-  note,
-  sign,
-  major,
-  bass,
-  bassSign,
-  modifier,
-}: Chord) => {
-  return [note, sign, major ? '' : 'm', modifier, bass, bassSign]
+export const formatChord = (input: ChordDetails | BreakType) => {
+  if (input.type === 'break') {
+    return `[${getNumberOfBeats(input.timing.duration)}]`;
+  }
+  const { note, sign, major, bass, bassSign, modifier } = input;
+  return [
+    note,
+    sign,
+    major ? '' : 'm',
+    modifier,
+    bass ? '/' : '',
+    bass,
+    bassSign,
+  ]
     .filter(Boolean)
     .join('');
 };
