@@ -1,4 +1,9 @@
-import { FormEventHandler, PropsWithChildren, useRef } from 'react';
+import {
+  FormEventHandler,
+  KeyboardEventHandler,
+  PropsWithChildren,
+  useRef,
+} from 'react';
 import styles from './Editable.module.css';
 
 export const Editable = ({
@@ -6,6 +11,15 @@ export const Editable = ({
   children,
 }: PropsWithChildren<{ onEdit: (value: string) => void }>) => {
   const ref = useRef<HTMLSpanElement | null>(null);
+
+  const handleKeyDown: KeyboardEventHandler<HTMLSpanElement> = (e) => {
+    if (e.key === 'Enter') {
+      const text = ref.current?.innerText;
+      onEdit(text ?? '');
+      ref.current?.blur();
+      e.stopPropagation();
+    }
+  };
 
   const handleBlur: FormEventHandler<HTMLSpanElement> = () => {
     const text = ref.current?.innerText;
@@ -19,6 +33,7 @@ export const Editable = ({
       ref={ref}
       contentEditable={true}
       suppressContentEditableWarning={true}
+      onKeyDown={handleKeyDown}
       onBlur={handleBlur}>
       {children}
     </span>

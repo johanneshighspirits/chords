@@ -14,7 +14,6 @@ export type PlayheadProps = PropsWithChildren<{
 export const Playhead = ({ partId, className, children }: PlayheadProps) => {
   const { currentPartUID, position } = usePlayhead();
   const ref = useRef<HTMLDivElement | null>(null);
-
   const { left, top } = calculatePlayheadPosition(
     partId,
     position,

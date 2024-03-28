@@ -93,10 +93,8 @@ export const PartView = ({
               <ChordsView
                 key={line.pattern + i}
                 lineIndex={i}
-                chords={line.chords}
-                repeatCount={line.repeatCount}
-                isDuplicate={line.isDuplicate}
                 partId={part.uid}
+                {...line}
               />
             );
           })}

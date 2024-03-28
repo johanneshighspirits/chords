@@ -55,7 +55,7 @@ type Action =
   | { type: 'setPartColor'; color: Color; partId: string }
   | { type: 'setActivePart'; partId: string }
   | { type: 'setPendingPosition'; pendingPosition: Duration | null }
-  | { type: 'setPosition'; position: Duration };
+  | { type: 'setPosition'; position: Duration; partId: string };
 type Dispatch = (action: Action) => void;
 
 const SongContext = createContext<
@@ -134,15 +134,9 @@ function reducer(state: SongState, action: Action): SongState {
       };
     }
     case 'setActivePart': {
-      const activePart = state.parts.find((p) => p.uid === action.partId);
-      const position = getPartEnd(activePart);
-      if (!position) {
-        return state;
-      }
       return {
         ...state,
         currentPartUID: action.partId,
-        position,
       };
     }
     case 'openSong': {
@@ -161,9 +155,11 @@ function reducer(state: SongState, action: Action): SongState {
       };
     }
     case 'setPosition': {
+      console.log('action', action.position);
       return {
         ...state,
         position: action.position,
+        currentPartUID: action.partId,
       };
     }
     case 'setPendingPosition': {
@@ -355,7 +351,11 @@ export function useChords() {
 
     const chords = [...beforeChords, chord, ...afterChords];
     dispatch({ type: 'updateChords', chords, partId: currentPartUID });
-    dispatch({ type: 'setPosition', position: getBarEnd(chord.timing) });
+    dispatch({
+      type: 'setPosition',
+      position: getBarEnd(chord.timing),
+      partId: currentPartUID,
+    });
     addToQueue([
       {
         action: 'upsertChords',
@@ -410,6 +410,7 @@ export function useChords() {
         dispatch({
           type: 'setPosition',
           position: getBarEnd(lastChord.timing),
+          partId: part.uid,
         });
       }
       addToQueue([
@@ -539,10 +540,17 @@ const modifyChord = (
 };
 
 export function usePlayhead() {
-  const { currentPartUID, position, pendingPosition, dispatch } = useSong();
+  const ctx = useContext(SongContext);
+  if (!ctx) {
+    throw new Error('No context');
+  }
+  const {
+    state: { currentPartUID, position, pendingPosition },
+    dispatch,
+  } = ctx;
 
-  const setPosition = (position: Duration) => {
-    dispatch({ type: 'setPosition', position });
+  const setPosition = (position: Duration, partId: string) => {
+    dispatch({ type: 'setPosition', position, partId });
   };
   const setPendingPosition = (pendingPosition: Duration | null) => {
     dispatch({ type: 'setPendingPosition', pendingPosition });

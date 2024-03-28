@@ -1,14 +1,11 @@
 import { Chord, ChordLine, Part as PartType } from '@/types';
 import {
-  Timing,
   getBarEnd,
   getDurationBetweenPositions,
   getNumberOfBeats,
-  isPositionEarlier,
-  isTimingEarlier,
   positionAsString,
 } from './timing';
-import { getRandomColor, deserializeColor } from './color';
+import { getRandomColor } from './color';
 import { generateId } from './common';
 import { formatChord } from './chord';
 import { Break, BreakType } from './break';
@@ -100,5 +97,18 @@ export const getChordLines = (chords: Chord[]): ChordLine[] => {
     }
   }
 
+  const lastLine = lines.at(-1);
+  if (lastLine) {
+    const lastChord = lastLine.chords.at(-1);
+    if (lastChord) {
+      const { bar, beat } = getBarEnd(lastChord.timing);
+      if (bar % 4 === 0 && beat === 0) {
+        lines.push({
+          pattern: `empty_${lines.length}`,
+          chords: [Break.blank()],
+        });
+      }
+    }
+  }
   return lines;
 };

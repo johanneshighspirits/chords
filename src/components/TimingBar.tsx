@@ -53,7 +53,7 @@ const Bar = ({ partId, position }: { partId: string; position: Duration }) => {
   };
   const handleBeatClick = (beat: number) => () => {
     const targetBar = getTargetBar(beat);
-    setPosition(targetBar);
+    setPosition(targetBar, partId);
   };
 
   return (
