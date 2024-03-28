@@ -241,7 +241,7 @@ const ChordView = ({ partId, chord, lineIndex }: ChordViewProps) => {
       {(chord.type === 'break' || chord.type === 'blank') && (
         <li
           ref={chordRef}
-          className={styles.Break}
+          className={styles[chord.type]}
           style={{
             gridColumnStart,
             gridColumnEnd: `span ${getNumberOfBeats(chord.timing.duration)}`,
@@ -264,10 +264,10 @@ export const FormattedChord = ({
   className?: string;
 }) => {
   if (chord.type === 'break') {
-    return <span className={className}>✧</span>;
+    return <span className={className}>✷</span>;
   }
   if (chord.type === 'blank') {
-    return <span className={className}>✷</span>;
+    return <span className={className}>&nbsp;</span>;
   }
   if (chord.type === 'chord') {
     const { note, sign, major, modifier, bass, bassSign } = chord;

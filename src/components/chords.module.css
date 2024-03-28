@@ -16,7 +16,8 @@
 }
 
 .chord,
-.Break {
+.break,
+.blank {
   display: grid;
   position: relative;
   padding: 2rem 0;
@@ -25,9 +26,13 @@
 .chord {
   background: var(--chord-color);
 }
-.Break {
+.break {
   box-shadow: 0 0 20px rgb(255 255 255 / 0.3) inset;
   color: rgb(255 255 255 / 0.5);
+}
+.blank {
+  box-shadow: none;
+  padding: 1rem 0;
 }
 
 .removeChord {
