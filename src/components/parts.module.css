@@ -15,7 +15,7 @@
 }
 
 .part {
-  background: var(--part-color);
+  background: var(--part-gradient);
   display: flex;
   flex-direction: column;
   gap: var(--spacing);

@@ -14,7 +14,7 @@ type SongViewProps = {
 
 export const SongView = ({ song }: SongViewProps) => {
   const { title, artist } = song;
-  console.log(song.uid);
+  console.log('Song uid:', song.uid);
   return (
     <SongProvider initialSong={song}>
       <div className={styles.SongView}>

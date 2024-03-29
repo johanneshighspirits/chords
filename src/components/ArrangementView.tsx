@@ -7,6 +7,7 @@ import styles from './ArrangementView.module.css';
 import clsx from 'clsx';
 import { Editable } from './Editable';
 import { Part } from '@/types';
+import { colorToCssVars } from '@/helpers/color';
 
 export const ArrangementView = ({ className }: { className?: string }) => {
   const { parts } = useSongParts();
@@ -36,10 +37,7 @@ const ArrangementItem = ({
   isLast: boolean;
 }) => {
   const { movePart, setPartTitle } = useSongParts();
-  const {
-    color: { h, s, l, a },
-    title,
-  } = part;
+  const { color, title } = part;
 
   const handleEditTitle = (title: string) => {
     if (title !== part.title) {
@@ -55,11 +53,7 @@ const ArrangementItem = ({
     <li
       key={part.uid}
       className={clsx(partsStyles.part, styles.ArrangementItem)}
-      style={
-        {
-          '--part-color': `hsl(${h} ${s}% ${l}% / ${a})`,
-        } as CSSProperties
-      }>
+      style={colorToCssVars(color, 'part')}>
       <Editable onEdit={handleEditTitle}>{title}</Editable>
       {!isFirst && (
         <button

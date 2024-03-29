@@ -201,13 +201,16 @@ function writePartsToDB({
   entries,
   removedEntryUids,
 }: UpsertPartsProps) {
-  console.log(`🔥 WRITING ${entries.length} entries (Part) to DB`);
+  console.log(
+    `🔥 WRITING ${entries.length} entries (Part) to DB Song (${songId})`
+  );
   return db.transaction(async (tx) => {
     for (const entry of entries) {
       const existingEntry = await preparedGetPart.execute({
         uid: entry.uid,
       });
       if (existingEntry) {
+        console.log('Part exists', entry.uid);
         const { color, index, title, uid } = entry;
         const dbPart: Partial<DBPart> = {
           index,
@@ -216,6 +219,7 @@ function writePartsToDB({
         };
         await tx.update(parts).set(dbPart).where(eq(parts.uid, uid));
       } else {
+        console.log('Part does not exist', entry.uid);
         await tx.insert(parts).values(convertDBPart(songId, entry));
       }
     }
@@ -235,7 +239,7 @@ function writeChordsToDB({
   return db.transaction(async (tx) => {
     const existingPart = await preparedGetPart.execute({ uid: part.uid });
     if (!existingPart) {
-      console.log(`🔥 part doesnt exist`);
+      console.log(`🔥 part ${part.uid} doesn't exist`);
       const dbPart = convertDBPart(songId, part);
       await tx.insert(parts).values(dbPart);
     }
@@ -313,13 +317,13 @@ const convertDBPart = (songId: string, part: PartType) => {
   } satisfies NewPart;
 };
 
-export async function insertPart(
-  songId: string,
-  part: PartType
-): Promise<DBPart[]> {
-  const dbPart = convertDBPart(songId, part);
-  return db.insert(parts).values(dbPart).returning();
-}
+// export async function insertPart(
+//   songId: string,
+//   part: PartType
+// ): Promise<DBPart[]> {
+//   const dbPart = convertDBPart(songId, part);
+//   return db.insert(parts).values(dbPart).returning();
+// }
 
 export async function updatePart(
   part: Partial<Pick<PartType, 'color' | 'index' | 'title'>> & { uid: string }

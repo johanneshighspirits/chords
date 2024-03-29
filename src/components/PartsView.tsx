@@ -11,7 +11,7 @@ import { AddPart } from './AddPart';
 import { RemovePart } from './RemovePart';
 import { Playhead } from './Playhead';
 import { updatePart } from '@/db/actions';
-import { serializeColor } from '@/helpers/color';
+import { colorToCssVars, serializeColor } from '@/helpers/color';
 import { ColorPicker } from './ColorPicker';
 import { debounce } from '@/helpers/common';
 
@@ -46,7 +46,7 @@ export const PartView = ({
 }) => {
   const { dispatch } = useSong();
   const { chordLines = [] } = part;
-  const { h, s, l } = part.color;
+  const { color } = part;
 
   const handleClick = () => {
     dispatch({ type: 'setActivePart', partId: part.uid });
@@ -70,11 +70,7 @@ export const PartView = ({
     <article
       className={clsx(styles.part, isActive && styles.isActive)}
       onClick={handleClick}
-      style={
-        {
-          '--part-color': `hsl(${h} ${s}% ${l}%)`,
-        } as CSSProperties
-      }>
+      style={colorToCssVars(color, 'part')}>
       <div className={styles.header}>
         <h3>
           <Editable onEdit={handleEditTitle}>{part.title}</Editable>

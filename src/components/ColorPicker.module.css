@@ -1,6 +1,6 @@
 .ColorPicker {
   display: inline-block;
-  background: var(--part-color);
+  background: hsl(var(--part-h) var(--part-s) var(--part-l));
   border: 1px dotted white;
   padding: 2px 8px;
   font-size: 0.7em;

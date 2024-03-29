@@ -30,7 +30,6 @@ import {
   updateTimingPositions,
 } from '@/helpers/timing';
 import { generateId } from '@/helpers/common';
-import { insertPart } from '@/db/actions';
 import { useDB } from './DBProvider';
 
 type SongState = SongMeta & {
@@ -89,6 +88,10 @@ function reducer(state: SongState, action: Action): SongState {
         ...state,
         parts: [...state.parts, action.part],
         currentPartUID: action.part.uid,
+        position: {
+          bar: 0,
+          beat: 0,
+        },
       };
     }
     case 'removePart': {
@@ -155,7 +158,6 @@ function reducer(state: SongState, action: Action): SongState {
       };
     }
     case 'setPosition': {
-      console.log('action', action.position);
       return {
         ...state,
         position: action.position,
@@ -206,6 +208,7 @@ export const SongProvider = ({
           ...emptyState(),
           ...initialSong,
           currentPartUID: initialSong.parts[0]?.uid ?? '',
+          currentSongUID: initialSong?.uid ?? '',
           position,
         }
       : emptyState()
@@ -246,7 +249,13 @@ export function useSongParts() {
 
   const addPart = async (part: PartType) => {
     dispatch({ type: 'addPart', part });
-    insertPart(currentSongUID, part);
+    addToQueue([
+      {
+        action: 'upsertParts',
+        songId: currentSongUID,
+        entries: [part],
+      },
+    ]);
   };
 
   const movePart = (direction: 'before' | 'after', partId: string) => {
