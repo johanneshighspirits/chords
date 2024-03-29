@@ -34,7 +34,7 @@ export type ChordDetails = {
 export type Chord = ChordMeta & ChordDetails;
 
 export const isChord = (
-  input: Chord | ChordMeta | BreakType
+  input: Chord | ChordMeta | ChordDetails | BreakType
 ): input is Chord => {
   return typeof input === 'object' && 'type' in input && input.type === 'chord';
 };
