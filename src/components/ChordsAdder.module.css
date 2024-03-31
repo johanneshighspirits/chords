@@ -5,12 +5,6 @@
   backdrop-filter: blur(3px);
   z-index: 1;
 }
-.ChordsAdderMenu.IsStuck {
-  border: 3px solid red;
-}
-.ChordsAdderMenu.NotStuck {
-  border: 3px double green;
-}
 
 .ChordsAdder {
   display: grid;
@@ -20,6 +14,12 @@
   padding-right: var(--spacing-x);
   padding-top: var(--spacing-y);
   padding-bottom: var(--spacing-y);
+  transition: padding 300ms ease-out;
+}
+
+.ChordsAdderMenu.IsStuck .ChordsAdder {
+  padding-top: calc(0.25 * var(--spacing-y));
+  padding-bottom: calc(0.25 * var(--spacing-y));
 }
 
 .ChordsAdder form {
@@ -34,8 +34,12 @@
   border-bottom: 1px solid rgb(255 255 255 / 0.5);
   background: rgb(255 255 255 / 0.05);
   text-align: center;
-  font-size: 20px;
+  font-size: 1.5rem;
   outline: none;
+  transition: font-size 300ms ease-out;
+}
+.ChordsAdderMenu.IsStuck input {
+  font-size: 1rem;
 }
 
 .ChordsAdder input:hover {

@@ -28,7 +28,7 @@ export const StickyMenuProvider = ({
 
   useEffect(() => {
     if (ref.current && !observerRef.current) {
-      const rootMargin = `0px 0px -${globalThis.window.innerHeight - 1}px 0px`;
+      const rootMargin = `0px 0px -${globalThis.window.innerHeight - 32}px 0px`;
       observerRef.current = new IntersectionObserver(
         (entries) => {
           for (const entry of entries) {
