@@ -2,7 +2,7 @@
 
 import styles from './ChordsLineEditor.module.css';
 import { Chord, isChord } from '@/types';
-import { useChords, useSong } from '../providers/SongProvider';
+import { useChords } from '../providers/SongProvider';
 import { BreakType } from '@/helpers/break';
 
 export const ChordsLineEditor = ({

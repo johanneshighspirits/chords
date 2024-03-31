@@ -1,9 +1,10 @@
 import styles from './Header.module.css';
+import { Container } from './layout/PageContainer';
 
 export const Header = () => (
   <header className={styles.Header}>
-    <div className="wrapper">
+    <Container>
       <h1>Chords</h1>
-    </div>
+    </Container>
   </header>
 );

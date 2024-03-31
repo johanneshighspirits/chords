@@ -1,3 +1,9 @@
+import { Container, PageContainer } from '@/components/layout/PageContainer';
+
 export default function LoadingSong() {
-  return <div>Loading song...</div>;
+  return (
+    <PageContainer>
+      <Container>Loading song...</Container>
+    </PageContainer>
+  );
 }

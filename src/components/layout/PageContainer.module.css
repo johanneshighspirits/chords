@@ -1,5 +1,32 @@
 .PageContainer {
   display: flex;
+  flex: 0.3;
+  justify-content: center;
   flex-direction: column;
   gap: var(--spacing-xl);
+}
+
+@media screen and (min-width: 960px) {
+  .PageContainer {
+    flex: 0;
+  }
+}
+
+.Container {
+  margin: 0 auto;
+  width: 100%;
+  max-width: 94vw;
+  flex: 1 0 100%;
+}
+
+@media (min-width: 680px) {
+  .Container {
+    max-width: 90vw;
+  }
+}
+
+@media (min-width: 960px) {
+  .Container {
+    max-width: 960px;
+  }
 }

@@ -4,12 +4,16 @@ import { Duration } from '@/types';
 import styles from './Display.module.css';
 import { usePlayhead } from './providers/SongProvider';
 import clsx from 'clsx';
+import { colorToCssVars } from '@/helpers/color';
 
 export const Display = () => {
-  const { position } = usePlayhead();
+  const { position, currentPartTitle, currentPartColor } = usePlayhead();
   return (
-    <div className={styles.Display}>
+    <div
+      style={colorToCssVars(currentPartColor, 'title-bg')}
+      className={styles.Display}>
       <FormattedDuration duration={position} />
+      <span className={styles.PartTitle}>{currentPartTitle}</span>
     </div>
   );
 };

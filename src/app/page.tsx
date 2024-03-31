@@ -1,12 +1,18 @@
+import { Header } from '@/components/Header';
 import { Center } from '@/components/layout/Center';
+import { Container } from '@/components/layout/PageContainer';
 import Link from 'next/link';
 
 export default function Home() {
   return (
-    <div className="wrapper">
+    <>
+      <Header />
       <Center>
         <Link href={'/songs'}>Open songs</Link>
       </Center>
-    </div>
+      <footer>
+        <Container>&copy; {new Date().getFullYear()}</Container>
+      </footer>
+    </>
   );
 }

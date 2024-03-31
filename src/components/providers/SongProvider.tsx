@@ -565,8 +565,13 @@ export function usePlayhead() {
     dispatch({ type: 'setPendingPosition', pendingPosition });
   };
 
+  const currentPart = ctx.state.parts.find((p) => p.uid === currentPartUID);
+  const currentPartTitle = currentPart?.title ?? '';
+  const currentPartColor = currentPart?.color;
   return {
     currentPartUID,
+    currentPartTitle,
+    currentPartColor,
     position,
     pendingPosition,
     setPendingPosition,

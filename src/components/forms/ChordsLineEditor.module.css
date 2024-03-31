@@ -1,6 +1,7 @@
 .editor {
   display: flex;
   flex-direction: column;
+  gap: 2px;
   opacity: 0.3;
   transition: opacity 200ms ease-out;
   position: absolute;
@@ -10,4 +11,32 @@
 }
 .editor:hover {
   opacity: 1;
+}
+.editor:hover button:global(.blank):hover {
+  background: hsl(var(--part-hsl));
+}
+
+@media screen and (min-width: 680px) {
+  .editor {
+    right: calc(-1 * (var(--spacing-x) + 2rem + 1px));
+    opacity: 1;
+  }
+  .editor button {
+    cursor: pointer;
+    padding: 0.5rem;
+    background: hsl(var(--part-hsl));
+  }
+}
+
+@media screen and (min-width: 960px) {
+  .editor {
+    opacity: 0.3;
+    right: -2rem;
+  }
+  .editor button {
+    background: transparent;
+  }
+  .editor:hover button:global(.blank):hover {
+    background: rgb(255 255 255 / 0.3);
+  }
 }

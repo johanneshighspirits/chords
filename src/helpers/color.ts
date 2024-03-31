@@ -200,13 +200,20 @@ export const hexToColor = (hex: string) => {
   };
 };
 
-export const colorToCssVars = (color: Color, prefix = ''): CSSProperties => {
+export const colorToCssVars = (
+  color: Color | undefined,
+  prefix = ''
+): CSSProperties => {
+  if (!color) {
+    return {};
+  }
   const { h, s, l, a } = color;
   return {
     [`--${prefix}-h`]: h,
     [`--${prefix}-s`]: s,
     [`--${prefix}-l`]: l,
     [`--${prefix}-a`]: a,
+    [`--${prefix}-hsl`]: `${h} ${s}% ${l}%`,
     [`--${prefix}-gradient`]: getGradient(color),
   };
 };

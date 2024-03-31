@@ -51,13 +51,9 @@ export default function RootLayout({
           noto.variable,
           poppins.variable
         )}>
-        <Header />
         <DBProvider>
-          <main className="wrapper">{children}</main>
+          <main>{children}</main>
         </DBProvider>
-        <footer>
-          <div className="wrapper">&copy; {new Date().getFullYear()}</div>
-        </footer>
       </body>
     </html>
   );

@@ -24,38 +24,6 @@
   opacity: 0.7;
 }
 
-.chordsAdder {
-  display: grid;
-  grid-template-columns: 25% 1fr 25%;
-  gap: var(--spacing);
-  justify-items: stretch;
-  padding-right: var(--spacing-x);
-}
-
-.chordsAdder form {
-  display: flex;
-}
-
-.chordsAdder input {
-  padding: 0.5em;
-  border: none;
-  width: 6em;
-  margin: auto;
-  border-bottom: 1px solid rgb(255 255 255 / 0.5);
-  background: rgb(255 255 255 / 0.05);
-  text-align: center;
-  font-size: 30px;
-  outline: none;
-}
-
-.chordsAdder input:hover {
-  background: rgb(255 255 255 / 0.075);
-}
-.chordsAdder input:focus {
-  background: rgb(255 255 255 / 0.1);
-  border-bottom: 1px solid white;
-}
-
 @media screen and (max-width: 959px) {
   .ArrangementView {
     display: none;

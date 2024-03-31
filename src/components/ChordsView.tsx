@@ -1,4 +1,4 @@
-import { Chord, Sign as SignType } from '@/types';
+import { Chord, Sign as SignType, isChord } from '@/types';
 import styles from './chords.module.css';
 import { RemoveChord } from './RemoveChord';
 import clsx from 'clsx';
@@ -30,6 +30,7 @@ export const ChordsView = ({
   repeatCount = 0,
   isDuplicate,
 }: ChordsViewProps) => {
+  const hasChords = chords.some(isChord);
   return (
     <div className={clsx(styles.chordsLine)}>
       <TimingBar
@@ -49,8 +50,10 @@ export const ChordsView = ({
             partId={partId}
           />
         ))}
+        {hasChords && (
+          <ChordsLineEditor chords={chords} partId={partId}></ChordsLineEditor>
+        )}
       </ul>
-      <ChordsLineEditor chords={chords} partId={partId}></ChordsLineEditor>
     </div>
   );
 };

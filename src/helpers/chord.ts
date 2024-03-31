@@ -1,6 +1,4 @@
-import { Chord, ChordDetails, ChordMeta, Note, Sign, isChord } from '@/types';
-import { Timing, getNumberOfBeats } from './timing';
-import { generateId } from './common';
+import { ChordDetails, Note, Sign, isChord } from '@/types';
 import { BreakType } from './break';
 
 const ChordRegex =
