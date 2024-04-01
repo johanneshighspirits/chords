@@ -5,6 +5,7 @@ import styles from './ChordsAdder.module.css';
 import { Container } from './layout/PageContainer';
 import { Display } from './Display';
 import { StickyMenuProvider } from './providers/StickyMenuProvider';
+import { VolumeControl } from './VolumeControl';
 
 export const ChordsAdder = () => {
   return (
@@ -15,6 +16,7 @@ export const ChordsAdder = () => {
       <Container className={styles.ChordsAdder}>
         <Display />
         <AddChord />
+        <VolumeControl />
         <AddPart />
       </Container>
     </StickyMenuProvider>

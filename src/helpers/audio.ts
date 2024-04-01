@@ -1,6 +1,6 @@
 import { MidiNote } from './midi';
 
-type PlayNoteOptions = { type: OscillatorNode['type'] };
+type PlayNoteOptions = { type?: OscillatorType; volume?: number };
 
 export const AudioApi = (ctx: AudioContext) => {
   const playNote = (tone: MidiNote, options?: PlayNoteOptions) => {
@@ -9,7 +9,7 @@ export const AudioApi = (ctx: AudioContext) => {
     osc.frequency.setValueAtTime(tone.freq, ctx.currentTime);
 
     const gain = ctx.createGain();
-    gain.gain.value = 0.5;
+    gain.gain.value = options?.volume ?? 0.5;
 
     osc.connect(gain);
     gain.connect(ctx.destination);

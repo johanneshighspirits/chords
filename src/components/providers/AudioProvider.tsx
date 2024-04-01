@@ -5,16 +5,23 @@ import { formatChord } from '@/helpers/chord';
 import { getMidiNotes } from '@/helpers/midi';
 import { Chord, ChordDetails } from '@/types';
 import {
+  Dispatch,
   PropsWithChildren,
+  SetStateAction,
   createContext,
   useContext,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from 'react';
 
 type AudioState = {
   resumeAudioContext: () => void;
+  volume: number;
+  setVolume: Dispatch<SetStateAction<number>>;
+  setOscillatorType: Dispatch<SetStateAction<OscillatorType>>;
+  oscillatorType: OscillatorType;
 } & (
   | {
       audioCtxLoaded: false;
@@ -30,6 +37,9 @@ const AudioStateContext = createContext<AudioState | undefined>(undefined);
 export const AudioProvider = ({ children }: PropsWithChildren) => {
   const ctxRef = useRef<AudioContext | undefined>();
   const [audioCtxLoaded, setAudioCtxLoaded] = useState(false);
+  const [volume, setVolume] = useState(0.5);
+  const [oscillatorType, setOscillatorType] =
+    useState<OscillatorType>('triangle');
 
   const resumeAudioContext = () => {
     if (ctxRef.current) {
@@ -40,13 +50,21 @@ export const AudioProvider = ({ children }: PropsWithChildren) => {
     setAudioCtxLoaded(true);
   };
 
+  const value = useMemo<AudioState>(() => {
+    const common = {
+      volume,
+      setVolume,
+      oscillatorType,
+      setOscillatorType,
+      resumeAudioContext,
+    };
+    return audioCtxLoaded
+      ? { ...common, audioCtx: ctxRef.current!, audioCtxLoaded: true }
+      : { ...common, audioCtxLoaded: false };
+  }, [audioCtxLoaded, volume, oscillatorType]);
+
   return (
-    <AudioStateContext.Provider
-      value={
-        audioCtxLoaded
-          ? { audioCtx: ctxRef.current!, audioCtxLoaded, resumeAudioContext }
-          : { audioCtxLoaded: false, resumeAudioContext }
-      }>
+    <AudioStateContext.Provider value={value}>
       {children}
     </AudioStateContext.Provider>
   );
@@ -63,18 +81,26 @@ export const useAudio = () => {
       playChord: () => ctx.resumeAudioContext(),
     };
   }
-  const { audioCtx } = ctx;
+  const { audioCtx, volume, oscillatorType, setVolume, setOscillatorType } =
+    ctx;
   const { playNote } = AudioApi(audioCtx);
 
   const playChord = (chord: ChordDetails) => {
     const midiNotes = getMidiNotes(chord);
-    console.log(`\nCHORD ${formatChord(chord)}`);
-    console.log(`NOTEs: ${midiNotes.map((n) => n.midi).join(',')}`);
-    console.log(`FREQs:\n${midiNotes.map((n) => n.freq).join('\n')}`);
+    // console.log(`\nCHORD ${formatChord(chord)}`);
+    // console.log(`NOTEs: ${midiNotes.map((n) => n.midi).join(',')}`);
+    // console.log(`FREQs:\n${midiNotes.map((n) => n.freq).join('\n')}`);
     for (const note of midiNotes) {
-      playNote(note);
+      playNote(note, { volume, type: oscillatorType });
     }
   };
 
-  return { audioCtx, playChord };
+  return {
+    audioCtx,
+    playChord,
+    volume,
+    setVolume,
+    oscillatorType,
+    setOscillatorType,
+  };
 };
