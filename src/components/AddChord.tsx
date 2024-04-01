@@ -10,10 +10,12 @@ import {
   useState,
 } from 'react';
 import { useChords } from './providers/SongProvider';
+import { useAudio } from './providers/AudioProvider';
 
 export const AddChord = () => {
   const [value, setValue] = useState('');
   const { currentPartUID, addChord } = useChords();
+  const { playChord } = useAudio();
   const ref = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
@@ -21,6 +23,13 @@ export const AddChord = () => {
       ref.current.focus();
     }
   }, [currentPartUID]);
+
+  useEffect(() => {
+    const chord = parseChord(value);
+    if (chord) {
+      playChord(chord);
+    }
+  }, [value, playChord]);
 
   const addChordDetails = (chordDetails: ChordDetails | null) => {
     if (chordDetails !== null) {
