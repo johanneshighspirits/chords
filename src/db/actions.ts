@@ -210,7 +210,7 @@ function writePartsToDB({
         uid: entry.uid,
       });
       if (existingEntry) {
-        console.log('Part exists', entry.uid);
+        console.log('Part exists', entry.uid, entry.index, entry.title);
         const { color, index, title, uid } = entry;
         const dbPart: Partial<DBPart> = {
           index,
@@ -441,10 +441,11 @@ const convertParts = (
         title,
         color: deserializeColor(color),
         chords: convertChords(chords),
+        barOffset: 0,
       } satisfies PartType;
     })
     .sort((a, b) => {
-      return b.index - a.index;
+      return a.index - b.index;
     });
 };
 

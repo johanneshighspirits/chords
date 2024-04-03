@@ -74,6 +74,10 @@
   opacity: 1;
 }
 
+.PlayButton {
+  align-self: flex-end;
+}
+
 .dragHandleRight,
 .dragHandleLeft {
   display: block;

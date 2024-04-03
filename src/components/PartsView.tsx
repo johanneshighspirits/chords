@@ -74,6 +74,7 @@ export const PartView = ({
       <div className={styles.header}>
         <h3>
           <Editable onEdit={handleEditTitle}>{part.title}</Editable>
+          {part.barOffset}
           <ColorPicker
             className={styles.ColorPicker}
             color={part.color}

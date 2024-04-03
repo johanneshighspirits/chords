@@ -119,6 +119,13 @@ export const getDurationBetweenPositions = (
 export const isDurationEqual = (duration: Duration, compareWith: Duration) =>
   duration.bar === compareWith.bar && duration.beat === compareWith.beat;
 
+export const addDurations = (durations: Duration[]) => {
+  const beats = durations.reduce((sum, duration) => {
+    return sum + getNumberOfBeats(duration);
+  }, 0);
+  return getPositionFromBeats(beats);
+};
+
 export const getBarEnd = (timing: TimingType) => {
   const pos = getNumberOfBeats(timing.position);
   const dur = getNumberOfBeats(timing.duration);

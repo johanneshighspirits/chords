@@ -14,6 +14,7 @@ import { TimingBar } from './TimingBar';
 import { FormattedDuration, FormattedPosition } from './Display';
 import { PendingPlayhead } from './PendingPlayhead';
 import { Break, BreakType } from '@/helpers/break';
+import { PlayButton } from './PlayButton';
 
 type ChordsViewProps = {
   chords: (Chord | BreakType)[];
@@ -223,6 +224,9 @@ const ChordView = ({ partId, chord, lineIndex }: ChordViewProps) => {
                 position={chord.timing.position}
               />
             </div>
+            <PlayButton
+              chord={chord}
+              className={styles.PlayButton}></PlayButton>
             <div className={styles.info}>
               <span className={styles.timingLabel}>Duration</span>
               <FormattedDuration

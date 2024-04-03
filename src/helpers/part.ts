@@ -22,6 +22,7 @@ export const Part = {
       chords,
       index,
       pattern,
+      barOffset: 0,
     };
   },
 };

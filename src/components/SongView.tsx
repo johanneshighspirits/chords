@@ -25,14 +25,14 @@ export const SongView = ({ song }: SongViewProps) => {
 
       <AudioProvider>
         <ChordsAdder />
-      </AudioProvider>
 
-      <Container>
-        <div className={styles.SongView}>
-          <PartsView />
-          <ArrangementView className={styles.ArrangementView} />
-        </div>
-      </Container>
+        <Container>
+          <div className={styles.SongView}>
+            <PartsView />
+            <ArrangementView className={styles.ArrangementView} />
+          </div>
+        </Container>
+      </AudioProvider>
     </SongProvider>
   );
 };

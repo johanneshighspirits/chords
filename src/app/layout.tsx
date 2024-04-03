@@ -23,7 +23,7 @@ const sanchez = Sanchez({
 });
 const poppins = Poppins({
   weight: ['100', '400'],
-  subsets: ['latin'],
+  subsets: ['latin-ext'],
   variable: '--font-body',
 });
 const noto = Noto_Sans_Mono({

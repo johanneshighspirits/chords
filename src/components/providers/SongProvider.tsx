@@ -21,9 +21,12 @@ import {
 // import { SongSaver } from './SongSaver';
 import {
   Timing,
+  addDurations,
   getBarEnd,
   getNumberOfBeats,
   getPartEnd,
+  getPartLength,
+  getPositionFromBeats,
   isTimingEarlier,
   moveChordBy,
   moveTiming,
@@ -38,6 +41,7 @@ type SongState = SongMeta & {
   currentPartUID: string;
   colorsByPattern?: Record<string, Color>;
   position: Duration;
+  masterPosition: Duration;
   pendingPosition: Duration | null;
 };
 
@@ -143,7 +147,16 @@ function reducer(state: SongState, action: Action): SongState {
       };
     }
     case 'openSong': {
-      const { uid, title, parts } = action.song;
+      const { uid, title } = action.song;
+      let prevPartOffset = 0;
+      const parts = action.song.parts.map((part) => {
+        const barOffset = prevPartOffset;
+        prevPartOffset += getPartLength(part.chords).bar;
+        return {
+          ...part,
+          barOffset,
+        };
+      });
       const currentPartUID = parts[parts.length - 1].uid;
       const activePart = parts.find((p) => p.uid === currentPartUID);
       const position = getPartEnd(activePart) ?? Timing.init().position;
@@ -158,10 +171,19 @@ function reducer(state: SongState, action: Action): SongState {
       };
     }
     case 'setPosition': {
+      const partIndex = state.parts.findIndex((p) => p.uid === action.partId);
+      const barOffset = state.parts.slice(0, partIndex).reduce((sum, part) => {
+        return sum + part.barOffset;
+      }, 0);
+
       return {
         ...state,
         position: action.position,
         currentPartUID: action.partId,
+        masterPosition: addDurations([
+          getPositionFromBeats(barOffset),
+          action.position,
+        ]),
       };
     }
     case 'setPendingPosition': {
@@ -189,6 +211,7 @@ const emptyState = (): SongState => {
     artistSlug: 'artist',
     parts: [newPart],
     position: { bar: 0, beat: 0 },
+    masterPosition: { bar: 0, beat: 0 },
     pendingPosition: null,
   };
 };
@@ -201,12 +224,24 @@ export const SongProvider = ({
   const activePart = initialSong?.parts.find((p) => p.uid === currentPartUID);
   const position = getPartEnd(activePart) ?? Timing.init().position;
 
+  let prevPartOffset = 0;
+  const parts =
+    initialSong?.parts.map((part) => {
+      const barOffset = prevPartOffset;
+      prevPartOffset += getPartLength(part.chords).bar;
+      return {
+        ...part,
+        barOffset,
+      };
+    }) || [];
+
   const [state, dispatch] = useReducer(
     reducer,
     initialSong
       ? {
           ...emptyState(),
           ...initialSong,
+          parts,
           currentPartUID: initialSong.parts[0]?.uid ?? '',
           currentSongUID: initialSong?.uid ?? '',
           position,
@@ -272,7 +307,7 @@ export function useSongParts() {
       ...parts.slice(0, targetIndex).filter((p) => p.uid !== partId),
       part,
       ...parts.slice(targetIndex).filter((p) => p.uid !== partId),
-    ];
+    ].map((part, index) => ({ ...part, index }));
 
     dispatch({ type: 'updateParts', parts: newParts });
     addToQueue([
@@ -331,10 +366,10 @@ export function useChords() {
     if (!part) {
       throw new Error('No active part selected');
     }
-    const beatOffset = playheadPosition.beat % 4;
+    const barOffset = playheadPosition.beat % 4;
     const duration = {
-      bar: beatOffset > 0 ? 0 : 1,
-      beat: beatOffset > 0 ? 4 - beatOffset : 0,
+      bar: barOffset > 0 ? 0 : 1,
+      beat: barOffset > 0 ? 4 - barOffset : 0,
     };
     const position = {
       ...playheadPosition,
