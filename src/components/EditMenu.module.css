@@ -1,0 +1,8 @@
+.EditMenu {
+  display: flex;
+  gap: calc(0.5 * var(--spacing-x));
+  padding: calc(0.5 * var(--spacing-x));
+  position: absolute;
+  top: 0;
+  right: 0;
+}

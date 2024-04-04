@@ -4,7 +4,6 @@ import { ChordsView } from './ChordsView';
 import { useSong, useSongParts } from './providers/SongProvider';
 import { Color, Part } from '@/types';
 import styles from './parts.module.css';
-import { CSSProperties } from 'react';
 import clsx from 'clsx';
 import { Editable } from './Editable';
 import { AddPart } from './AddPart';
@@ -14,6 +13,7 @@ import { updatePart } from '@/db/actions';
 import { colorToCssVars, serializeColor } from '@/helpers/color';
 import { ColorPicker } from './ColorPicker';
 import { debounce } from '@/helpers/common';
+import { EditMenu } from './EditMenu';
 
 export const PartsView = () => {
   const { currentPartUID, parts } = useSongParts();
@@ -80,7 +80,9 @@ export const PartView = ({
             color={part.color}
             onEdit={handleEditColor}></ColorPicker>
         </h3>
-        <RemovePart uid={part.uid}></RemovePart>
+        <EditMenu>
+          <RemovePart uid={part.uid}></RemovePart>
+        </EditMenu>
       </div>
       {/* <Debug>{part.pattern}</Debug> */}
       {chordLines.length > 0 ? (

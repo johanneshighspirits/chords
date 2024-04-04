@@ -473,7 +473,7 @@ export function useChords() {
   const editChord = (
     uid: string,
     chord: Partial<Chord>,
-    change: 'durationChange' | 'positionChange'
+    change: 'durationChange' | 'positionChange' | 'chordChange'
   ): Chord | undefined => {
     const part = parts.find((p) => p.chords.some((c) => c.uid === uid));
     if (part) {
@@ -552,7 +552,7 @@ export function useChords() {
 const modifyChord = (
   uid: string,
   chord: Partial<Chord>,
-  change: 'durationChange' | 'positionChange',
+  change: 'durationChange' | 'positionChange' | 'chordChange',
   chords: Chord[]
 ) => {
   const chordIndex = chords.findIndex((chord) => chord.uid === uid);
@@ -574,6 +574,9 @@ const modifyChord = (
           getNumberOfBeats(newChord.timing.position) -
           getNumberOfBeats(oldChord.timing.position);
         console.log('position change in beats', positionChange);
+      }
+      case 'chordChange': {
+        console.log('Changing chord from', oldChord, newChord);
       }
     }
     return {

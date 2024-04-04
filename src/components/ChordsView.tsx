@@ -15,6 +15,8 @@ import { FormattedDuration, FormattedPosition } from './Display';
 import { PendingPlayhead } from './PendingPlayhead';
 import { Break, BreakType } from '@/helpers/break';
 import { PlayButton } from './PlayButton';
+import { EditChord } from './EditChord';
+import { EditMenu } from './EditMenu';
 
 type ChordsViewProps = {
   chords: (Chord | BreakType)[];
@@ -200,11 +202,17 @@ const ChordView = ({ partId, chord, lineIndex }: ChordViewProps) => {
             gridColumnStart,
             gridColumnEnd: `span ${getNumberOfBeats(chord.timing.duration)}`,
           }}>
-          <RemoveChord
-            uid={chord.uid}
-            partId={partId}
-            className={clsx(styles.removeChord, styles.inset)}
-          />
+          <EditMenu>
+            <EditChord
+              chord={chord}
+              className={clsx(styles.editChord, styles.inset)}
+            />
+            <RemoveChord
+              uid={chord.uid}
+              partId={partId}
+              className={clsx(styles.removeChord, styles.inset)}
+            />
+          </EditMenu>
           <PendingPlayhead timing={chord.timing} />
           <FormattedChord
             className={styles.display}

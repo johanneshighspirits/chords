@@ -124,3 +124,17 @@ button.blank:hover {
   opacity: 1;
   pointer-events: all;
 }
+
+dialog {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: var(--spacing-lg);
+  border-radius: var(--radius);
+}
+
+::backdrop {
+  background: rgb(0 0 0 / 0.5);
+  backdrop-filter: blur(20px);
+}

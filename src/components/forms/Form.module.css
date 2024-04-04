@@ -1,0 +1,25 @@
+.Form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing);
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.Form input {
+  padding: 1em 2em;
+}
+
+.Form:valid button[type='submit'] {
+  border-width: 3px;
+  padding: 0.5em;
+  text-transform: uppercase;
+}
+.Form:invalid button[type='submit'] {
+  opacity: 0.5;
+}
+
+.errorMessages {
+  color: rgb(200 0 0);
+}

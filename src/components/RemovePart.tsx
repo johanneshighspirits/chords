@@ -1,7 +1,6 @@
 'use client';
 
 import { useSongParts } from './providers/SongProvider';
-import styles from './remove-button.module.css';
 import clsx from 'clsx';
 
 export const RemovePart = ({
@@ -18,9 +17,7 @@ export const RemovePart = ({
   };
 
   return (
-    <button
-      className={clsx('blank', styles.button, className)}
-      onClick={handleClick}>
+    <button className={clsx('blank', className)} onClick={handleClick}>
       X
     </button>
   );

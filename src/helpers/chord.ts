@@ -42,17 +42,20 @@ const getSign = (match?: string): Sign => {
   return '';
 };
 
+const signToString = (sign?: Sign) =>
+  sign === SHARP ? '#' : sign === FLAT ? 'b' : '';
+
 export const formatChord = (input: ChordDetails | BreakType) => {
   if (isChord(input)) {
     const { note, sign, major, bass, bassSign, modifier } = input;
     return [
       note,
-      sign,
+      signToString(sign),
       major ? '' : 'm',
       modifier,
       bass ? '/' : '',
       bass,
-      bassSign,
+      signToString(bassSign),
     ]
       .filter(Boolean)
       .join('');

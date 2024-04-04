@@ -28,13 +28,15 @@
   }
 }
 
-.header .ColorPicker {
+.header .ColorPicker,
+.header :global(.edit-menu) {
   opacity: 0;
-  transition: opacity 400ms ease-out;
+  transition: opacity 300ms ease-out;
 }
-.header:hover .ColorPicker {
+.header:hover .ColorPicker,
+.header:hover :global(.edit-menu) {
   opacity: 1;
-  transition: opacity 200ms 400ms ease-out;
+  transition: opacity 300ms ease-out;
 }
 
 .chordLinesContainer {

@@ -1,7 +1,6 @@
 'use client';
 
 import { useChords } from './providers/SongProvider';
-import styles from './remove-button.module.css';
 import clsx from 'clsx';
 
 export const RemoveChord = ({
@@ -20,9 +19,7 @@ export const RemoveChord = ({
   };
 
   return (
-    <button
-      className={clsx('blank', styles.button, styles.inset, className)}
-      onClick={handleClick}>
+    <button className={clsx('blank', className)} onClick={handleClick}>
       X
     </button>
   );
