@@ -126,12 +126,26 @@ export const addDurations = (durations: Duration[]) => {
   return getPositionFromBeats(beats);
 };
 
-export const getBarEnd = (timing: TimingType) => {
+export const getBarEnd = (timing?: TimingType) => {
+  if (!timing) {
+    return Timing.init().position;
+  }
   const pos = getNumberOfBeats(timing.position);
   const dur = getNumberOfBeats(timing.duration);
   return getPositionFromBeats(pos + dur);
 };
 
+export const calculateOffset = (parts: Part[]) => {
+  let prevPartOffset = 1;
+  return parts.map((part) => {
+    const barOffset = prevPartOffset;
+    prevPartOffset += getPartLength(part.chords).bar + 1;
+    return {
+      ...part,
+      barOffset,
+    };
+  });
+};
 export const updateTimingPositions = <T extends { timing: TimingType }>(
   items: T[],
   initialOffset = Timing.init()

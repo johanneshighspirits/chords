@@ -12,17 +12,13 @@ export type PlayheadProps = PropsWithChildren<{
 }>;
 
 export const Playhead = ({ partId, className, children }: PlayheadProps) => {
-  const { currentPartUID, position } = usePlayhead();
+  const { currentPart, masterPosition } = usePlayhead();
   const ref = useRef<HTMLDivElement | null>(null);
-  const { left, top } = calculatePlayheadPosition(
-    partId,
-    position,
-    ref.current
-  );
+  const { left, top } = calculatePlayheadPosition(masterPosition, ref.current);
 
   return (
     <div className={className} ref={ref}>
-      {partId === currentPartUID ? (
+      {partId === currentPart.uid ? (
         <div
           style={{
             left,
@@ -36,12 +32,11 @@ export const Playhead = ({ partId, className, children }: PlayheadProps) => {
 };
 
 const calculatePlayheadPosition = (
-  partId: string,
   position: Duration,
   container: HTMLDivElement | null
 ) => {
   if (typeof document !== 'undefined') {
-    const barId = `part_${partId}_${position.bar}.${position.beat}`;
+    const barId = `bar_${position.bar}.${position.beat}`;
     const barElement: HTMLDivElement | null = document.querySelector(
       `div[data-bar-id="${barId}"]`
     );

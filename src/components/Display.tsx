@@ -7,13 +7,13 @@ import clsx from 'clsx';
 import { colorToCssVars } from '@/helpers/color';
 
 export const Display = () => {
-  const { position, currentPartTitle, currentPartColor } = usePlayhead();
+  const { masterPosition, currentPart } = usePlayhead();
   return (
     <div
-      style={colorToCssVars(currentPartColor, 'title-bg')}
+      style={colorToCssVars(currentPart.color, 'title-bg')}
       className={styles.Display}>
-      <FormattedDuration duration={position} />
-      <span className={styles.PartTitle}>{currentPartTitle}</span>
+      <FormattedDuration duration={masterPosition} />
+      <span className={styles.PartTitle}>{currentPart.title}</span>
     </div>
   );
 };

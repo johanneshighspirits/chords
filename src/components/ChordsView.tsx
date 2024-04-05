@@ -1,4 +1,4 @@
-import { Chord, Sign as SignType, isChord } from '@/types';
+import { Chord, Part, Sign as SignType, isChord } from '@/types';
 import styles from './chords.module.css';
 import { RemoveChord } from './RemoveChord';
 import clsx from 'clsx';
@@ -20,14 +20,14 @@ import { EditMenu } from './EditMenu';
 
 type ChordsViewProps = {
   chords: (Chord | BreakType)[];
-  partId: string;
+  part: Part;
   lineIndex: number;
   repeatCount?: number;
   isDuplicate?: boolean;
 };
 
 export const ChordsView = ({
-  partId,
+  part,
   lineIndex,
   chords,
   repeatCount = 0,
@@ -37,8 +37,8 @@ export const ChordsView = ({
   return (
     <div className={clsx(styles.chordsLine)}>
       <TimingBar
-        partId={partId}
-        lineIndex={lineIndex}
+        barOffset={part.barOffset}
+        chords={chords}
         isDuplicate={isDuplicate}
       />
       <ul className={clsx(styles.chords, isDuplicate && styles.duplicate)}>
@@ -50,11 +50,13 @@ export const ChordsView = ({
             chord={chord}
             key={chord.uid}
             lineIndex={lineIndex}
-            partId={partId}
+            partId={part.uid}
           />
         ))}
         {hasChords && (
-          <ChordsLineEditor chords={chords} partId={partId}></ChordsLineEditor>
+          <ChordsLineEditor
+            chords={chords}
+            partId={part.uid}></ChordsLineEditor>
         )}
       </ul>
     </div>

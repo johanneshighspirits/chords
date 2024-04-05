@@ -14,15 +14,9 @@ import { useAudio } from './providers/AudioProvider';
 
 export const AddChord = () => {
   const [value, setValue] = useState('');
-  const { currentPartUID, addChord } = useChords();
+  const { addChord } = useChords();
   const { playChord } = useAudio();
   const ref = useRef<HTMLInputElement | null>(null);
-
-  useEffect(() => {
-    if (ref.current && currentPartUID) {
-      ref.current.focus();
-    }
-  }, [currentPartUID]);
 
   useEffect(() => {
     const chord = parseChord(value);
@@ -58,7 +52,6 @@ export const AddChord = () => {
   return (
     <form onSubmit={handleSubmit}>
       <input
-        disabled={currentPartUID === undefined}
         type="text"
         ref={ref}
         value={value}

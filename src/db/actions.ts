@@ -3,7 +3,6 @@
 import { eq, and, inArray, sql } from 'drizzle-orm';
 import { db } from '.';
 import {
-  NewSong,
   DBSong,
   songs,
   DBPart,

@@ -16,14 +16,14 @@ import { debounce } from '@/helpers/common';
 import { EditMenu } from './EditMenu';
 
 export const PartsView = () => {
-  const { currentPartUID, parts } = useSongParts();
+  const { currentPart, parts } = useSongParts();
   return (
     <section className={styles.parts}>
       {parts.map((part) => {
         return (
           <PartView
             key={part.uid}
-            isActive={currentPartUID === part.uid}
+            isActive={currentPart.uid === part.uid}
             part={part}
           />
         );
@@ -48,10 +48,6 @@ export const PartView = ({
   const { chordLines = [] } = part;
   const { color } = part;
 
-  const handleClick = () => {
-    dispatch({ type: 'setActivePart', partId: part.uid });
-  };
-
   const handleEditTitle = (title: string) => {
     if (title !== part.title) {
       updatePart({ ...part, title });
@@ -69,7 +65,6 @@ export const PartView = ({
   return (
     <article
       className={clsx(styles.part, isActive && styles.isActive)}
-      onClick={handleClick}
       style={colorToCssVars(color, 'part')}>
       <div className={styles.header}>
         <h3>
@@ -92,7 +87,7 @@ export const PartView = ({
               <ChordsView
                 key={line.pattern + i}
                 lineIndex={i}
-                partId={part.uid}
+                part={part}
                 {...line}
               />
             );
