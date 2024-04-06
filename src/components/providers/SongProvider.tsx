@@ -22,6 +22,7 @@ import {
   addDurations,
   calculateOffset,
   getBarEnd,
+  getCurrentPart,
   getNumberOfBeats,
   getPartEnd,
   getPartLength,
@@ -54,7 +55,7 @@ type Action =
   | { type: 'setPartTitle'; title: string; partId: string }
   | { type: 'setPartColor'; color: Color; partId: string }
   | { type: 'setPendingPosition'; pendingPosition: Duration | null }
-  | { type: 'setMasterPosition'; position: Duration };
+  | { type: 'setMasterPosition'; position: Duration; partId: string };
 type Dispatch = (action: Action) => void;
 
 const SongContext = createContext<
@@ -66,27 +67,29 @@ function reducer(state: SongState, action: Action): SongState {
     case 'updateChords': {
       return {
         ...state,
-        parts: state.parts.map((part) => {
-          if (part.uid === action.partId) {
-            return {
-              ...part,
-              chords: action.chords,
-            };
-          }
-          return part;
-        }),
+        parts: calculateOffset(
+          state.parts.map((part) => {
+            if (part.uid === action.partId) {
+              return {
+                ...part,
+                chords: action.chords,
+              };
+            }
+            return part;
+          })
+        ),
       };
     }
     case 'updateParts': {
       return {
         ...state,
-        parts: [...action.parts],
+        parts: calculateOffset([...action.parts]),
       };
     }
     case 'addPart': {
       return {
         ...state,
-        parts: [...state.parts, action.part],
+        parts: calculateOffset([...state.parts, action.part]),
         masterPosition: {
           bar: 0,
           beat: 0,
@@ -96,35 +99,41 @@ function reducer(state: SongState, action: Action): SongState {
     case 'removePart': {
       return {
         ...state,
-        parts: state.parts.filter((part) => part.uid !== action.uid),
+        parts: calculateOffset(
+          state.parts.filter((part) => part.uid !== action.uid)
+        ),
       };
     }
     case 'setPartTitle': {
       return {
         ...state,
-        parts: state.parts.map((part) => {
-          if (part.uid === action.partId) {
-            return {
-              ...part,
-              title: action.title,
-            };
-          }
-          return part;
-        }),
+        parts: calculateOffset(
+          state.parts.map((part) => {
+            if (part.uid === action.partId) {
+              return {
+                ...part,
+                title: action.title,
+              };
+            }
+            return part;
+          })
+        ),
       };
     }
     case 'setPartColor': {
       return {
         ...state,
-        parts: state.parts.map((part) => {
-          if (part.uid === action.partId) {
-            return {
-              ...part,
-              color: action.color,
-            };
-          }
-          return part;
-        }),
+        parts: calculateOffset(
+          state.parts.map((part) => {
+            if (part.uid === action.partId) {
+              return {
+                ...part,
+                color: action.color,
+              };
+            }
+            return part;
+          })
+        ),
       };
     }
     case 'openSong': {
@@ -142,17 +151,10 @@ function reducer(state: SongState, action: Action): SongState {
       };
     }
     case 'setMasterPosition': {
+      // const currentPart = getCurrentPart(state.parts, action.position);
       const currentPart =
-        state.parts.find((p, i) => {
-          const nextPart = state.parts[i + 1];
-          if (!nextPart) {
-            return true;
-          }
-          return (
-            action.position.bar >= p.barOffset &&
-            action.position.bar < nextPart.barOffset
-          );
-        }) ?? state.parts[0];
+        state.parts.find((p) => p.uid === action.partId) ??
+        getCurrentPart(state.parts, action.position);
 
       return {
         ...state,
@@ -184,7 +186,7 @@ const emptyState = (): SongState => {
     artistSlug: 'artist',
     parts: [newPart],
     currentPart: newPart,
-    masterPosition: { bar: 0, beat: 0 },
+    masterPosition: Timing.init().position,
     pendingPosition: null,
   };
 };
@@ -205,7 +207,7 @@ export const SongProvider = ({
           parts,
           currentSongUID: initialSong?.uid ?? '',
           currentPart: parts[0] ?? defaultState.currentPart,
-          masterPosition: { bar: 0, beat: 0 },
+          masterPosition: Timing.init().position,
         }
       : emptyState()
   );
@@ -355,6 +357,7 @@ export function useChords() {
     dispatch({
       type: 'setMasterPosition',
       position: getBarEnd(chord.timing),
+      partId: currentPart.uid,
     });
     addToQueue([
       {
@@ -410,6 +413,7 @@ export function useChords() {
         dispatch({
           type: 'setMasterPosition',
           position: getBarEnd(lastChord.timing),
+          partId: part.uid,
         });
       }
       addToQueue([
@@ -550,8 +554,8 @@ export function usePlayhead() {
     dispatch,
   } = ctx;
 
-  const setPosition = (position: Duration) => {
-    dispatch({ type: 'setMasterPosition', position });
+  const setPosition = (position: Duration, partId: string) => {
+    dispatch({ type: 'setMasterPosition', position, partId });
   };
   const setPendingPosition = (pendingPosition: Duration | null) => {
     dispatch({ type: 'setPendingPosition', pendingPosition });

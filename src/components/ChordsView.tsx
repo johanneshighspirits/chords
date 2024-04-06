@@ -37,6 +37,7 @@ export const ChordsView = ({
   return (
     <div className={clsx(styles.chordsLine)}>
       <TimingBar
+        partId={part.uid}
         barOffset={part.barOffset}
         chords={chords}
         isDuplicate={isDuplicate}
@@ -51,6 +52,7 @@ export const ChordsView = ({
             key={chord.uid}
             lineIndex={lineIndex}
             partId={part.uid}
+            barOffset={part.barOffset}
           />
         ))}
         {hasChords && (
@@ -67,9 +69,10 @@ type ChordViewProps = {
   chord: Chord | BreakType;
   lineIndex: number;
   partId: string;
+  barOffset: number;
 };
 
-const ChordView = ({ partId, chord, lineIndex }: ChordViewProps) => {
+const ChordView = ({ partId, barOffset, chord, lineIndex }: ChordViewProps) => {
   const { editChord } = useChords();
   const tempRef = useRef<{
     chordLeft: number;
@@ -215,7 +218,6 @@ const ChordView = ({ partId, chord, lineIndex }: ChordViewProps) => {
               className={clsx(styles.removeChord, styles.inset)}
             />
           </EditMenu>
-          <PendingPlayhead timing={chord.timing} />
           <FormattedChord
             className={styles.display}
             chord={chord}></FormattedChord>
@@ -252,6 +254,7 @@ const ChordView = ({ partId, chord, lineIndex }: ChordViewProps) => {
           <button
             className={styles.dragHandleRight}
             onMouseDown={handleDurationMouseDown}></button>
+          <PendingPlayhead timing={chord.timing} barOffset={barOffset} />
         </li>
       )}
 
@@ -263,10 +266,10 @@ const ChordView = ({ partId, chord, lineIndex }: ChordViewProps) => {
             gridColumnStart,
             gridColumnEnd: `span ${getNumberOfBeats(chord.timing.duration)}`,
           }}>
-          <PendingPlayhead timing={chord.timing} />
           <FormattedChord
             className={styles.display}
             chord={chord}></FormattedChord>
+          <PendingPlayhead timing={chord.timing} barOffset={barOffset} />
         </li>
       )}
     </>

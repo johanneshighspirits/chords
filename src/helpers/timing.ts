@@ -1,11 +1,26 @@
-import { Chord, Duration, Part, type Timing as TimingType } from '@/types';
+import {
+  Chord,
+  type Duration as DurationType,
+  Part,
+  type Timing as TimingType,
+} from '@/types';
+
+export const Duration = {
+  zero: (): DurationType => ({ bar: 0, beat: 0 }),
+};
 
 export const Timing = {
+  /**
+   * Zero position, 1 bar duration
+   */
   init: (offset = 0): TimingType => ({
     offset,
     position: { bar: 0, beat: 0 },
     duration: { bar: 1, beat: 0 },
   }),
+  /**
+   * Zero position, custom bar duration
+   */
   withBarLength: (barLength = 1, offset = 0): TimingType => ({
     offset,
     position: { bar: 0, beat: 0 },
@@ -16,20 +31,34 @@ export const Timing = {
   }),
 };
 
-export const positionAsString = (position: Duration): string =>
+export const positionAsString = (position: DurationType): string =>
   `${position.bar}.${position.beat}.0`;
 
-export const getPartLength = (chords: Chord[]): Duration =>
-  chords.reduce(
-    (result, chord) => {
-      result.bar += chord.timing.duration.bar;
-      result.beat += chord.timing.duration.beat;
-      return result;
-    },
-    { bar: 0, beat: 0 } as Duration
-  );
+export const getPartLength = (chords: Chord[]): DurationType => {
+  const firstChord = chords[0];
+  const lastChord = chords.findLast((c) => c.type === 'chord');
+  if (!firstChord || !lastChord) {
+    return Duration.zero();
+  }
 
-export const getPartEnd = (part?: Part): Duration | undefined => {
+  if (firstChord === lastChord) {
+    const barEnd = getBarEnd(firstChord.timing);
+    return {
+      bar: barEnd.bar + 1,
+      beat: 0,
+    };
+  }
+  const barLength =
+    lastChord.timing.position.bar +
+    lastChord.timing.duration.bar -
+    firstChord.timing.position.bar;
+  return {
+    bar: barLength,
+    beat: 0,
+  };
+};
+
+export const getPartEnd = (part?: Part): DurationType | undefined => {
   const lastChord = part?.chords.at(-1);
   if (lastChord) {
     return getBarEnd(lastChord.timing);
@@ -37,18 +66,20 @@ export const getPartEnd = (part?: Part): Duration | undefined => {
   return undefined;
 };
 
-export const getNumberOfBeats = (position: Duration) => {
+export const getNumberOfBeats = (position: DurationType) => {
   return position.bar * 4 + position.beat;
 };
 
-export const getPositionFromBeats = (beats: number): Duration => {
+export const getPositionFromBeats = (beats: number): DurationType => {
   return {
     bar: Math.floor(beats / 4),
     beat: beats % 4,
   };
 };
 
-export const getTotalDuration = (items: { timing: TimingType }[]): Duration => {
+export const getTotalDuration = (
+  items: { timing: TimingType }[]
+): DurationType => {
   const totalBeats = items.reduce(
     (sum, item) => sum + getNumberOfBeats(item.timing.duration),
     0
@@ -60,7 +91,7 @@ export const getTotalDuration = (items: { timing: TimingType }[]): Duration => {
 };
 
 export const moveChordBy =
-  (moveBy: Duration, direction: 'earlier' | 'later') =>
+  (moveBy: DurationType, direction: 'earlier' | 'later') =>
   (chord: Chord): Chord => {
     return {
       ...chord,
@@ -70,7 +101,7 @@ export const moveChordBy =
 
 export const moveTiming = (
   timing: TimingType,
-  moveBy: Duration,
+  moveBy: DurationType,
   direction: 'earlier' | 'later'
 ): TimingType => {
   const multiplier = direction === 'earlier' ? -1 : 1;
@@ -95,8 +126,8 @@ export const isTimingEarlier = (
 };
 
 export const isPositionEarlier = (
-  position: Duration,
-  compareWith: Duration
+  position: DurationType,
+  compareWith: DurationType
 ) => {
   if (position.bar < compareWith.bar) {
     return true;
@@ -108,18 +139,20 @@ export const isPositionEarlier = (
 };
 
 export const getDurationBetweenPositions = (
-  fromPosition: Duration,
-  toPosition: Duration
+  fromPosition: DurationType,
+  toPosition: DurationType
 ) => {
   const from = getNumberOfBeats(fromPosition);
   const to = getNumberOfBeats(toPosition);
   return getPositionFromBeats(to - from);
 };
 
-export const isDurationEqual = (duration: Duration, compareWith: Duration) =>
-  duration.bar === compareWith.bar && duration.beat === compareWith.beat;
+export const isDurationEqual = (
+  duration: DurationType,
+  compareWith: DurationType
+) => duration.bar === compareWith.bar && duration.beat === compareWith.beat;
 
-export const addDurations = (durations: Duration[]) => {
+export const addDurations = (durations: DurationType[]) => {
   const beats = durations.reduce((sum, duration) => {
     return sum + getNumberOfBeats(duration);
   }, 0);
@@ -136,15 +169,30 @@ export const getBarEnd = (timing?: TimingType) => {
 };
 
 export const calculateOffset = (parts: Part[]) => {
-  let prevPartOffset = 1;
+  let prevPartOffset = 0;
   return parts.map((part) => {
     const barOffset = prevPartOffset;
-    prevPartOffset += getPartLength(part.chords).bar + 1;
+    prevPartOffset += getPartLength(part.chords).bar;
     return {
       ...part,
       barOffset,
     };
   });
+};
+
+export const getCurrentPart = (parts: Part[], masterPosition: DurationType) => {
+  return (
+    parts.find((p, i) => {
+      const nextPart = parts[i + 1];
+      if (!nextPart) {
+        return true;
+      }
+      return (
+        masterPosition.bar >= p.barOffset &&
+        masterPosition.bar <= nextPart.barOffset
+      );
+    }) ?? parts[0]
+  );
 };
 export const updateTimingPositions = <T extends { timing: TimingType }>(
   items: T[],
@@ -189,10 +237,10 @@ export const deserializeTiming = (t: SerializedTiming): TimingType => {
   };
 };
 
-export const serializeDuration = (duration: Duration) =>
+export const serializeDuration = (duration: DurationType) =>
   (duration.bar << 4) + duration.beat;
 
-export const deserializeDuration = (input: number): Duration => ({
+export const deserializeDuration = (input: number): DurationType => ({
   bar: input >> 4,
   beat: input % 16,
 });

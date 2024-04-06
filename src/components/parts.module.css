@@ -15,6 +15,7 @@
 .part {
   background: var(--part-gradient);
   display: flex;
+  position: relative;
   flex-direction: column;
   gap: var(--spacing);
   padding: var(--spacing);
@@ -26,6 +27,13 @@
   .part {
     padding-right: var(--spacing-x-lg);
   }
+}
+
+.part :global(.pending-playhead) {
+  opacity: 0;
+}
+.part:hover :global(.pending-playhead) {
+  opacity: 1;
 }
 
 .header .ColorPicker,

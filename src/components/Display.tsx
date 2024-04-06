@@ -27,6 +27,7 @@ export const FormattedPosition = ({
 }) => {
   return <Formatted duration={{ bar: bar + 1, beat: beat + 1 }} {...props} />;
 };
+
 export const FormattedDuration = (props: {
   duration: Duration;
   className?: string;

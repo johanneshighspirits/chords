@@ -5,12 +5,14 @@ import { CSSProperties } from 'react';
 import { BreakType } from '@/helpers/break';
 
 export type TimingBarProps = {
+  partId: string;
   barOffset: number;
   chords: (Chord | BreakType)[];
   isDuplicate?: boolean;
 };
 
 export const TimingBar = ({
+  partId,
   chords,
   barOffset,
   isDuplicate,
@@ -32,14 +34,14 @@ export const TimingBar = ({
       onMouseOut={() => setPendingPosition(null)}>
       {barPositions.map((position) => {
         return (
-          <Bar key={`${position.bar}_${position.beat}`} position={position} />
+          <Bar key={getBarId(position)} partId={partId} position={position} />
         );
       })}
     </div>
   );
 };
 
-const Bar = ({ position }: { position: Duration }) => {
+const Bar = ({ position, partId }: { position: Duration; partId: string }) => {
   const { setPendingPosition, setPosition } = usePlayhead();
   const beats = Array.from({ length: 4 }, (_, b) => b);
   const getTargetBar = (beat: number) =>
@@ -51,22 +53,23 @@ const Bar = ({ position }: { position: Duration }) => {
   };
   const handleBeatClick = (beat: number) => () => {
     const targetBar = getTargetBar(beat);
-    setPosition(targetBar);
+    setPosition(targetBar, partId);
   };
 
   return (
-    <div
-      data-bar-id={`bar_${position.bar}.${position.beat}`}
-      className={styles.bar}>
+    <div data-bar-id={getBarId(position)} className={styles.bar}>
       {beats.map((beat) => (
         <span
           key={beat}
           className={styles.beat}
           onMouseOver={handleMouseOver(beat)}
           onClick={handleBeatClick(beat)}>
-          {position.bar}:{beat}
+          {/* {position.bar}:{beat} */}
         </span>
       ))}
     </div>
   );
 };
+
+export const getBarId = (position: Duration) =>
+  `bar_${position.bar}.${position.beat}`;

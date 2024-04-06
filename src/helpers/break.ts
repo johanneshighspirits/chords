@@ -1,4 +1,4 @@
-import { Duration, Timing as TimingType } from '@/types';
+import type { Duration, Timing as TimingType } from '@/types';
 import { generateId } from './common';
 import { Timing } from './timing';
 
@@ -30,9 +30,15 @@ function createBreak(
 
 export const Break = {
   new: createBreak,
-  blank: (): BreakType => ({
-    type: 'blank',
-    uid: generateId(),
-    timing: Timing.withBarLength(1),
-  }),
+  blank: (position?: Duration): BreakType => {
+    const timing = Timing.withBarLength(1);
+    if (position) {
+      timing.position = position;
+    }
+    return {
+      type: 'blank',
+      uid: generateId(),
+      timing,
+    };
+  },
 };

@@ -106,7 +106,7 @@ export const getChordLines = (chords: Chord[]): ChordLine[] => {
       if (bar % 4 === 0 && beat === 0) {
         lines.push({
           pattern: `empty_${lines.length}`,
-          chords: [Break.blank()],
+          chords: [Break.blank({ bar, beat })],
         });
       }
     }
