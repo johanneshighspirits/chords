@@ -9,13 +9,19 @@ export const AudioApi = (ctx: AudioContext) => {
     osc.frequency.setValueAtTime(tone.freq, ctx.currentTime);
 
     const gain = ctx.createGain();
-    gain.gain.value = options?.volume ?? 0.5;
+    const requestedVolume = options?.volume ?? 0.5;
+    gain.gain.value = requestedVolume;
 
-    osc.connect(gain);
-    gain.connect(ctx.destination);
+    const compressor = ctx.createDynamicsCompressor();
+    compressor.ratio.value = 12;
+    compressor.threshold.value = -50;
+    compressor.attack.value = 0;
+    compressor.release.value = 0.5;
+    compressor.knee.value = 40;
+
+    osc.connect(compressor).connect(gain).connect(ctx.destination);
 
     osc.start();
-
     gain.gain.setTargetAtTime(0.01, ctx.currentTime + 0.1, 0.5);
 
     setTimeout(() => {

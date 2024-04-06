@@ -12,16 +12,16 @@ export const VolumeControl = () => {
         type="range"
         value={volume}
         min={0.0}
-        max={0.5}
+        max={1.0}
         step={0.0001}
         onChange={(e) => {
           const val = parseFloat(e.target.value);
           if (!isNaN(val)) {
-            const newVolume = Math.min(0.5, Math.max(0, val));
+            const newVolume = Math.min(1.0, Math.max(0, val));
             setVolume(newVolume);
           }
         }}></input>
-      {Math.round(volume * 200)}
+      {Math.round(volume * 100)}
     </div>
   );
 };
