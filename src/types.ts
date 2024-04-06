@@ -21,14 +21,16 @@ export type ChordMeta = {
   timing: Timing;
 };
 
+export type ChordFlavor = 'major' | 'minor' | 'dim' | 'aug';
+
 export type ChordDetails = {
   type: 'chord';
   note: Note;
-  major: boolean;
+  flavor: ChordFlavor;
   sign: Sign;
   bass?: Note;
   bassSign?: Sign;
-  modifier?: number;
+  modifiers?: number[];
 };
 
 export type Chord = ChordMeta & ChordDetails;

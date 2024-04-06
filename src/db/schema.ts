@@ -63,11 +63,11 @@ export const chords = pgTable('chords', {
   duration: integer('duration').notNull(),
   offset: integer('offset').notNull(),
   note: varchar('note', { length: 1 }).notNull(),
-  major: boolean('major').notNull().default(true),
+  flavor: varchar('flavor').notNull(),
   sign: varchar('sign', { length: 8 }).notNull(),
   bass: varchar('bass', { length: 1 }),
   bassSign: varchar('bass_sign', { length: 8 }),
-  modifier: integer('modifier'),
+  modifiers: varchar('modifiers'),
   partId: uuid('part_id')
     .notNull()
     .references(() => parts.uid, {

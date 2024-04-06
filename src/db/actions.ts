@@ -14,6 +14,7 @@ import {
 } from './schema';
 import {
   Chord,
+  ChordFlavor,
   ChordMeta,
   Note,
   Part as PartType,
@@ -457,22 +458,22 @@ const convertChords = (chords: DBChord[]): Chord[] => {
         duration,
         offset,
         note,
-        major,
+        flavor,
         sign,
         bass,
         bassSign,
-        modifier,
+        modifiers,
       }) => {
         return {
           type: 'chord',
           uid,
           timing: deserializeTiming({ position, duration, offset }),
           note: note as Note,
-          major,
+          flavor: flavor as ChordFlavor,
           sign: sign as Sign,
           bass: bass ? (bass as Note) : undefined,
           bassSign: bassSign ? (bassSign as Sign) : undefined,
-          modifier: modifier || undefined,
+          modifiers: modifiers?.split(',').map(Number) || undefined,
         } satisfies Chord;
       }
     )
@@ -482,10 +483,11 @@ const convertChords = (chords: DBChord[]): Chord[] => {
 };
 
 const serializeChord = (partId: string, chord: Chord): NewChord => {
-  const { uid, timing, type, ...details } = chord;
+  const { uid, timing, type, modifiers, ...details } = chord;
   const dbChord: NewChord = {
     ...details,
     ...serializeTiming(timing),
+    modifiers: modifiers?.join(','),
     uid,
     partId,
   };

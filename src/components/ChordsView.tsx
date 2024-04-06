@@ -17,6 +17,7 @@ import { Break, BreakType } from '@/helpers/break';
 import { PlayButton } from './PlayButton';
 import { EditChord } from './EditChord';
 import { EditMenu } from './EditMenu';
+import { flavorToString, modifiersToString } from '@/helpers/chord';
 
 type ChordsViewProps = {
   chords: (Chord | BreakType)[];
@@ -290,13 +291,13 @@ export const FormattedChord = ({
     return <span className={className}>&nbsp;</span>;
   }
   if (chord.type === 'chord') {
-    const { note, sign, major, modifier, bass, bassSign } = chord;
+    const { note, sign, flavor, modifiers, bass, bassSign } = chord;
     return (
       <span className={className}>
         {note}
         <Sign sign={sign} />
-        {!major && 'm'}
-        {modifier && <sup>{modifier}</sup>}
+        {flavorToString(flavor)}
+        {modifiers && <sup>{modifiersToString(modifiers)}</sup>}
         {bass && (
           <span style={{ opacity: 0.8 }}>
             &nbsp;/&nbsp;{bass}

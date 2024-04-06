@@ -11,6 +11,7 @@ const Notes: { [key in Note]: number } = {
 };
 
 const Modifiers: Record<number, number> = {
+  11: 11,
   7: 10,
   9: 2,
 };
@@ -23,10 +24,10 @@ const getSignMod = (sign?: Sign) => {
 };
 
 export const getMidiNotes = (chord: ChordDetails): MidiNote[] => {
-  const { note, sign, major, bass, bassSign, modifier } = chord;
+  const { note, sign, flavor, bass, bassSign, modifiers } = chord;
   const rootNote = Notes[note] + getSignMod(sign);
-  const midNote = rootNote + (major ? 4 : 3);
-  const lastNote = rootNote + 7;
+  const midNote = rootNote + (flavor === 'major' || flavor === 'aug' ? 4 : 3);
+  const lastNote = rootNote + (flavor === 'dim' ? 6 : flavor === 'aug' ? 8 : 7);
   const notes = [
     createNote(rootNote),
     createNote(midNote),
@@ -34,12 +35,13 @@ export const getMidiNotes = (chord: ChordDetails): MidiNote[] => {
   ];
   if (bass) {
     const bassNote = Notes[bass] + getSignMod(bassSign) - 12;
-    notes.push(createNote(bassNote));
+    notes.unshift(createNote(bassNote));
+  } else {
+    notes.unshift(createNote(rootNote - 12));
   }
-  if (modifier) {
-    const Mod = rootNote + Modifiers[modifier];
-    if (Mod) {
-      notes.push(createNote(Mod));
+  if (modifiers) {
+    for (const mod of modifiers) {
+      notes.push(createNote(rootNote + mod));
     }
   }
   return notes;

@@ -19,9 +19,10 @@ describe('chord', () => {
     [
       'Dm7',
       {
+        type: 'chord',
         note: 'D',
-        major: false,
-        modifier: 7,
+        flavor: 'minor',
+        modifiers: [10],
         sign: '',
         bass: undefined,
         bassSign: '',
@@ -30,8 +31,9 @@ describe('chord', () => {
     [
       'd',
       {
+        type: 'chord',
         note: 'D',
-        major: true,
+        flavor: 'major',
         sign: '',
         bass: undefined,
         bassSign: '',
@@ -40,10 +42,11 @@ describe('chord', () => {
     [
       'dbm9',
       {
+        type: 'chord',
         note: 'D',
-        major: false,
+        flavor: 'minor',
         sign: '&#9837;',
-        modifier: 9,
+        modifiers: [2],
         bass: undefined,
         bassSign: '',
       },
@@ -51,11 +54,72 @@ describe('chord', () => {
     [
       'G/H',
       {
+        type: 'chord',
         note: 'G',
-        major: true,
-        modifier: undefined,
+        flavor: 'major',
+        modifiers: undefined,
         sign: '',
         bass: 'B',
+        bassSign: '',
+      },
+    ],
+    [
+      'Dmaj7',
+      {
+        type: 'chord',
+        note: 'D',
+        flavor: 'major',
+        modifiers: [11],
+        sign: '',
+        bass: undefined,
+        bassSign: '',
+      },
+    ],
+    [
+      'Gadd9',
+      {
+        type: 'chord',
+        note: 'G',
+        flavor: 'major',
+        modifiers: [2],
+        sign: '',
+        bass: undefined,
+        bassSign: '',
+      },
+    ],
+    [
+      'G11',
+      {
+        type: 'chord',
+        note: 'G',
+        flavor: 'major',
+        modifiers: [10, 14, 17],
+        sign: '',
+        bass: undefined,
+        bassSign: '',
+      },
+    ],
+    [
+      'C+',
+      {
+        type: 'chord',
+        note: 'C',
+        flavor: 'aug',
+        modifiers: undefined,
+        sign: '',
+        bass: undefined,
+        bassSign: '',
+      },
+    ],
+    [
+      'Cdim',
+      {
+        type: 'chord',
+        note: 'C',
+        flavor: 'dim',
+        modifiers: undefined,
+        sign: '',
+        bass: undefined,
         bassSign: '',
       },
     ],
@@ -68,9 +132,10 @@ describe('chord', () => {
   const displayTestCases: [ChordDetails, string][] = [
     [
       {
+        type: 'chord',
         note: 'D',
-        major: false,
-        modifier: 7,
+        flavor: 'minor',
+        modifiers: [10],
         sign: '',
         bass: undefined,
         bassSign: '',
@@ -79,8 +144,9 @@ describe('chord', () => {
     ],
     [
       {
+        type: 'chord',
         note: 'D',
-        major: true,
+        flavor: 'major',
         sign: '',
         bass: undefined,
         bassSign: '',
@@ -89,14 +155,39 @@ describe('chord', () => {
     ],
     [
       {
+        type: 'chord',
         note: 'G',
-        major: true,
-        modifier: undefined,
+        flavor: 'major',
+        modifiers: undefined,
         sign: '',
         bass: 'B',
         bassSign: '',
       },
       'G/B',
+    ],
+    [
+      {
+        type: 'chord',
+        note: 'C',
+        flavor: 'aug',
+        modifiers: undefined,
+        sign: '',
+        bass: undefined,
+        bassSign: '',
+      },
+      'C+',
+    ],
+    [
+      {
+        type: 'chord',
+        note: 'C',
+        flavor: 'dim',
+        modifiers: undefined,
+        sign: '',
+        bass: undefined,
+        bassSign: '',
+      },
+      'Cdim',
     ],
   ];
 
