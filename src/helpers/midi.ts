@@ -1,4 +1,5 @@
 import { ChordDetails, Note, Sign } from '@/types';
+import { FLAT } from './chord';
 
 const Notes: { [key in Note]: number } = {
   A: 69,
@@ -10,17 +11,11 @@ const Notes: { [key in Note]: number } = {
   G: 67,
 };
 
-const Modifiers: Record<number, number> = {
-  11: 11,
-  7: 10,
-  9: 2,
-};
-
 const getSignMod = (sign?: Sign) => {
   if (!sign) {
     return 0;
   }
-  return sign === '&#9837;' ? -1 : 1;
+  return sign === FLAT ? -1 : 1;
 };
 
 export const getMidiNotes = (chord: ChordDetails): MidiNote[] => {

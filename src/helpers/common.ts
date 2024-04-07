@@ -13,3 +13,11 @@ export const debounce = <F extends (...args: any[]) => any>(
     }, delay);
   };
 };
+
+export const randomNr = (min = 0, max = 1) => {
+  if (max < min) {
+    return Math.random();
+  }
+  const range = max - min;
+  return min + Math.random() * range;
+};

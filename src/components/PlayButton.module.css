@@ -1,3 +1,34 @@
 .PlayButton {
+  position: relative;
   padding: 0.25rem 1rem;
+  overflow: hidden;
+}
+
+.PlayAnimation {
+  display: flex;
+  gap: 1px;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  padding: 10%;
+  background: hsl(var(--part-hsl));
+  opacity: 0;
+  transition: opacity 500ms ease-out;
+}
+
+.PlayAnimation.IsPlaying {
+  transition: opacity 10ms ease-in;
+  opacity: 1;
+}
+
+.FreqBar {
+  display: block;
+  background: white;
+  width: 15%;
+  height: 100%;
+  transition: transform 250ms linear, opacity 250ms ease-in;
 }

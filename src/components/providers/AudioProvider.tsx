@@ -78,7 +78,7 @@ export const useAudio = () => {
   if (!ctx.audioCtxLoaded) {
     return {
       ...ctx,
-      playChord: () => ctx.resumeAudioContext(),
+      playChord: async () => ctx.resumeAudioContext(),
     };
   }
   const { audioCtx, volume, oscillatorType, setVolume, setOscillatorType } =
@@ -90,9 +90,9 @@ export const useAudio = () => {
     // console.log(`\nCHORD ${formatChord(chord)}`);
     // console.log(`NOTEs: ${midiNotes.map((n) => n.midi).join(',')}`);
     // console.log(`FREQs:\n${midiNotes.map((n) => n.freq).join('\n')}`);
-    for (const note of midiNotes) {
-      playNote(note, { volume, type: oscillatorType });
-    }
+    return Promise.all(
+      midiNotes.map((note) => playNote(note, { volume, type: oscillatorType }))
+    );
   };
 
   return {

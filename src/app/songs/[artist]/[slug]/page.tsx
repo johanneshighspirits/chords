@@ -27,7 +27,7 @@ export default async function SongPage({
           &laquo; Songs
         </Link>
       </Container>
-      <SongView song={song} />;
+      <SongView song={song} />
     </>
   );
 }
