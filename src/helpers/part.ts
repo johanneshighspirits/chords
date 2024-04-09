@@ -1,6 +1,6 @@
 import { Chord, ChordLine, Part as PartType } from '@/types';
 import {
-  getBarEnd,
+  getNextBarStart,
   getDurationBetweenPositions,
   getNumberOfBeats,
   positionAsString,
@@ -45,12 +45,12 @@ export const getChordLines = (chords: Chord[]): ChordLine[] => {
     if (chord.timing.position.bar < (lines.length + 1) * 4) {
       if (prevChord) {
         const breakDuration = getDurationBetweenPositions(
-          getBarEnd(prevChord.timing),
+          getNextBarStart(prevChord.timing),
           chord.timing.position
         );
         if (getNumberOfBeats(breakDuration)) {
           currentChords.push(
-            Break.new(getBarEnd(prevChord.timing), breakDuration)
+            Break.new(getNextBarStart(prevChord.timing), breakDuration)
           );
         }
       }
@@ -77,6 +77,10 @@ export const getChordLines = (chords: Chord[]): ChordLine[] => {
    */
   for (let index = 0; index < lines.length; index += 1) {
     const line = lines[index];
+    // if (line.chords.length === 0) {
+    // console.log('Ignore empty chords line?')
+    //   continue;
+    // }
     if (line.isDuplicate) {
       index += 1;
       continue;
@@ -102,7 +106,7 @@ export const getChordLines = (chords: Chord[]): ChordLine[] => {
   if (lastLine) {
     const lastChord = lastLine.chords.at(-1);
     if (lastChord) {
-      const { bar, beat } = getBarEnd(lastChord.timing);
+      const { bar, beat } = getNextBarStart(lastChord.timing);
       if (bar % 4 === 0 && beat === 0) {
         lines.push({
           pattern: `empty_${lines.length}`,

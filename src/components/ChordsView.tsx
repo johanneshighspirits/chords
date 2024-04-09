@@ -59,7 +59,8 @@ export const ChordsView = ({
         {hasChords && (
           <ChordsLineEditor
             chords={chords}
-            partId={part.uid}></ChordsLineEditor>
+            partId={part.uid}
+            isDuplicate={isDuplicate}></ChordsLineEditor>
         )}
       </ul>
     </div>

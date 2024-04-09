@@ -1,8 +1,9 @@
 import { Chord, Duration } from '@/types';
 import styles from './TimingBar.module.css';
-import { usePlayhead } from './providers/SongProvider';
+import { useMasterPosition } from './providers/SongProvider';
 import { CSSProperties } from 'react';
 import { BreakType } from '@/helpers/break';
+import { usePendingPosition } from './providers/PendingPositionProvider';
 
 export type TimingBarProps = {
   partId: string;
@@ -17,7 +18,10 @@ export const TimingBar = ({
   barOffset,
   isDuplicate,
 }: TimingBarProps) => {
-  const { setPendingPosition } = usePlayhead();
+  const { setPendingPosition } = usePendingPosition();
+  if (!chords.length) {
+    return null;
+  }
   const startBar = barOffset + chords[0].timing.position.bar;
   const barPositions = Array.from({ length: 4 }, (_, b) => ({
     bar: b + startBar,
@@ -42,7 +46,8 @@ export const TimingBar = ({
 };
 
 const Bar = ({ position, partId }: { position: Duration; partId: string }) => {
-  const { setPendingPosition, setPosition } = usePlayhead();
+  const { setPosition } = useMasterPosition();
+  const { setPendingPosition } = usePendingPosition();
   const beats = Array.from({ length: 4 }, (_, b) => b);
   const getTargetBar = (beat: number) =>
     beat >= 2 ? { ...position, bar: position.bar + 1 } : position;

@@ -6,6 +6,7 @@ import { ArrangementView } from './ArrangementView';
 import { ChordsAdder } from './ChordsAdder';
 import { Container } from './layout/PageContainer';
 import { AudioProvider } from './providers/AudioProvider';
+import { PendingPositionProvider } from './providers/PendingPositionProvider';
 
 type SongViewProps = {
   song: Song;
@@ -28,7 +29,9 @@ export const SongView = ({ song }: SongViewProps) => {
 
         <Container>
           <div className={styles.SongView}>
-            <PartsView />
+            <PendingPositionProvider>
+              <PartsView />
+            </PendingPositionProvider>
             <ArrangementView className={styles.ArrangementView} />
           </div>
         </Container>

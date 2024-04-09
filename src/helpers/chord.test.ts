@@ -123,6 +123,18 @@ describe('chord', () => {
         bassSign: '',
       },
     ],
+    [
+      'Gsus4',
+      {
+        type: 'chord',
+        note: 'G',
+        flavor: 'sus',
+        modifiers: [4],
+        sign: '',
+        bass: undefined,
+        bassSign: '',
+      },
+    ],
   ];
 
   for (const testCase of parseTestCases) {
@@ -188,6 +200,18 @@ describe('chord', () => {
         bassSign: '',
       },
       'Cdim',
+    ],
+    [
+      {
+        type: 'chord',
+        note: 'G',
+        flavor: 'sus',
+        modifiers: [4],
+        sign: '',
+        bass: undefined,
+        bassSign: '',
+      },
+      'Gsus4',
     ],
   ];
 

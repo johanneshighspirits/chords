@@ -53,10 +53,11 @@ export type DBActionPayload = UpsertChordsProps | UpsertPartsProps;
 export async function saveToDB(payloads: DBActionPayload[]): Promise<void> {
   console.log('----- saveToDB() ------', payloads.length);
   const merged = await mergePayloads(payloads);
-  console.log(merged);
   for (const payload of merged) {
     console.log('WRITING:', payload.action);
     if (payload.action === 'upsertChords') {
+      console.log('----------------', payload.entries.length);
+      console.log(JSON.stringify(payload.entries, null, 2));
       await writeChordsToDB(payload);
     }
     if (payload.action === 'upsertParts') {

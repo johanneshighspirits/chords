@@ -14,6 +14,7 @@ describe('midi.getMidiNotes', () => {
 
     const assertions: [string, number[]][] = [
       ['C', [48, 60, 64, 67]],
+      ['Csus4', [48, 60, 65, 67]],
       ['F', [53, 65, 69, 72]],
       ['Cm', [48, 60, 63, 67]],
       ['Cm7', [48, 60, 63, 67, 70]],

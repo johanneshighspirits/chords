@@ -1,8 +1,12 @@
 import { Timing } from '@/types';
 import styles from './PendingPlayhead.module.css';
-import { usePlayhead } from './providers/SongProvider';
-import { addDurations, getBarEnd, isDurationEqual } from '@/helpers/timing';
+import {
+  addDurations,
+  getNextBarStart,
+  isDurationEqual,
+} from '@/helpers/timing';
 import clsx from 'clsx';
+import { usePendingPosition } from './providers/PendingPositionProvider';
 
 export type PendingPlayheadProps = { timing: Timing; barOffset: number };
 
@@ -10,7 +14,7 @@ export const PendingPlayhead = ({
   timing,
   barOffset,
 }: PendingPlayheadProps) => {
-  const { pendingPosition } = usePlayhead();
+  const { pendingPosition } = usePendingPosition();
   const timingWithOffset = {
     ...timing,
     position: addDurations([{ bar: barOffset, beat: 0 }, timing.position]),
@@ -25,7 +29,7 @@ export const PendingPlayhead = ({
 
   const showPlayheadAfterThisBar = isDurationEqual(
     pendingPosition,
-    getBarEnd(timingWithOffset)
+    getNextBarStart(timingWithOffset)
   );
   return (
     <div

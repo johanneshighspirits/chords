@@ -21,7 +21,7 @@ export type ChordMeta = {
   timing: Timing;
 };
 
-export type ChordFlavor = 'major' | 'minor' | 'dim' | 'aug';
+export type ChordFlavor = 'major' | 'minor' | 'dim' | 'aug' | 'sus';
 
 export type ChordDetails = {
   type: 'chord';

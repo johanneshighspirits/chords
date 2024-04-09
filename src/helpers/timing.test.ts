@@ -1,7 +1,7 @@
 import { Duration, Timing } from '@/types';
 import { describe, expect, it } from 'vitest';
 import {
-  getBarEnd,
+  getNextBarStart,
   getDurationBetweenPositions,
   getTotalDuration,
   moveChordBy,
@@ -23,7 +23,7 @@ describe('timing', () => {
         },
         offset: 0,
       };
-      expect(getBarEnd(barTiming)).toEqual({
+      expect(getNextBarStart(barTiming)).toEqual({
         bar: 4,
         beat: 0,
       });

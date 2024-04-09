@@ -3,7 +3,7 @@
 import { PropsWithChildren, useRef } from 'react';
 import styles from './Playhead.module.css';
 import { Duration } from '@/types';
-import { usePlayhead } from './providers/SongProvider';
+import { useMasterPosition } from './providers/SongProvider';
 import clsx from 'clsx';
 import { getBarId } from './TimingBar';
 
@@ -13,7 +13,7 @@ export type PlayheadProps = PropsWithChildren<{
 }>;
 
 export const Playhead = ({ partId, className, children }: PlayheadProps) => {
-  const { currentPart, masterPosition } = usePlayhead();
+  const { currentPart, masterPosition } = useMasterPosition();
   const ref = useRef<HTMLDivElement | null>(null);
   const { left, top } = calculatePlayheadPosition(masterPosition, ref.current);
 

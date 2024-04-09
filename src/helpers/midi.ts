@@ -1,4 +1,4 @@
-import { ChordDetails, Note, Sign } from '@/types';
+import { ChordDetails, ChordFlavor, Note, Sign } from '@/types';
 import { FLAT } from './chord';
 
 const Notes: { [key in Note]: number } = {
@@ -18,15 +18,26 @@ const getSignMod = (sign?: Sign) => {
   return sign === FLAT ? -1 : 1;
 };
 
+const ChordNotes: { [key in ChordFlavor]: number[] } = {
+  major: [4, 7],
+  minor: [3, 7],
+  dim: [3, 6],
+  aug: [4, 8],
+  sus: [5, 7],
+};
+
+const getChordNotes = (flavor: ChordFlavor) => {
+  return ChordNotes[flavor];
+};
+
 export const getMidiNotes = (chord: ChordDetails): MidiNote[] => {
   const { note, sign, flavor, bass, bassSign, modifiers } = chord;
   const rootNote = Notes[note] + getSignMod(sign);
-  const midNote = rootNote + (flavor === 'major' || flavor === 'aug' ? 4 : 3);
-  const lastNote = rootNote + (flavor === 'dim' ? 6 : flavor === 'aug' ? 8 : 7);
+  const [midNote, lastNote] = getChordNotes(flavor);
   const notes = [
     createNote(rootNote),
-    createNote(midNote),
-    createNote(lastNote),
+    createNote(rootNote + midNote),
+    createNote(rootNote + lastNote),
   ];
   if (bass) {
     const bassNote = Notes[bass] + getSignMod(bassSign) - 12;

@@ -62,11 +62,22 @@ export const PartView = ({
     }
   };
 
+  const handleHeaderClick = () => {
+    dispatch({
+      type: 'setMasterPosition',
+      partId: part.uid,
+      position: {
+        bar: part.barOffset,
+        beat: 0,
+      },
+    });
+  };
+
   return (
     <article
       className={clsx(styles.part, isActive && styles.isActive)}
       style={colorToCssVars(color, 'part')}>
-      <div className={styles.header}>
+      <div className={styles.header} onClick={handleHeaderClick}>
         <h3>
           <Editable onEdit={handleEditTitle}>{part.title}</Editable>
           {/* {part.barOffset} */}

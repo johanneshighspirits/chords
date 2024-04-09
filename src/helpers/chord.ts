@@ -2,18 +2,20 @@ import { ChordDetails, ChordFlavor, Note, Sign, isChord } from '@/types';
 import { BreakType } from './break';
 
 const ChordRegex =
-  /^(?<root>[A-H])(?<signMatch>\#|b)?(?<flavorMatch>(?:m(?!aj7)|\+|dim))?(?<modifierMatch>(?:maj7|add[0-9]|[0-9])*)?(?<bassMatch>\/[A-H])?(?<bassSignMatch>\#|b?)?/i;
+  /^(?<root>[A-H])(?<signMatch>\#|b)?(?<flavorMatch>(?:m(?!aj7)|\+|dim|sus))?(?<modifierMatch>(?:maj7|add[0-9]|[0-9])*)?(?<bassMatch>\/[A-H])?(?<bassSignMatch>\#|b?)?/i;
 
 const Flavors: Record<string, ChordFlavor> = {
   m: 'minor',
   min: 'minor',
   minor: 'minor',
   dim: 'dim',
+  sus: 'sus',
   '+': 'aug',
 };
 
 const Modifiers: Record<string, number[]> = {
   add9: [2],
+  4: [4],
   6: [9],
   7: [10],
   maj7: [11],
@@ -74,6 +76,7 @@ export const flavorToString = (flavor: ChordFlavor) => {
   if (flavor === 'major') return '';
   if (flavor === 'minor') return 'm';
   if (flavor === 'aug') return '+';
+  if (flavor === 'sus') return 'sus';
   return flavor;
 };
 
@@ -101,5 +104,5 @@ export const formatChord = (input: ChordDetails | BreakType) => {
       .filter(Boolean)
       .join('');
   }
-  return JSON.stringify(input);
+  return `${input.type === 'blank' ? '[_]' : '(*)'}`;
 };

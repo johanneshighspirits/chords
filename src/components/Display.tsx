@@ -2,17 +2,28 @@
 
 import { Duration } from '@/types';
 import styles from './Display.module.css';
-import { usePlayhead } from './providers/SongProvider';
+import { useMasterPosition } from './providers/SongProvider';
 import clsx from 'clsx';
 import { colorToCssVars } from '@/helpers/color';
+import { Editable } from './Editable';
 
 export const Display = () => {
-  const { masterPosition, currentPart } = usePlayhead();
+  const { masterPosition, setPosition, currentPart } = useMasterPosition();
   return (
     <div
       style={colorToCssVars(currentPart.color, 'title-bg')}
       className={styles.Display}>
-      <FormattedDuration duration={masterPosition} />
+      <Editable
+        onEdit={(e) => {
+          const [bar, beat, zero] = e
+            .split('.')
+            .map((digit) => (digit?.trim() ? parseInt(digit, 10) : 0));
+          if (!isNaN(bar)) {
+            setPosition({ bar, beat: !isNaN(beat) ? beat : 0 });
+          }
+        }}>
+        <FormattedDuration duration={masterPosition} />
+      </Editable>
       <span className={styles.PartTitle}>{currentPart.title}</span>
     </div>
   );

@@ -21,7 +21,7 @@ import {
   Timing,
   addDurations,
   calculateOffset,
-  getBarEnd,
+  getNextBarStart,
   getCurrentPart,
   getNumberOfBeats,
   getPartEnd,
@@ -30,6 +30,7 @@ import {
   isTimingEarlier,
   moveChordBy,
   moveTiming,
+  getTimingPositionDiff,
 } from '@/helpers/timing';
 import { generateId } from '@/helpers/common';
 import { useDB } from './DBProvider';
@@ -40,7 +41,6 @@ type SongState = SongMeta & {
   currentPart: PartType;
   colorsByPattern?: Record<string, Color>;
   masterPosition: Duration;
-  pendingPosition: Duration | null;
 };
 
 type Action =
@@ -54,7 +54,6 @@ type Action =
   | { type: 'removePart'; uid: string }
   | { type: 'setPartTitle'; title: string; partId: string }
   | { type: 'setPartColor'; color: Color; partId: string }
-  | { type: 'setPendingPosition'; pendingPosition: Duration | null }
   | { type: 'setMasterPosition'; position: Duration; partId: string };
 type Dispatch = (action: Action) => void;
 
@@ -162,12 +161,6 @@ function reducer(state: SongState, action: Action): SongState {
         currentPart,
       };
     }
-    case 'setPendingPosition': {
-      return {
-        ...state,
-        pendingPosition: action.pendingPosition,
-      };
-    }
     default: {
       console.warn(`Action ${(action as any).type} not implemented yet`);
       return state;
@@ -187,7 +180,6 @@ const emptyState = (): SongState => {
     parts: [newPart],
     currentPart: newPart,
     masterPosition: Timing.init().position,
-    pendingPosition: null,
   };
 };
 
@@ -211,11 +203,22 @@ export const SongProvider = ({
         }
       : emptyState()
   );
+
   const value = {
-    state,
+    state: {
+      ...state,
+      parts: state.parts.map((part) => {
+        return {
+          ...part,
+          chordLines: getChordLines(part.chords),
+          pattern: getChordPattern(part.chords),
+        };
+      }),
+    },
     dispatch,
   };
 
+  console.log(value.state.parts);
   return <SongContext.Provider value={value}>{children}</SongContext.Provider>;
 };
 
@@ -225,20 +228,7 @@ export function useSong() {
     throw new Error('useSong must be used within a SongContext Provider');
   }
   const { state, dispatch } = ctx;
-
-  const parts = useMemo(
-    () =>
-      ctx.state.parts.map((part) => {
-        return {
-          ...part,
-          chordLines: getChordLines(part.chords),
-          pattern: getChordPattern(part.chords),
-        };
-      }),
-    [ctx.state.parts]
-  );
-
-  return { ...state, parts, dispatch };
+  return { ...state, dispatch };
 }
 
 export function useSongParts() {
@@ -332,6 +322,7 @@ export function useChords() {
     };
     const position = {
       ...playheadPosition,
+      bar: playheadPosition.bar - currentPart.barOffset,
     };
     const chord: Chord = {
       ...chordDetails,
@@ -342,21 +333,25 @@ export function useChords() {
         offset: 0,
       },
     };
-    const beforeChords = currentPart.chords.filter((c) =>
-      isTimingEarlier(c.timing, chord.timing)
+    const beforeChords = currentPart.chords.filter(
+      (c) => getTimingPositionDiff(chord.timing, c.timing) < 0
     );
     const afterChords = currentPart.chords
-      .filter((c): c is Chord => !isTimingEarlier(c.timing, chord.timing))
+      .filter(
+        (c): c is Chord => getTimingPositionDiff(chord.timing, c.timing) >= 0
+      )
       .map((c) => ({
         ...c,
         timing: moveTiming(c.timing, chord.timing.duration, 'later'),
       }));
-
     const chords = [...beforeChords, chord, ...afterChords];
     dispatch({ type: 'updateChords', chords, partId: currentPart.uid });
     dispatch({
       type: 'setMasterPosition',
-      position: getBarEnd(chord.timing),
+      position: addDurations([
+        { bar: currentPart.barOffset, beat: 0 },
+        getNextBarStart(chord.timing),
+      ]),
       partId: currentPart.uid,
     });
     addToQueue([
@@ -412,7 +407,7 @@ export function useChords() {
       if (lastChord) {
         dispatch({
           type: 'setMasterPosition',
-          position: getBarEnd(lastChord.timing),
+          position: getNextBarStart(lastChord.timing),
           partId: part.uid,
         });
       }
@@ -544,28 +539,21 @@ const modifyChord = (
   }
 };
 
-export function usePlayhead() {
-  const ctx = useContext(SongContext);
+export function useMasterPosition() {
+  const ctx = useSong();
   if (!ctx) {
     throw new Error('No context');
   }
-  const {
-    state: { currentPart, masterPosition, pendingPosition },
-    dispatch,
-  } = ctx;
+  const { currentPart, masterPosition, parts, dispatch } = ctx;
 
-  const setPosition = (position: Duration, partId: string) => {
-    dispatch({ type: 'setMasterPosition', position, partId });
-  };
-  const setPendingPosition = (pendingPosition: Duration | null) => {
-    dispatch({ type: 'setPendingPosition', pendingPosition });
+  const setPosition = (position: Duration, partId?: string) => {
+    const uid = partId ?? getCurrentPart(parts, position).uid;
+    dispatch({ type: 'setMasterPosition', position, partId: uid });
   };
 
   return {
-    currentPart,
     masterPosition,
-    pendingPosition,
-    setPendingPosition,
     setPosition,
+    currentPart,
   };
 }

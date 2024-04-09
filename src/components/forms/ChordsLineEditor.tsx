@@ -8,9 +8,11 @@ import { BreakType } from '@/helpers/break';
 export const ChordsLineEditor = ({
   chords,
   partId,
+  isDuplicate,
 }: {
   chords: (Chord | BreakType)[];
   partId: string;
+  isDuplicate?: boolean;
 }) => {
   const { duplicateChords, removeChords } = useChords();
   const handleDelete = () => {
@@ -27,9 +29,11 @@ export const ChordsLineEditor = ({
 
   return (
     <div className={styles.editor}>
-      <button className="blank" onClick={handleRepeat}>
-        +
-      </button>
+      {!isDuplicate && (
+        <button className="blank" onClick={handleRepeat}>
+          +
+        </button>
+      )}
       <button className="blank" onClick={handleDelete}>
         x
       </button>

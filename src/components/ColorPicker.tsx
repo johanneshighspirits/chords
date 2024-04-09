@@ -19,7 +19,9 @@ export const ColorPicker = ({ className, color, onEdit }: ColorPickerProps) => {
   };
 
   return (
-    <label className={clsx(styles.ColorPicker, className)}>
+    <label
+      className={clsx(styles.ColorPicker, className)}
+      onClick={(e) => e.stopPropagation()}>
       EDIT COLOR
       <input type="color" defaultValue={hex} onChange={handleChange}></input>
     </label>

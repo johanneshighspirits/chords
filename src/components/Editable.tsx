@@ -33,6 +33,7 @@ export const Editable = ({
       ref={ref}
       contentEditable={true}
       suppressContentEditableWarning={true}
+      onClick={(e) => e.stopPropagation()}
       onKeyDown={handleKeyDown}
       onBlur={handleBlur}>
       {children}

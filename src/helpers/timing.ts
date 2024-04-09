@@ -42,7 +42,7 @@ export const getPartLength = (chords: Chord[]): DurationType => {
   }
 
   if (firstChord === lastChord) {
-    const barEnd = getBarEnd(firstChord.timing);
+    const barEnd = getNextBarStart(firstChord.timing);
     return {
       bar: barEnd.bar + 1,
       beat: 0,
@@ -61,7 +61,7 @@ export const getPartLength = (chords: Chord[]): DurationType => {
 export const getPartEnd = (part?: Part): DurationType | undefined => {
   const lastChord = part?.chords.at(-1);
   if (lastChord) {
-    return getBarEnd(lastChord.timing);
+    return getNextBarStart(lastChord.timing);
   }
   return undefined;
 };
@@ -118,6 +118,30 @@ export const moveTiming = (
   };
 };
 
+/**
+ * @returns number of beats
+ */
+export const getTimingPositionDiff = (
+  timing: TimingType,
+  compareWith: TimingType
+) => {
+  console.log(
+    `Comparing ${timing.position.bar}.${timing.position.beat} with ${compareWith.position.bar}.${compareWith.position.beat}`
+  );
+  if (isDurationEqual(timing.position, compareWith.position)) {
+    console.log(`Result: 0`);
+    return 0;
+  }
+  console.log(
+    `Result: ${
+      getNumberOfBeats(compareWith.position) - getNumberOfBeats(timing.position)
+    }`
+  );
+  return (
+    getNumberOfBeats(compareWith.position) - getNumberOfBeats(timing.position)
+  );
+};
+
 export const isTimingEarlier = (
   timing: TimingType,
   compareWith: TimingType
@@ -159,7 +183,7 @@ export const addDurations = (durations: DurationType[]) => {
   return getPositionFromBeats(beats);
 };
 
-export const getBarEnd = (timing?: TimingType) => {
+export const getNextBarStart = (timing?: TimingType) => {
   if (!timing) {
     return Timing.init().position;
   }
@@ -212,7 +236,7 @@ export const updateTimingPositions = <T extends { timing: TimingType }>(
         ...item,
         timing: {
           ...item.timing,
-          position: getBarEnd(lastItem.timing),
+          position: getNextBarStart(lastItem.timing),
         },
       },
     ];
