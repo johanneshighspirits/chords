@@ -8,7 +8,7 @@
 
 .ChordsAdder {
   display: grid;
-  grid-template-columns: 25% 1fr 25%;
+  grid-template-columns: auto 1fr 100px auto;
   gap: var(--spacing);
   justify-items: stretch;
   padding-right: var(--spacing-x);

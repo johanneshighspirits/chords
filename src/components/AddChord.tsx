@@ -17,16 +17,22 @@ export const AddChord = () => {
   const { addChord } = useChords();
   const { playChord } = useAudio();
   const ref = useRef<HTMLInputElement | null>(null);
+  const timer = useRef<NodeJS.Timeout>();
 
   useEffect(() => {
+    clearTimeout(timer.current);
     const chord = parseChord(value);
     if (chord) {
-      playChord(chord);
+      timer.current = setTimeout(() => {
+        playChord(chord);
+      }, 500);
     }
   }, [value, playChord]);
 
   const addChordDetails = (chordDetails: ChordDetails | null) => {
     if (chordDetails !== null) {
+      clearTimeout(timer.current);
+      playChord(chordDetails);
       addChord(chordDetails);
     }
     setValue('');
@@ -35,7 +41,8 @@ export const AddChord = () => {
   const handleChange: ChangeEventHandler<HTMLInputElement> = (e) => {
     const inputValue = e.target.value;
     if (inputValue.endsWith(' ')) {
-      addChordDetails(parseChord(inputValue));
+      const chord = parseChord(inputValue);
+      addChordDetails(chord);
     } else {
       setValue(inputValue);
     }
