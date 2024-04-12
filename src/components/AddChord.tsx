@@ -17,22 +17,16 @@ export const AddChord = () => {
   const { addChord } = useChords();
   const { playChord } = useAudio();
   const ref = useRef<HTMLInputElement | null>(null);
-  const timer = useRef<NodeJS.Timeout>();
 
   useEffect(() => {
-    clearTimeout(timer.current);
     const chord = parseChord(value);
     if (chord) {
-      timer.current = setTimeout(() => {
-        playChord(chord);
-      }, 500);
+      playChord(chord);
     }
   }, [value, playChord]);
 
   const addChordDetails = (chordDetails: ChordDetails | null) => {
     if (chordDetails !== null) {
-      clearTimeout(timer.current);
-      playChord(chordDetails);
       addChord(chordDetails);
     }
     setValue('');
