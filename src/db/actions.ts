@@ -267,9 +267,9 @@ export async function querySong({
 }
 
 export async function querySongsMeta(userUid: string): Promise<SongMeta[]> {
-  const user = await auth;
+  console.log('userUid', userUid);
   const result = await db.query.songs.findMany({
-    where: (songs, { eq }) => eq(songs.uid, userUid),
+    where: (songs, { eq }) => eq(songs.userId, userUid),
     columns: {
       uid: true,
       userId: true,
@@ -279,6 +279,7 @@ export async function querySongsMeta(userUid: string): Promise<SongMeta[]> {
       artistSlug: true,
     },
   });
+  console.log('querySongsMeta', result);
   if (!result) {
     throw new Error('No Songs found');
   }

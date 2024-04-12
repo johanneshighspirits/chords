@@ -12,6 +12,7 @@ export const SongsList = async () => {
     console.log(`SongsList no session`, session);
     redirect('/');
   }
+  console.log('SongsList', session);
   const songs = await querySongsMeta(session.user.id);
   return (
     <ul className={styles.SongsList}>
