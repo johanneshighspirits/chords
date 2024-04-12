@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { DBActionPayload, mergePayloads } from './actions';
 import { Timing } from '@/helpers/timing';
 import { Part } from '@/helpers/part';
+import { mergePayloads } from './merger';
+import { DBActionPayload } from './types';
 
 describe('mergePayloads', () => {
   it('should merge two chord payloads with same chord id', () => {
@@ -14,7 +15,7 @@ describe('mergePayloads', () => {
         entries: [
           {
             note: 'C',
-            major: true,
+            flavor: 'major',
             timing: Timing.init(),
             uid: 'chord-1',
             sign: '&#9837;',
@@ -28,7 +29,7 @@ describe('mergePayloads', () => {
         entries: [
           {
             note: 'F',
-            major: true,
+            flavor: 'major',
             timing: Timing.init(),
             uid: 'chord-1',
             sign: undefined,
@@ -45,7 +46,7 @@ describe('mergePayloads', () => {
         entries: [
           {
             note: 'F',
-            major: true,
+            flavor: 'major',
             timing: Timing.init(),
             uid: 'chord-1',
             sign: undefined,
@@ -65,7 +66,7 @@ describe('mergePayloads', () => {
         entries: [
           {
             note: 'C',
-            major: true,
+            flavor: 'major',
             timing: Timing.init(),
             uid: 'chord-1',
             sign: '&#9837;',
@@ -79,7 +80,7 @@ describe('mergePayloads', () => {
         entries: [
           {
             note: 'F',
-            major: true,
+            flavor: 'major',
             timing: Timing.init(),
             uid: 'chord-2',
             sign: undefined,
@@ -96,7 +97,7 @@ describe('mergePayloads', () => {
         entries: [
           {
             note: 'C',
-            major: true,
+            flavor: 'major',
             timing: Timing.init(),
             uid: 'chord-1',
             sign: '&#9837;',
@@ -110,7 +111,7 @@ describe('mergePayloads', () => {
         entries: [
           {
             note: 'F',
-            major: true,
+            flavor: 'major',
             timing: Timing.init(),
             uid: 'chord-2',
             sign: undefined,
@@ -129,7 +130,7 @@ describe('mergePayloads', () => {
         entries: [
           {
             note: 'C',
-            major: true,
+            flavor: 'major',
             timing: Timing.init(),
             uid: 'chord-1',
             sign: '&#9837;',
@@ -143,7 +144,7 @@ describe('mergePayloads', () => {
         entries: [
           {
             note: 'F',
-            major: true,
+            flavor: 'major',
             timing: Timing.init(),
             uid: 'chord-2',
             sign: undefined,
@@ -160,14 +161,14 @@ describe('mergePayloads', () => {
         entries: [
           {
             note: 'C',
-            major: true,
+            flavor: 'major',
             timing: Timing.init(),
             uid: 'chord-1',
             sign: '&#9837;',
           },
           {
             note: 'F',
-            major: true,
+            flavor: 'major',
             timing: Timing.init(),
             uid: 'chord-2',
             sign: undefined,
@@ -211,8 +212,9 @@ describe('mergePayloads', () => {
     part1.title = 'Part 1';
     const part2 = Part.new([
       {
+        type: 'chord',
         note: 'F',
-        major: true,
+        flavor: 'major',
         timing: Timing.init(),
         uid: 'chord-1',
         sign: '',

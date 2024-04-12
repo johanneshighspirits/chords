@@ -15,7 +15,6 @@ import {
 import {
   Chord,
   ChordFlavor,
-  ChordMeta,
   Note,
   Part as PartType,
   Sign,
@@ -32,23 +31,9 @@ import {
 } from '@/helpers/timing';
 import { Part } from '@/helpers/part';
 import { revalidatePath } from 'next/cache';
-
-type UpsertChordsProps = {
-  action: 'upsertChords';
-  songId: string;
-  part: PartType;
-  entries: (Chord | ChordMeta)[];
-  removedEntryUids?: string[];
-};
-
-type UpsertPartsProps = {
-  action: 'upsertParts';
-  songId: string;
-  entries: PartType[];
-  removedEntryUids?: string[];
-};
-
-export type DBActionPayload = UpsertChordsProps | UpsertPartsProps;
+import { DBActionPayload, UpsertChordsProps, UpsertPartsProps } from './types';
+import { mergePayloads } from './merger';
+import { auth } from '@/auth';
 
 export async function saveToDB(payloads: DBActionPayload[]): Promise<void> {
   console.log('----- saveToDB() ------', payloads.length);
@@ -65,125 +50,6 @@ export async function saveToDB(payloads: DBActionPayload[]): Promise<void> {
     }
   }
 }
-
-export const mergePayloads = (payloads: DBActionPayload[]) => {
-  const mergedChordPayloads: Record<string, UpsertChordsProps> = {};
-  const chordsDictionary: Record<string, Chord | ChordMeta> = {};
-
-  const mergedPartPayloads: Record<string, UpsertPartsProps> = {};
-  const partsDictionary: Record<string, PartType> = {};
-
-  for (const payload of payloads) {
-    const key = getPayloadKey(payload);
-    if (payload.action === 'upsertChords') {
-      if (!mergedChordPayloads[key]) {
-        mergedChordPayloads[key] = payload;
-      } else {
-        mergedChordPayloads[key].entries.push(...payload.entries);
-        if (payload.removedEntryUids) {
-          mergedChordPayloads[key].removedEntryUids?.push(
-            ...payload.removedEntryUids
-          );
-        }
-      }
-
-      for (const entry of payload.entries) {
-        if (!chordsDictionary[entry.uid]) {
-          chordsDictionary[entry.uid] = entry;
-        } else {
-          chordsDictionary[entry.uid] = {
-            ...chordsDictionary[entry.uid],
-            ...entry,
-          };
-        }
-      }
-    }
-
-    if (payload.action === 'upsertParts') {
-      if (!mergedPartPayloads[key]) {
-        mergedPartPayloads[key] = payload;
-      } else {
-        mergedPartPayloads[key].entries.push(...payload.entries);
-        if (payload.removedEntryUids) {
-          mergedPartPayloads[key].removedEntryUids?.push(
-            ...payload.removedEntryUids
-          );
-        }
-      }
-
-      for (const entry of payload.entries) {
-        if (!partsDictionary[entry.uid]) {
-          partsDictionary[entry.uid] = entry;
-        } else {
-          partsDictionary[entry.uid] = {
-            ...partsDictionary[entry.uid],
-            ...entry,
-          };
-        }
-      }
-    }
-  }
-
-  const chordPayloads = Object.values(mergedChordPayloads).map((payload) => {
-    const existingUids = new Set<string>();
-    payload.entries = payload.entries
-      .toReversed()
-      .map((entry) => {
-        if (existingUids.has(entry.uid)) {
-          return null;
-        }
-        existingUids.add(entry.uid);
-        if (chordsDictionary[entry.uid]) {
-          return {
-            ...entry,
-            ...chordsDictionary[entry.uid],
-          };
-        }
-        return entry;
-      })
-      .filter((e): e is Chord | ChordMeta => e !== null)
-      .toReversed();
-    if (payload.removedEntryUids) {
-      payload.removedEntryUids = [...new Set(payload.removedEntryUids)];
-    }
-    return payload;
-  });
-
-  const partPayloads = Object.values(mergedPartPayloads).map((payload) => {
-    const existingUids = new Set<string>();
-    payload.entries = payload.entries
-      .toReversed()
-      .map((entry) => {
-        if (existingUids.has(entry.uid)) {
-          return null;
-        }
-        existingUids.add(entry.uid);
-        if (partsDictionary[entry.uid]) {
-          return {
-            ...entry,
-            ...partsDictionary[entry.uid],
-          };
-        }
-        return entry;
-      })
-      .filter((e): e is PartType => e !== null)
-      .toReversed();
-    if (payload.removedEntryUids) {
-      payload.removedEntryUids = [...new Set(payload.removedEntryUids)];
-    }
-    return payload;
-  });
-
-  return [...chordPayloads, ...partPayloads];
-};
-
-const getPayloadKey = (payload: DBActionPayload) => {
-  const segments = [payload.action, payload.songId];
-  if (payload.action === 'upsertChords') {
-    segments.push(payload.part.uid);
-  }
-  return segments.join('|');
-};
 
 const preparedGetChord = db.query.chords
   .findFirst({
@@ -400,10 +266,13 @@ export async function querySong({
   return convertSong(result);
 }
 
-export async function querySongsMeta(): Promise<SongMeta[]> {
+export async function querySongsMeta(userUid: string): Promise<SongMeta[]> {
+  const user = await auth;
   const result = await db.query.songs.findMany({
+    where: (songs, { eq }) => eq(songs.uid, userUid),
     columns: {
       uid: true,
+      userId: true,
       slug: true,
       title: true,
       artist: true,
@@ -419,9 +288,10 @@ export async function querySongsMeta(): Promise<SongMeta[]> {
 const convertSong = (
   dbSong: WithMany<DBSong, WithMany<DBPart, DBChord, 'chords'>, 'parts'>
 ): Song => {
-  const { uid, title, artist, artistSlug, slug, parts } = dbSong;
+  const { uid, userId, title, artist, artistSlug, slug, parts } = dbSong;
   const song: Song = {
     uid,
+    userId,
     title,
     slug,
     artist,

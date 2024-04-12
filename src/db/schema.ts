@@ -2,6 +2,7 @@ import { relations } from 'drizzle-orm';
 import {
   integer,
   boolean,
+  serial,
   pgTable,
   text,
   uuid,
@@ -10,6 +11,8 @@ import {
 
 export const users = pgTable('users', {
   uid: uuid('uid').primaryKey(),
+  email: text('email').notNull(),
+  imageUrl: text('image_url').notNull(),
   firstName: text('first_name').notNull(),
   lastName: text('last_name').notNull(),
 });
@@ -22,12 +25,16 @@ export type NewUser = typeof users.$inferInsert;
 
 export const songs = pgTable('songs', {
   uid: uuid('uid').primaryKey(),
+  userId: uuid('user_id')
+    .notNull()
+    .references(() => users.uid),
   title: text('title').notNull(),
   artist: text('artist').notNull(),
-  artistSlug: text('artistSlug').notNull(),
+  artistSlug: text('artist_slug').notNull(),
   slug: text('slug').notNull(),
 });
-export const songsRelations = relations(songs, ({ many }) => ({
+export const songsRelations = relations(songs, ({ one, many }) => ({
+  admin: one(users, { fields: [songs.userId], references: [users.uid] }),
   parts: many(parts),
 }));
 

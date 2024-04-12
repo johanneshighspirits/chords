@@ -5,3 +5,8 @@
     margin: 1rem auto;
   }
 }
+
+.Container {
+  display: flex;
+  justify-content: space-between;
+}

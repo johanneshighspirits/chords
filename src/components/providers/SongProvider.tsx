@@ -173,6 +173,7 @@ const emptyState = (): SongState => {
   return {
     currentSongUID: generateId(),
     uid: generateId(),
+    userId: '',
     slug: '',
     title: 'New Song',
     artist: 'Artist',

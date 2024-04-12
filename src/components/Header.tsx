@@ -1,12 +1,12 @@
 import styles from './Header.module.css';
-import { SignIn } from './auth/SignIn';
+import { SignOut } from './auth/SignOut';
 import { Container } from './layout/PageContainer';
 
 export const Header = () => (
   <header className={styles.Header}>
-    <Container>
+    <Container className={styles.Container}>
       <h1>Chords</h1>
-      <SignIn />
+      <SignOut />
     </Container>
   </header>
 );

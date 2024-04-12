@@ -1,5 +1,6 @@
 'use server';
 
+import { auth } from '@/auth';
 import { insertSong } from '@/db/actions';
 import { generateId } from '@/helpers/common';
 import { slugify } from '@/helpers/string';
@@ -26,12 +27,18 @@ export const createSong = async (
     };
   }
 
+  const session = await auth();
+  const userId = session?.user?.id;
+  if (!userId) {
+    throw new Error('Permission denied');
+  }
+
   const { title, artist } = validatedFields.data;
   const slug = slugify(title);
   const artistSlug = slugify(artist);
-
   const newSong = await insertSong({
     uid: generateId(),
+    userId,
     slug,
     title,
     artist,
