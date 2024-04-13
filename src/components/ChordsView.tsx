@@ -3,7 +3,7 @@ import styles from './chords.module.css';
 import { RemoveChord } from './RemoveChord';
 import clsx from 'clsx';
 import { useChords } from './providers/SongProvider';
-import { MouseEventHandler, useRef } from 'react';
+import { MouseEventHandler, TouchEventHandler, useRef } from 'react';
 import { ChordsLineEditor } from './forms/ChordsLineEditor';
 import {
   getNumberOfBeats,
@@ -14,12 +14,13 @@ import { TimingBar } from './TimingBar';
 import { FormattedDuration, FormattedPosition } from './Display';
 import { PendingPlayhead } from './PendingPlayhead';
 import { Break, BreakType } from '@/helpers/break';
-import { PlayButton } from './PlayButton';
+import { PlayAnimation, PlayButton } from './PlayButton';
 import { EditChord } from './EditChord';
 import { EditMenu } from './EditMenu';
 import { flavorToString, modifiersToString } from '@/helpers/chord';
 import { EditPosition } from './EditPosition';
 import { EditDuration } from './EditDuration';
+import { useAudio } from './providers/AudioProvider';
 
 type ChordsViewProps = {
   chords: (Chord | BreakType)[];
@@ -78,12 +79,20 @@ type ChordViewProps = {
 
 const ChordView = ({ partId, barOffset, chord, lineIndex }: ChordViewProps) => {
   const { editChord } = useChords();
+  const { playChord } = useAudio();
   const tempRef = useRef<{
     chordLeft: number;
     colStart: number;
     beatWidth: number;
   } | null>(null);
   const chordRef = useRef<HTMLLIElement | null>(null);
+
+  const handleTouchStart: TouchEventHandler = (e) => {
+    e.stopPropagation();
+    if (isChord(chord)) {
+      playChord(chord);
+    }
+  };
 
   const calculateBeatsMoved = (clientX: number) => {
     if (tempRef.current) {
@@ -207,6 +216,7 @@ const ChordView = ({ partId, barOffset, chord, lineIndex }: ChordViewProps) => {
         <li
           ref={chordRef}
           className={styles.chord}
+          onTouchStart={handleTouchStart}
           style={{
             gridColumnStart,
             gridColumnEnd: `span ${getNumberOfBeats(chord.timing.duration)}`,
@@ -239,17 +249,16 @@ const ChordView = ({ partId, barOffset, chord, lineIndex }: ChordViewProps) => {
               className={styles.PlayButton}></PlayButton>
             <EditDuration chord={chord} />
           </div>
-          <div className={clsx('touch-only', styles.PlayButtonContainer)}>
-            <PlayButton
-              chord={chord}
-              className={styles.PlayButton}></PlayButton>
+
+          <div className={clsx('touch-only', styles.PlayAnimation)}>
+            <PlayAnimation chordId={chord.uid} nrOfBars={7} />
           </div>
 
           <button
-            className={styles.dragHandleLeft}
+            className={clsx(styles.dragHandleLeft, 'touch-hidden')}
             onMouseDown={handlePositionMouseDown}></button>
           <button
-            className={styles.dragHandleRight}
+            className={clsx(styles.dragHandleRight, 'touch-hidden')}
             onMouseDown={handleDurationMouseDown}></button>
           <PendingPlayhead timing={chord.timing} barOffset={barOffset} />
         </li>

@@ -6,7 +6,7 @@ export const EditMenu = ({ children }: PropsWithChildren) => {
   return (
     <div
       onClick={(e) => e.stopPropagation()}
-      className={clsx('edit-menu', styles.EditMenu)}>
+      className={clsx('edit-menu touch-hidden', styles.EditMenu)}>
       {children}
     </div>
   );

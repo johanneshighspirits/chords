@@ -21,6 +21,8 @@ type AudioState = {
   volume: number;
   setVolume: Dispatch<SetStateAction<number>>;
   setOscillatorType: Dispatch<SetStateAction<OscillatorType>>;
+  playingChords: Set<string>;
+  setPlayingChords: Dispatch<SetStateAction<Set<string>>>;
   oscillatorType: OscillatorType;
 } & (
   | {
@@ -40,7 +42,7 @@ export const AudioProvider = ({ children }: PropsWithChildren) => {
   const [volume, setVolume] = useState(0.5);
   const [oscillatorType, setOscillatorType] =
     useState<OscillatorType>('triangle');
-
+  const [playingChords, setPlayingChords] = useState<Set<string>>(new Set());
   const resumeAudioContext = () => {
     if (ctxRef.current) {
       ctxRef.current.resume();
@@ -57,11 +59,13 @@ export const AudioProvider = ({ children }: PropsWithChildren) => {
       oscillatorType,
       setOscillatorType,
       resumeAudioContext,
+      playingChords,
+      setPlayingChords,
     };
     return audioCtxLoaded
       ? { ...common, audioCtx: ctxRef.current!, audioCtxLoaded: true }
       : { ...common, audioCtxLoaded: false };
-  }, [audioCtxLoaded, volume, oscillatorType]);
+  }, [audioCtxLoaded, volume, oscillatorType, playingChords]);
 
   return (
     <AudioStateContext.Provider value={value}>
@@ -81,18 +85,30 @@ export const useAudio = () => {
       playChord: async () => ctx.resumeAudioContext(),
     };
   }
-  const { audioCtx, volume, oscillatorType, setVolume, setOscillatorType } =
-    ctx;
+  const {
+    audioCtx,
+    volume,
+    oscillatorType,
+    setVolume,
+    setOscillatorType,
+    playingChords,
+    setPlayingChords,
+  } = ctx;
   const { playNote } = AudioApi(audioCtx);
 
-  const playChord = (chord: ChordDetails) => {
+  const playChord = async (chord: Chord) => {
     const midiNotes = getMidiNotes(chord);
-    // console.log(`\nCHORD ${formatChord(chord)}`);
-    // console.log(`NOTEs: ${midiNotes.map((n) => n.midi).join(',')}`);
-    // console.log(`FREQs:\n${midiNotes.map((n) => n.freq).join('\n')}`);
-    return Promise.all(
+    setPlayingChords((state) => {
+      state.add(chord.uid);
+      return new Set(state);
+    });
+    await Promise.all(
       midiNotes.map((note) => playNote(note, { volume, type: oscillatorType }))
     );
+    setPlayingChords((state) => {
+      state.delete(chord.uid);
+      return new Set(state);
+    });
   };
 
   return {
@@ -102,5 +118,6 @@ export const useAudio = () => {
     setVolume,
     oscillatorType,
     setOscillatorType,
+    playingChords,
   };
 };

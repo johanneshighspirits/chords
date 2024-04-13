@@ -82,7 +82,7 @@ export const PartView = ({
           <Editable onEdit={handleEditTitle}>{part.title}</Editable>
           {/* {part.barOffset} */}
           <ColorPicker
-            className={styles.ColorPicker}
+            className={clsx(styles.ColorPicker, 'touch-hidden')}
             color={part.color}
             onEdit={handleEditColor}></ColorPicker>
         </h3>

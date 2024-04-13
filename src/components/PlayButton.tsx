@@ -13,34 +13,31 @@ export const PlayButton = ({
   className?: string;
 }) => {
   const { playChord } = useAudio();
-  const [isPlaying, setIsPlaying] = useState(false);
 
   return (
     <button
-      onClick={() => {
-        setIsPlaying(true);
-        playChord(chord).then(() => {
-          setIsPlaying(false);
-        });
-      }}
+      onClick={() => playChord(chord)}
       className={clsx('blank', styles.PlayButton, className)}>
-      <PlayAnimation isPlaying={isPlaying} />
+      <PlayAnimation chordId={chord.uid} />
       ▶︎
     </button>
   );
 };
 
-const PlayAnimation = ({ isPlaying }: { isPlaying: boolean }) => {
+export const PlayAnimation = ({
+  chordId,
+  nrOfBars = 3,
+}: {
+  chordId: string;
+  nrOfBars?: number;
+}) => {
+  const { playingChords } = useAudio();
+  const isPlaying = playingChords.has(chordId);
   return (
     <div
       className={clsx(styles.PlayAnimation, { [styles.IsPlaying]: isPlaying })}>
-      {isPlaying && (
-        <>
-          <Frequency />
-          <Frequency />
-          <Frequency />
-        </>
-      )}
+      {isPlaying &&
+        Array.from({ length: nrOfBars }, (_, i) => <Frequency key={i} />)}
     </div>
   );
 };
