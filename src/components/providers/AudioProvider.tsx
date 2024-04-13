@@ -3,7 +3,7 @@
 import { AudioApi } from '@/helpers/audio';
 import { formatChord } from '@/helpers/chord';
 import { getMidiNotes } from '@/helpers/midi';
-import { Chord, ChordDetails } from '@/types';
+import { Chord, ChordDetails, isChord } from '@/types';
 import {
   Dispatch,
   PropsWithChildren,
@@ -96,19 +96,23 @@ export const useAudio = () => {
   } = ctx;
   const { playNote } = AudioApi(audioCtx);
 
-  const playChord = async (chord: Chord) => {
+  const playChord = async (chord: Chord | ChordDetails) => {
     const midiNotes = getMidiNotes(chord);
-    setPlayingChords((state) => {
-      state.add(chord.uid);
-      return new Set(state);
-    });
+    if (isChord(chord)) {
+      setPlayingChords((state) => {
+        state.add(chord.uid);
+        return new Set(state);
+      });
+    }
     await Promise.all(
       midiNotes.map((note) => playNote(note, { volume, type: oscillatorType }))
     );
-    setPlayingChords((state) => {
-      state.delete(chord.uid);
-      return new Set(state);
-    });
+    if (isChord(chord)) {
+      setPlayingChords((state) => {
+        state.delete(chord.uid);
+        return new Set(state);
+      });
+    }
   };
 
   return {
