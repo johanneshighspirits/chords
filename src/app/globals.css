@@ -138,3 +138,14 @@ dialog {
   background: rgb(0 0 0 / 0.5);
   backdrop-filter: blur(20px);
 }
+
+@media screen and (pointer: coarse) {
+  .touch-hidden {
+    display: none !important;
+  }
+}
+@media screen and (pointer: fine) {
+  .touch-only {
+    display: none !important;
+  }
+}

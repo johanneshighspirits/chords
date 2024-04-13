@@ -56,6 +56,16 @@
   bottom: calc(0.5 * var(--spacing-y));
   opacity: 0;
 }
+.PlayButtonContainer {
+  display: flex;
+  justify-content: center;
+  position: absolute;
+  font-size: 0.7em;
+  left: calc(0.5 * var(--spacing-x));
+  width: calc(100% - var(--spacing-x));
+  bottom: calc(0.5 * var(--spacing-y));
+}
+
 .info {
   display: flex;
   flex-direction: column;

@@ -232,12 +232,17 @@ const ChordView = ({ partId, barOffset, chord, lineIndex }: ChordViewProps) => {
         <br />
         Len: {chord.timing.duration.bar}.{chord.timing.duration.beat}.0
       </Debug> */}
-          <div className={styles.hoverInfo}>
+          <div className={clsx(styles.hoverInfo, 'touch-hidden')}>
             <EditPosition chord={chord} />
             <PlayButton
               chord={chord}
               className={styles.PlayButton}></PlayButton>
             <EditDuration chord={chord} />
+          </div>
+          <div className={clsx('touch-only', styles.PlayButtonContainer)}>
+            <PlayButton
+              chord={chord}
+              className={styles.PlayButton}></PlayButton>
           </div>
 
           <button
