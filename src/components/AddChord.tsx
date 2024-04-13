@@ -11,6 +11,7 @@ import {
 } from 'react';
 import { useChords } from './providers/SongProvider';
 import { useAudio } from './providers/AudioProvider';
+import styles from './AddChord.module.css';
 
 export const AddChord = () => {
   const [value, setValue] = useState('');
@@ -35,7 +36,8 @@ export const AddChord = () => {
   const handleChange: ChangeEventHandler<HTMLInputElement> = (e) => {
     const inputValue = e.target.value;
     if (inputValue.endsWith(' ')) {
-      addChordDetails(parseChord(inputValue));
+      const chord = parseChord(inputValue);
+      addChordDetails(chord);
     } else {
       setValue(inputValue);
     }
@@ -53,6 +55,7 @@ export const AddChord = () => {
     <form onSubmit={handleSubmit}>
       <input
         type="text"
+        className={styles.Volume}
         ref={ref}
         value={value}
         onChange={handleChange}></input>

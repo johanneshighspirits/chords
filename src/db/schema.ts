@@ -2,32 +2,87 @@ import { relations } from 'drizzle-orm';
 import {
   integer,
   boolean,
+  serial,
   pgTable,
   text,
   uuid,
   varchar,
+  timestamp,
+  primaryKey,
 } from 'drizzle-orm/pg-core';
+import type { AdapterAccount } from 'next-auth/adapters';
 
-export const users = pgTable('users', {
-  uid: uuid('uid').primaryKey(),
-  firstName: text('first_name').notNull(),
-  lastName: text('last_name').notNull(),
+export const users = pgTable('user', {
+  id: text('id').notNull().primaryKey(),
+  name: text('name'),
+  email: text('email').notNull(),
+  emailVerified: timestamp('emailVerified', { mode: 'date' }),
+  image: text('image'),
 });
+
 export const usersRelations = relations(users, ({ many }) => ({
   songs: many(songs),
 }));
+
+export const accounts = pgTable(
+  'account',
+  {
+    userId: text('userId')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    type: text('type').$type<AdapterAccount['type']>().notNull(),
+    provider: text('provider').notNull(),
+    providerAccountId: text('providerAccountId').notNull(),
+    refresh_token: text('refresh_token'),
+    access_token: text('access_token'),
+    expires_at: integer('expires_at'),
+    token_type: text('token_type'),
+    scope: text('scope'),
+    id_token: text('id_token'),
+    session_state: text('session_state'),
+  },
+  (account) => ({
+    compoundKey: primaryKey({
+      columns: [account.provider, account.providerAccountId],
+    }),
+  })
+);
+
+export const sessions = pgTable('session', {
+  sessionToken: text('sessionToken').notNull().primaryKey(),
+  userId: text('userId')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  expires: timestamp('expires', { mode: 'date' }).notNull(),
+});
+
+export const verificationTokens = pgTable(
+  'verificationToken',
+  {
+    identifier: text('identifier').notNull(),
+    token: text('token').notNull(),
+    expires: timestamp('expires', { mode: 'date' }).notNull(),
+  },
+  (vt) => ({
+    compoundKey: primaryKey({ columns: [vt.identifier, vt.token] }),
+  })
+);
 
 export type DBUser = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
 
 export const songs = pgTable('songs', {
   uid: uuid('uid').primaryKey(),
+  userId: text('user_id')
+    .notNull()
+    .references(() => users.id),
   title: text('title').notNull(),
   artist: text('artist').notNull(),
-  artistSlug: text('artistSlug').notNull(),
+  artistSlug: text('artist_slug').notNull(),
   slug: text('slug').notNull(),
 });
-export const songsRelations = relations(songs, ({ many }) => ({
+export const songsRelations = relations(songs, ({ one, many }) => ({
+  admin: one(users, { fields: [songs.userId], references: [users.id] }),
   parts: many(parts),
 }));
 

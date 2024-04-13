@@ -3,9 +3,17 @@ import styles from './SongsList.module.css';
 import { DeleteSongButton } from './forms/DeleteButton';
 import { querySongsMeta } from '@/db/actions';
 import { SkeletonContainer, SkeletonText } from './skeleton/SkeletonText';
+import { auth } from '@/auth';
+import { redirect } from 'next/navigation';
 
 export const SongsList = async () => {
-  const songs = await querySongsMeta();
+  const session = await auth();
+  if (!session?.user?.id) {
+    console.log(`SongsList no session`, session);
+    redirect('/');
+  }
+  console.log('SongsList', session);
+  const songs = await querySongsMeta(session.user.id);
   return (
     <ul className={styles.SongsList}>
       {songs.map((song) => {

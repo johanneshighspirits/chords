@@ -173,6 +173,7 @@ const emptyState = (): SongState => {
   return {
     currentSongUID: generateId(),
     uid: generateId(),
+    userId: '',
     slug: '',
     title: 'New Song',
     artist: 'Artist',
@@ -246,6 +247,27 @@ export function useSongParts() {
     ]);
   };
 
+  const duplicatePart = async (part: PartType) => {
+    const lastPart = parts.at(-1);
+    const newPart: PartType = {
+      ...part,
+      chords: [],
+      uid: generateId(),
+      index: parts.length,
+      barOffset: lastPart
+        ? lastPart.barOffset + getPartLength(lastPart.chords).bar
+        : 0,
+    };
+    dispatch({ type: 'addPart', part: newPart });
+    addToQueue([
+      {
+        action: 'upsertParts',
+        songId: currentSongUID,
+        entries: [newPart],
+      },
+    ]);
+  };
+
   const movePart = (direction: 'before' | 'after', partId: string) => {
     const currentIndex = parts.findIndex((p) => p.uid === partId);
     if (currentIndex === -1) {
@@ -298,6 +320,7 @@ export function useSongParts() {
     currentPart,
     parts,
     addPart,
+    duplicatePart,
     movePart,
     removePart,
     setPartTitle,

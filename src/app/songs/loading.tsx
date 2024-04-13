@@ -1,9 +1,10 @@
-import { Container, PageContainer } from '@/components/layout/PageContainer';
+import { Center } from '@/components/layout/Center';
+import { PageContainer } from '@/components/layout/PageContainer';
 
 export default function LoadingSong() {
   return (
     <PageContainer>
-      <Container>Loading song...</Container>
+      <Center>Loading song...</Center>
     </PageContainer>
   );
 }

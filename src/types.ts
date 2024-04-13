@@ -7,6 +7,7 @@ export type Song = SongMeta & {
 
 export type SongMeta = {
   uid: string;
+  userId: string;
   slug: string;
   title: string;
   artist: string;

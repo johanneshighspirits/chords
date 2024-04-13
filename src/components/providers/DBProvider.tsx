@@ -1,6 +1,7 @@
 'use client';
 
-import { DBActionPayload, saveToDB } from '@/db/actions';
+import { saveToDB } from '@/db/actions';
+import { DBActionPayload } from '@/db/types';
 import {
   PropsWithChildren,
   createContext,

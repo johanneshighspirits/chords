@@ -34,3 +34,17 @@
   bottom: 10%;
   cursor: s-resize;
 }
+
+.DuplicatePartButtons {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 0.5rem;
+  gap: 0.5rem;
+  opacity: 0;
+  transition: opacity 400ms ease-out;
+}
+
+.Arrangement:hover .DuplicatePartButtons {
+  opacity: 1;
+  transition: opacity 200ms 400ms ease-out;
+}
