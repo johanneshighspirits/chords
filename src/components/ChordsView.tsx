@@ -18,6 +18,8 @@ import { PlayButton } from './PlayButton';
 import { EditChord } from './EditChord';
 import { EditMenu } from './EditMenu';
 import { flavorToString, modifiersToString } from '@/helpers/chord';
+import { EditPosition } from './EditPosition';
+import { EditDuration } from './EditDuration';
 
 type ChordsViewProps = {
   chords: (Chord | BreakType)[];
@@ -231,23 +233,11 @@ const ChordView = ({ partId, barOffset, chord, lineIndex }: ChordViewProps) => {
         Len: {chord.timing.duration.bar}.{chord.timing.duration.beat}.0
       </Debug> */}
           <div className={styles.hoverInfo}>
-            <div className={styles.info}>
-              <span className={styles.timingLabel}>Position</span>
-              <FormattedPosition
-                className={styles.timing}
-                position={chord.timing.position}
-              />
-            </div>
+            <EditPosition chord={chord} />
             <PlayButton
               chord={chord}
               className={styles.PlayButton}></PlayButton>
-            <div className={styles.info}>
-              <span className={styles.timingLabel}>Duration</span>
-              <FormattedDuration
-                className={styles.timing}
-                duration={chord.timing.duration}
-              />
-            </div>
+            <EditDuration chord={chord} />
           </div>
 
           <button

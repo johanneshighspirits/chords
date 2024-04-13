@@ -11,6 +11,7 @@ import {
 } from 'react';
 import { useChords } from './providers/SongProvider';
 import { useAudio } from './providers/AudioProvider';
+import styles from './AddChord.module.css';
 
 export const AddChord = () => {
   const [value, setValue] = useState('');
@@ -54,6 +55,7 @@ export const AddChord = () => {
     <form onSubmit={handleSubmit}>
       <input
         type="text"
+        className={styles.Volume}
         ref={ref}
         value={value}
         onChange={handleChange}></input>

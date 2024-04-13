@@ -1,6 +1,5 @@
 'use client';
 
-import { CSSProperties } from 'react';
 import { useSongParts } from './providers/SongProvider';
 import partsStyles from './parts.module.css';
 import styles from './ArrangementView.module.css';
@@ -10,29 +9,55 @@ import { Part } from '@/types';
 import { colorToCssVars } from '@/helpers/color';
 
 export const ArrangementView = ({ className }: { className?: string }) => {
-  const { parts } = useSongParts();
+  const { parts, duplicatePart } = useSongParts();
+  const uniquePartTitles = [...new Set(parts.map((part) => part.title))];
   return (
     <aside className={clsx('print-hidden', styles.Arrangement, className)}>
       {parts.map((part, index) => {
+        const similarPreviousParts = parts.filter(
+          (p) =>
+            p.title === part.title && p.uid !== part.uid && p.index < part.index
+        );
+        const repeatCount = similarPreviousParts.length;
         return (
           <ArrangementItem
             key={part.uid}
+            repeatCount={repeatCount}
             isFirst={index === 0}
             isLast={index === parts.length - 1}
             part={part}
           />
         );
       })}
+
+      <div className={styles.DuplicatePartButtons}>
+        {uniquePartTitles.map((title) => {
+          return (
+            <button
+              onClick={() => {
+                const part = parts.find((p) => p.title === title);
+                if (part) {
+                  duplicatePart(part);
+                }
+              }}
+              key={title}>
+              {title} +
+            </button>
+          );
+        })}
+      </div>
     </aside>
   );
 };
 
 const ArrangementItem = ({
   part,
+  repeatCount,
   isFirst,
   isLast,
 }: {
   part: Part;
+  repeatCount: number;
   isFirst: boolean;
   isLast: boolean;
 }) => {
@@ -54,7 +79,16 @@ const ArrangementItem = ({
       key={part.uid}
       className={clsx(partsStyles.part, styles.ArrangementItem)}
       style={colorToCssVars(color, 'part')}>
-      <Editable onEdit={handleEditTitle}>{title}</Editable>
+      <span>
+        <Editable onEdit={handleEditTitle}>{title}</Editable>
+        {repeatCount > 0 ? (
+          <span style={{ paddingLeft: '0.5em', userSelect: 'none' }}>
+            ({repeatCount + 1})
+          </span>
+        ) : (
+          ''
+        )}
+      </span>
       {!isFirst && (
         <button
           className={clsx('blank', styles.MoveButton, styles.MoveButtonUp)}
