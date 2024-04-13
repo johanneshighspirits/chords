@@ -1,6 +1,5 @@
 import NextAuth from 'next-auth';
 import Google from 'next-auth/providers/google';
-// import { upsertUser } from './db/user';
 import { db } from './db';
 import { DrizzleAdapter } from '@auth/drizzle-adapter';
 
@@ -11,17 +10,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     signIn: async (params) => {
       console.log(params);
       if (params.user.email === 'johannes@highspirits.se') {
-        const { id, email, image, name } = params.user;
-        if (!id) {
-          return false;
-        }
-        // const user = await upsertUser({
-        //   id,
-        //   email,
-        //   image: image ?? '',
-        //   name: name ?? '',
-        // });
-        // console.log('Logged in:', user.firstName, user.lastName);
         return true;
       }
       return false;
