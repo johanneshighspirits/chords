@@ -7,12 +7,12 @@ import clsx from 'clsx';
 import { colorToCssVars } from '@/helpers/color';
 import { Editable } from './Editable';
 
-export const Display = () => {
+export const Display = ({ className }: { className?: string }) => {
   const { masterPosition, setPosition, currentPart } = useMasterPosition();
   return (
     <div
       style={colorToCssVars(currentPart.color, 'title-bg')}
-      className={styles.Display}>
+      className={clsx(className, styles.Display)}>
       <Editable
         onEdit={(e) => {
           const [bar, beat, zero] = e

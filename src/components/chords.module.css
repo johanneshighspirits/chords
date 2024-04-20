@@ -55,6 +55,7 @@
   width: calc(100% - var(--spacing-x));
   bottom: calc(0.5 * var(--spacing-y));
   opacity: 0;
+  overflow: auto;
 }
 .PlayButtonContainer {
   display: flex;

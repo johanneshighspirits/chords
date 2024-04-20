@@ -150,3 +150,9 @@ dialog {
     display: none !important;
   }
 }
+
+@media screen and (max-width: 579px) {
+  .mobile-hidden {
+    display: none !important;
+  }
+}

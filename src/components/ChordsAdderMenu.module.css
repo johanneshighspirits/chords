@@ -8,13 +8,20 @@
 
 .ChordsAdder {
   display: grid;
-  grid-template-columns: auto 1fr 100px auto;
+  justify-items: center;
+  grid-template-columns: repeat(2, 1fr);
   gap: var(--spacing);
-  justify-items: stretch;
   padding-right: var(--spacing-x);
   padding-top: var(--spacing-y);
   padding-bottom: var(--spacing-y);
   transition: padding 300ms ease-out;
+}
+
+@media screen and (min-width: 580px) {
+  .ChordsAdder {
+    grid-template-columns: auto 1fr 100px auto;
+    justify-items: stretch;
+  }
 }
 
 .ChordsAdderMenu.IsStuck .ChordsAdder {

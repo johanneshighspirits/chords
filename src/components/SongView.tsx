@@ -3,7 +3,7 @@ import { SongProvider } from './providers/SongProvider';
 import { PartsView } from './PartsView';
 import styles from './SongView.module.css';
 import { ArrangementView } from './ArrangementView';
-import { ChordsAdder } from './ChordsAdder';
+import { ChordsAdderMenu } from './ChordsAdderMenu';
 import { Container } from './layout/PageContainer';
 import { AudioProvider } from './providers/AudioProvider';
 import { PendingPositionProvider } from './providers/PendingPositionProvider';
@@ -25,7 +25,7 @@ export const SongView = ({ song }: SongViewProps) => {
       </Container>
 
       <AudioProvider>
-        <ChordsAdder />
+        <ChordsAdderMenu />
 
         <Container>
           <div className={styles.SongView}>
