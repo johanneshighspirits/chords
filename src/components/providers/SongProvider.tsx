@@ -219,7 +219,7 @@ export const SongProvider = ({
     dispatch,
   };
 
-  console.log(value.state.parts);
+  // console.log(value.state.parts);
   return <SongContext.Provider value={value}>{children}</SongContext.Provider>;
 };
 

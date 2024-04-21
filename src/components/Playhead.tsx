@@ -5,7 +5,7 @@ import styles from './Playhead.module.css';
 import { Duration } from '@/types';
 import { useMasterPosition } from './providers/SongProvider';
 import clsx from 'clsx';
-import { getBarId } from './TimingBar';
+import { getBarId, getBeatId } from './TimingBar';
 
 export type PlayheadProps = PropsWithChildren<{
   partId: string;
@@ -37,20 +37,34 @@ const calculatePlayheadPosition = (
   container: HTMLDivElement | null
 ) => {
   if (typeof document !== 'undefined' && container) {
-    const barId = getBarId(position);
-    const barElement: HTMLDivElement | null = container.querySelector(
-      `div[data-bar-id="${barId}"]`
+    const beatId = getBeatId(position);
+    const beatElement: HTMLDivElement | null = container.querySelector(
+      `[data-beat-id="${beatId}"]`
     );
-    if (barElement) {
+    if (beatElement) {
       const { top: containerTop, left: containerLeft } =
         container.getBoundingClientRect();
-      const { top, left } = barElement.getBoundingClientRect();
+      const { top, left } = beatElement.getBoundingClientRect();
 
       return {
         top: top - containerTop,
         left: left - containerLeft,
       };
     }
+    // const barId = getBarId(position);
+    // const barElement: HTMLDivElement | null = container.querySelector(
+    //   `div[data-bar-id="${barId}"]`
+    // );
+    // if (barElement) {
+    //   const { top: containerTop, left: containerLeft } =
+    //     container.getBoundingClientRect();
+    //   const { top, left } = barElement.getBoundingClientRect();
+
+    //   return {
+    //     top: top - containerTop,
+    //     left: left - containerLeft,
+    //   };
+    // }
   }
   return { top: 0, left: 0 };
 };

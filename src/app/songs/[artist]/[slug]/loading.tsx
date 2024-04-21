@@ -4,7 +4,7 @@ import { PageContainer } from '@/components/layout/PageContainer';
 export default function LoadingSong() {
   return (
     <PageContainer>
-      <Center>Loading songs...</Center>
+      <Center>Loading song...</Center>
     </PageContainer>
   );
 }
